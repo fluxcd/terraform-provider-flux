@@ -46,11 +46,6 @@ func DataInstall() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"events_address": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.EventsAddr,
-			},
 			"registry": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -81,16 +76,6 @@ func DataInstall() *schema.Resource {
 				Optional: true,
 				Default:  installDefaults.LogLevel,
 			},
-			"notification_controller": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.NotificationController,
-			},
-			"manifest_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.ManifestFile,
-			},
 			"timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -114,20 +99,17 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 		components = installDefaults.Components
 	}
 
-	opt := install.Options{}
+	opt := install.MakeDefaultOptions()
 	opt.BaseURL = d.Get("base_url").(string)
 	opt.Version = d.Get("version").(string)
 	opt.Namespace = d.Get("namespace").(string)
 	opt.Components = components
-	opt.EventsAddr = d.Get("events_address").(string)
 	opt.Registry = d.Get("registry").(string)
 	opt.ImagePullSecret = d.Get("image_pull_secrets").(string)
 	opt.Arch = d.Get("arch").(string)
 	opt.WatchAllNamespaces = d.Get("watch_all_namespaces").(bool)
 	opt.NetworkPolicy = d.Get("network_policy").(bool)
 	opt.LogLevel = d.Get("log_level").(string)
-	opt.NotificationController = d.Get("notification_controller").(string)
-	opt.ManifestFile = d.Get("manifest_file").(string)
 	timeout := d.Get("timeout").(int)
 	opt.Timeout = time.Duration(timeout)
 	opt.TargetPath = d.Get("target_path").(string)
