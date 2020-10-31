@@ -48,11 +48,6 @@ func DataSync() *schema.Resource {
 				Optional: true,
 				Default:  syncDefaults.Interval,
 			},
-			"manifest_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  syncDefaults.ManifestFile,
-			},
 			"path": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -66,7 +61,7 @@ func DataSync() *schema.Resource {
 }
 
 func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	opt := sync.Options{}
+	opt := sync.MakeDefaultOptions()
 	interval := d.Get("interval").(int)
 	opt.Interval = time.Duration(interval)
 	opt.URL = d.Get("url").(string)
@@ -74,7 +69,6 @@ func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 	opt.Namespace = d.Get("namespace").(string)
 	opt.Branch = d.Get("branch").(string)
 	opt.TargetPath = d.Get("target_path").(string)
-	opt.ManifestFile = d.Get("manifest_file").(string)
 	manifest, err := sync.Generate(opt)
 	if err != nil {
 		return diag.FromErr(err)
