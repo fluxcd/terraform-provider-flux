@@ -22,23 +22,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccSync_basic(t *testing.T) {
+func TestAccDataSync_basic(t *testing.T) {
+	resourceName := "data.flux_sync.basic"
 	resource.ParallelTest(t, resource.TestCase{
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSyncBasicDataSource,
+				Config: testAccDataSyncBasic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("data.flux_sync.main", "content"),
-					resource.TestCheckResourceAttr("data.flux_sync.main", "path", "staging-cluster/flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceName, "content"),
+					resource.TestCheckResourceAttr(resourceName, "path", "staging-cluster/flux-system/gotk-sync.yaml"),
 				),
 			},
 		},
 	})
 }
 
-const testAccSyncBasicDataSource = `
-data "flux_sync" "main" {
+const testAccDataSyncBasic = `
+data "flux_sync" "basic" {
   target_path = "staging-cluster"
   url = "ssh://git@example.com"
 }
