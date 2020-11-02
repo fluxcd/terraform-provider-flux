@@ -17,31 +17,77 @@ limitations under the License.
 package provider
 
 import (
+	"fmt"
+	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSync_basic(t *testing.T) {
-	resourceName := "data.flux_sync.basic"
+	resourceName := "data.flux_sync.main"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
+				// Without required target_path set
+				Config:      testAccDataSyncMissingTargetPath,
+				ExpectError: regexp.MustCompile(`The argument "target_path" is required, but no definition was found\.`),
+			},
+			{
+				// Without required url set
+				Config:      testAccDataSyncMissingURL,
+				ExpectError: regexp.MustCompile(`The argument "url" is required, but no definition was found\.`),
+			},
+			{
+				// Check default values
 				Config: testAccDataSyncBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "content"),
+					resource.TestCheckResourceAttr(resourceName, "namespace", "flux-system"),
+					resource.TestCheckResourceAttr(resourceName, "url", "ssh://git@example.com"),
+					resource.TestCheckResourceAttr(resourceName, "branch", "main"),
+					resource.TestCheckResourceAttr(resourceName, "target_path", "staging-cluster"),
+					resource.TestCheckResourceAttr(resourceName, "interval", fmt.Sprintf("%d", time.Minute)),
 					resource.TestCheckResourceAttr(resourceName, "path", "staging-cluster/flux-system/gotk-sync.yaml"),
 				),
+			},
+			// Ensure attribute value changes are propagated correctly into the state
+			{
+				Config: testAccDataSyncWithArg("namespace", "test-system"),
+				Check:  resource.TestCheckResourceAttr(resourceName, "namespace", "test-system"),
+			},
+			{
+				Config: testAccDataSyncWithArg("branch", "develop"),
+				Check:  resource.TestCheckResourceAttr(resourceName, "branch", "develop"),
+			},
+			{
+				Config: testAccDataSyncWithArg("interval", "90000000000"),
+				Check:  resource.TestCheckResourceAttr(resourceName, "interval", "90000000000"),
 			},
 		},
 	})
 }
 
-const testAccDataSyncBasic = `
-data "flux_sync" "basic" {
-  target_path = "staging-cluster"
-  url = "ssh://git@example.com"
+const (
+	testAccDataSyncMissingTargetPath = `data "flux_sync" "main" {  url = "ssh://git@example.com" }`
+	testAccDataSyncMissingURL        = `data "flux_sync" "main" {  target_path = "test" }`
+	testAccDataSyncBasic             = `
+		data "flux_sync" "main" {
+			target_path = "staging-cluster"
+			url = "ssh://git@example.com"
+		}
+	`
+)
+
+func testAccDataSyncWithArg(attr string, value string) string {
+	return fmt.Sprintf(`
+		data "flux_sync" "main" {
+			target_path = "staging-cluster"
+			url = "ssh://git@example.com"
+			%s = %q
+		}
+	`, attr, value)
 }
-`
