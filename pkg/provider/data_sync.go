@@ -34,43 +34,46 @@ var (
 
 func DataSync() *schema.Resource {
 	return &schema.Resource{
+		Description: "`flux_sync` can be used to get sync manifests for Flux.",
 		ReadContext: dataSyncRead,
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  syncDefaults.Name,
-			},
 			"namespace": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  syncDefaults.Namespace,
+				Description: "The namespace scope for this operation.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     syncDefaults.Namespace,
 			},
 			"url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Description: "Git repository clone url.",
+				Type:        schema.TypeString,
+				Required:    true,
 			},
 			"branch": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  syncDefaults.Branch,
+				Description: "Default branch to sync from.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     syncDefaults.Branch,
 			},
 			"target_path": {
-				Type:     schema.TypeString,
-				Required: true,
+				Description: "Path to use when computing manifest file path.",
+				Type:        schema.TypeString,
+				Required:    true,
 			},
 			"interval": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  syncDefaults.Interval,
+				Description: "Sync interval.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     syncDefaults.Interval,
 			},
 			"path": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Expected path of content in git repository.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"content": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Manifests in multi-doc yaml format.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}
@@ -81,7 +84,7 @@ func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 	interval := d.Get("interval").(int)
 	opt.Interval = time.Duration(interval)
 	opt.URL = d.Get("url").(string)
-	opt.Name = d.Get("name").(string)
+	opt.Name = d.Get("namespace").(string)
 	opt.Namespace = d.Get("namespace").(string)
 	opt.Branch = d.Get("branch").(string)
 	opt.TargetPath = d.Get("target_path").(string)
