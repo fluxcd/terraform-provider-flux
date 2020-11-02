@@ -34,6 +34,7 @@ var (
 
 func DataInstall() *schema.Resource {
 	return &schema.Resource{
+		Description: "`flux_install` Returns the manifest to install fluxv2 ",
 		ReadContext: dataInstallRead,
 		Schema: map[string]*schema.Schema{
 			"target_path": {
