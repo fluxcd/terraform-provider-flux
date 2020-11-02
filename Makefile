@@ -10,7 +10,7 @@ vet:
 	go vet ./...
 
 test: tidy fmt vet
-	go test ./... -coverprofile cover.out
+	TF_ACC=true go test ./... -coverprofile cover.out
 
 build:
 	CGO_ENABLED=0 go build -o ./bin/flux main.go
