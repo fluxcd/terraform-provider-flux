@@ -2,12 +2,12 @@
 page_title: "flux_sync Data Source - terraform-provider-flux"
 subcategory: ""
 description: |-
-  flux_sync Returns the manifest for a gitsource configuration for fluxv2
+  flux_sync Returns the manifest for a gitsource configuration for flux
 ---
 
 # Data Source `flux_sync`
 
-`flux_sync` Returns the manifest for a gitsource configuration for fluxv2
+`flux_sync` Returns the manifest for a gitsource configuration for flux
 
 
 

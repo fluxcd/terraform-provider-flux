@@ -1,13 +1,13 @@
 ---
 layout: ""
-page_title: "Provider: fluxv2"
+page_title: "Provider: flux"
 description: |-
-  The fluxv2 provider provides a way to bootstrap fluxv2 into a kubernetes cluster using terraform.
+  The flux provider provides a way to bootstrap flux into a kubernetes cluster using terraform.
 ---
 
 # Flux Provider
 
-The flux provider provides datasources to generate installation and gitsource manifest for fluxv2.
+The flux provider provides datasources to generate installation and gitsource manifest for flux.
 
 ## Example Usage
 

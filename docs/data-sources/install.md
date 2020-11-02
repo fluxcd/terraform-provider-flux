@@ -2,12 +2,14 @@
 page_title: "flux_install Data Source - terraform-provider-flux"
 subcategory: ""
 description: |-
-  flux_install Returns the manifest to install fluxv2
+  flux_install Returns the manifest to install flux
 ---
 
 # Data Source `flux_install`
 
-`flux_install` Returns the manifest to install fluxv2
+`flux_install` Returns the manifest to install flux
+
+
 
 ## Schema
 

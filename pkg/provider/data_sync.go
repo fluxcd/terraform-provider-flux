@@ -34,7 +34,7 @@ var (
 
 func DataSync() *schema.Resource {
 	return &schema.Resource{
-		Description: "`flux_sync` Returns the manifest for a gitsource configuration for fluxv2 ",
+		Description: "`flux_sync` Returns the manifest for a gitsource configuration for flux ",
 
 		ReadContext: dataSyncRead,
 		Schema: map[string]*schema.Schema{

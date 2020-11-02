@@ -4,11 +4,11 @@ This is a Terraform provider for Flux v2, it enables bootstrap a Kubernetes cust
 
 ## Example Usage
 
-The provider is consists of two data sources `flux_install` and `flux_sync` the data sources are corresponding to [fluxv2 manifests](https://pkg.go.dev/github.com/fluxcd/flux2@v0.2.1/pkg/manifestgen)
+The provider is consists of two data sources `flux_install` and `flux_sync` the data sources are corresponding to [flux manifests](https://pkg.go.dev/github.com/fluxcd/flux2@v0.2.1/pkg/manifestgen)
 
 The data sources are returing `YAML` manifest so a second provider is needed to apply the manifest into the Kubernetes cluster. See example folder.
 
-The `flux_install` generates manifests to install the `fluxv2` components.
+The `flux_install` generates manifests to install the `flux` components.
 
 ```hcl
 # Flux
