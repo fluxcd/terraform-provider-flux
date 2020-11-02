@@ -140,13 +140,3 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 
 	return nil
 }
-
-func toStringList(ll interface{}) []string {
-	set := ll.(*schema.Set)
-	result := []string{}
-	for _, l := range set.List() {
-		result = append(result, l.(string))
-	}
-
-	return result
-}
