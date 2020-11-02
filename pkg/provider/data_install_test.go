@@ -22,23 +22,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccInstall_basic(t *testing.T) {
+func TestAccDataInstall_basic(t *testing.T) {
+	resourceName := "data.flux_install.basic"
 	resource.ParallelTest(t, resource.TestCase{
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstallBasicDataSource,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("data.flux_install.main", "content"),
-					resource.TestCheckResourceAttr("data.flux_install.main", "path", "staging-cluster/flux-system/gotk-components.yaml"),
+				Config: testAccDataInstallBasic,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "content"),
+					resource.TestCheckResourceAttr(resourceName, "path", "staging-cluster/flux-system/gotk-components.yaml"),
 				),
 			},
 		},
 	})
 }
 
-const testAccInstallBasicDataSource = `
-data "flux_install" "main" {
+const testAccDataInstallBasic = `
+data "flux_install" "basic" {
   target_path = "staging-cluster"
 }
 `
