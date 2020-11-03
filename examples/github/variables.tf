@@ -23,5 +23,5 @@ variable "branch" {
 
 variable "target_path" {
   type    = string
-  default = "fleet-infra"
+  default = "staging-cluster"
 }

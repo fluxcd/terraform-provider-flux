@@ -14,3 +14,7 @@ test: tidy fmt vet
 
 build:
 	CGO_ENABLED=0 go build -o ./bin/flux main.go
+
+.PHONY: docs
+docs:
+	tfplugindocs generate

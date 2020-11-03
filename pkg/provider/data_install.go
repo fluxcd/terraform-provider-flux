@@ -20,7 +20,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -34,76 +33,79 @@ var (
 
 func DataInstall() *schema.Resource {
 	return &schema.Resource{
+		Description: "`flux_install` can be used to generate Kubernetes manifests for deploying Flux.",
 		ReadContext: dataInstallRead,
 		Schema: map[string]*schema.Schema{
 			"target_path": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"base_url": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.BaseURL,
+				Description: "Relative path to the Git repository root where Flux manifests are committed.",
+				Type:        schema.TypeString,
+				Required:    true,
 			},
 			"version": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.Version,
+				Description: "Flux version.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     installDefaults.Version,
 			},
 			"namespace": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.Namespace,
+				Description: "The namespace scope for install manifests.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     installDefaults.Namespace,
 			},
 			"components": {
-				Type: schema.TypeSet,
+				Description: "Toolkit components to include in the install manifests.",
+				Type:        schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Optional: true,
 			},
 			"registry": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.Registry,
+				Description: "Container registry where the toolkit images are published.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     installDefaults.Registry,
 			},
 			"image_pull_secrets": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.ImagePullSecret,
+				Description: "Kubernetes secret name used for pulling the toolkit images from a private registry.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     installDefaults.ImagePullSecret,
 			},
 			"arch": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.Arch,
+				Description: "Cluster architecture for toolkit container images.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     installDefaults.Arch,
 			},
 			"watch_all_namespaces": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  installDefaults.WatchAllNamespaces,
+				Description: "If true watch for custom resources in all namespaces.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     installDefaults.WatchAllNamespaces,
 			},
 			"network_policy": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  installDefaults.NetworkPolicy,
+				Description: "Deny ingress access to the toolkit controllers from other namespaces using network policies.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     installDefaults.NetworkPolicy,
 			},
 			"log_level": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  installDefaults.LogLevel,
-			},
-			"timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  installDefaults.Timeout,
+				Description: "Log level for toolkit components.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     installDefaults.LogLevel,
 			},
 			"path": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Expected path of content in git repository.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"content": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Manifests in multi-doc yaml format.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}
@@ -116,7 +118,6 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	}
 
 	opt := install.MakeDefaultOptions()
-	opt.BaseURL = d.Get("base_url").(string)
 	opt.Version = d.Get("version").(string)
 	opt.Namespace = d.Get("namespace").(string)
 	opt.Components = components
@@ -126,8 +127,6 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	opt.WatchAllNamespaces = d.Get("watch_all_namespaces").(bool)
 	opt.NetworkPolicy = d.Get("network_policy").(bool)
 	opt.LogLevel = d.Get("log_level").(string)
-	timeout := d.Get("timeout").(int)
-	opt.Timeout = time.Duration(timeout)
 	opt.TargetPath = d.Get("target_path").(string)
 	manifest, err := install.Generate(opt)
 	if err != nil {
