@@ -17,6 +17,9 @@ limitations under the License.
 package provider
 
 import (
+	"bytes"
+	"text/template"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -33,3 +36,27 @@ func toStringList(ll interface{}) []string {
 
 	return result
 }
+
+func generateKustomizationYaml(paths []string) (string, error) {
+	t, err := template.New("kustomize").Parse(kustomizeTemplateString)
+	if err != nil {
+		return "", err
+	}
+
+	var kustomize bytes.Buffer
+	err = t.Execute(&kustomize, paths)
+	if err != nil {
+		return "", err
+	}
+
+	return kustomize.String(), nil
+}
+
+const kustomizeTemplateString = `
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+{{- range . }}
+- {{.}}
+{{- end }}
+`

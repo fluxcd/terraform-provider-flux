@@ -36,3 +36,18 @@ func TestStringListNil(t *testing.T) {
 
 	assert.Equal(t, list, []string{})
 }
+
+func TestGenereateKustomizationYaml(t *testing.T) {
+	result, err := generateKustomizationYaml([]string{"foo", "bar"})
+
+	expected := `
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- foo
+- bar
+`
+
+	assert.Nil(t, err)
+	assert.Equal(t, result, expected)
+}
