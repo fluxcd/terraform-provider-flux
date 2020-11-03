@@ -43,6 +43,8 @@ data "flux_sync" "main" {
 ### Read-only
 
 - **content** (String, Read-only) Manifests in multi-doc yaml format.
+- **kustomize_content** (String, Read-only) Kustomize yaml document.
+- **kustomize_path** (String, Read-only) Expected path of kustomize content in git repository.
 - **path** (String, Read-only) Expected path of content in git repository.
 
 
