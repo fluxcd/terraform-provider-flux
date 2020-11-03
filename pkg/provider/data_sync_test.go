@@ -46,12 +46,14 @@ func TestAccDataSync_basic(t *testing.T) {
 				Config: testAccDataSyncBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "content"),
+					resource.TestCheckResourceAttrSet(resourceName, "kustomize_content"),
 					resource.TestCheckResourceAttr(resourceName, "namespace", "flux-system"),
 					resource.TestCheckResourceAttr(resourceName, "url", "ssh://git@example.com"),
 					resource.TestCheckResourceAttr(resourceName, "branch", "main"),
 					resource.TestCheckResourceAttr(resourceName, "target_path", "staging-cluster"),
 					resource.TestCheckResourceAttr(resourceName, "interval", fmt.Sprintf("%d", time.Minute)),
 					resource.TestCheckResourceAttr(resourceName, "path", "staging-cluster/flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttr(resourceName, "kustomize_path", "staging-cluster/flux-system/kustomization.yaml"),
 				),
 			},
 			// Ensure attribute value changes are propagated correctly into the state

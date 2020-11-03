@@ -20,11 +20,13 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/fluxcd/flux2/pkg/manifestgen/install"
 	"github.com/fluxcd/flux2/pkg/manifestgen/sync"
 )
 
@@ -75,6 +77,16 @@ func DataSync() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
+			"kustomize_path": {
+				Description: "Expected path of kustomize content in git repository.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
+			"kustomize_content": {
+				Description: "Kustomize yaml document.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -93,9 +105,19 @@ func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 		return diag.FromErr(err)
 	}
 
+	basePath := filepath.Dir(manifest.Path)
+	kustomizePath := filepath.Join(basePath, "kustomization.yaml")
+	paths := []string{opt.ManifestFile, install.MakeDefaultOptions().ManifestFile}
+	kustomizeContent, err := generateKustomizationYaml(paths)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId(fmt.Sprintf("%x", sha256.Sum256([]byte(manifest.Path+manifest.Content))))
 	d.Set("path", manifest.Path)
 	d.Set("content", manifest.Content)
+	d.Set("kustomize_path", kustomizePath)
+	d.Set("kustomize_content", kustomizeContent)
 
 	return nil
 }
