@@ -77,7 +77,7 @@ resource "kubernetes_secret" "main" {
   depends_on = [kubectl_manifest.install]
 
   metadata {
-    name      = data.flux_sync.main.name
+    name      = data.flux_sync.main.namespace
     namespace = data.flux_sync.main.namespace
   }
 
