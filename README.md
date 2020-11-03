@@ -1,28 +1,75 @@
 # terraform-provider-flux
 
-This is a Terraform provider for Flux v2, it enables bootstrap a Kubernetes custer with Flux v2 using terraform.
+This is the Terraform provider for Flux v2.
+The provider allows you to install Flux on Kubernetes
+and configure it to reconcile the cluster state from a Git repository.
 
 ## Example Usage
 
-The provider is consists of two data sources `flux_install` and `flux_sync` the data sources are corresponding to [fluxv2 manifests](https://pkg.go.dev/github.com/fluxcd/flux2@v0.2.1/pkg/manifestgen)
+The provider consists of two data sources `flux_install` and `flux_sync`,
+the data sources are corresponding to [fluxv2 manifests](https://pkg.go.dev/github.com/fluxcd/flux2@v0.2.1/pkg/manifestgen).
 
-The data sources are returing `YAML` manifest so a second provider is needed to apply the manifest into the Kubernetes cluster. See example folder.
-
-The `flux_install` generates manifests to install the `fluxv2` components.
+The `flux_install` data source generates a multi-doc YAML with Kubernetes manifests that can be used to install or upgrade Flux:
 
 ```hcl
-# Flux
+# Generate manifests
 data "flux_install" "main" {
-  target_path = "staging-cluster"
+  target_path    = "production"
+  arch           = "amd64"
+  network_policy = false
+  version        = "latest"
+}
+
+# Split multi-doc YAML with
+# https://registry.terraform.io/providers/gavinbunney/kubectl/latest
+data "kubectl_file_documents" "apply" {
+  content = data.flux_install.main.content
+}
+
+# Apply manifests on the cluster
+resource "kubectl_manifest" "apply" {
+  for_each  = { for v in data.kubectl_file_documents.apply.documents : sha1(v) => v }
+  yaml_body = each.value
 }
 ```
 
-`flux_sync` the initial source manifest.
+The `flux_sync` data source generates a multi-doc YAML containing the `GitRepository` and `Kustomization`
+manifests that configure Flux to sync the cluster with the specified repository:
 
 ```hcl
+# Generate manifests
 data "flux_sync" "main" {
-  target_path = "staging-cluster"
-  url         = "ssh://git@github.com/${var.github_owner}/${var.repository_name}.git"
+  target_path = "production"
+  url         = "https://github.com/${var.github_owner}/${var.repository_name}"
+}
+
+# Split multi-doc YAML with
+# https://registry.terraform.io/providers/gavinbunney/kubectl/latest
+data "kubectl_file_documents" "sync" {
+  content = data.flux_sync.main.content
+}
+
+# Apply manifests on the cluster
+resource "kubectl_manifest" "sync" {
+  depends_on = [kubectl_manifest.apply]
+
+  for_each  = { for v in data.kubectl_file_documents.sync.documents : sha1(v) => v }
+  yaml_body = each.value
+}
+
+# Generate a Kubernetes secret with the Git credentials
+resource "kubernetes_secret" "main" {
+  depends_on = [kubectl_manifest.apply]
+
+  metadata {
+    name      = data.flux_sync.main.name
+    namespace = data.flux_sync.main.namespace
+  }
+
+  data = {
+    username = "git"
+    password = var.flux_token
+  }
 }
 ```
 
