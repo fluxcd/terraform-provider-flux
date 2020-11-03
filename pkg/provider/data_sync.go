@@ -34,7 +34,7 @@ var (
 
 func DataSync() *schema.Resource {
 	return &schema.Resource{
-		Description: "`flux_sync` can be used to get sync manifests for Flux.",
+		Description: "`flux_sync` can be used to generate manifests for reconciling the specified repository path on the cluster.",
 		ReadContext: dataSyncRead,
 		Schema: map[string]*schema.Schema{
 			"namespace": {
@@ -55,7 +55,7 @@ func DataSync() *schema.Resource {
 				Default:     syncDefaults.Branch,
 			},
 			"target_path": {
-				Description: "Path to use when computing manifest file path.",
+				Description: "Relative path to the Git repository root where the sync manifests are committed.",
 				Type:        schema.TypeString,
 				Required:    true,
 			},

@@ -2,12 +2,12 @@
 page_title: "flux_install Data Source - terraform-provider-flux"
 subcategory: ""
 description: |-
-  flux_install can be used to get install manifests for Flux.
+  flux_install can be used to generate Kubernetes manifests for deploying Flux.
 ---
 
 # Data Source `flux_install`
 
-`flux_install` can be used to get install manifests for Flux.
+`flux_install` can be used to generate Kubernetes manifests for deploying Flux.
 
 ## Example Usage
 
@@ -25,7 +25,7 @@ data "flux_install" "main" {
 
 ### Required
 
-- **target_path** (String, Required) Path to use when computing manifest file path.
+- **target_path** (String, Required) Relative path to the Git repository root where Flux manifests are committed.
 
 ### Optional
 
@@ -37,7 +37,7 @@ data "flux_install" "main" {
 - **namespace** (String, Optional) The namespace scope for install manifests. Defaults to `flux-system`.
 - **network_policy** (Boolean, Optional) Deny ingress access to the toolkit controllers from other namespaces using network policies. Defaults to `true`.
 - **registry** (String, Optional) Container registry where the toolkit images are published. Defaults to `ghcr.io/fluxcd`.
-- **version** (String, Optional) Toolkit version. Defaults to `latest`.
+- **version** (String, Optional) Flux version. Defaults to `latest`.
 - **watch_all_namespaces** (Boolean, Optional) If true watch for custom resources in all namespaces. Defaults to `true`.
 
 ### Read-only

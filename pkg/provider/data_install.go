@@ -33,16 +33,16 @@ var (
 
 func DataInstall() *schema.Resource {
 	return &schema.Resource{
-		Description: "`flux_install` can be used to get install manifests for Flux.",
+		Description: "`flux_install` can be used to generate Kubernetes manifests for deploying Flux.",
 		ReadContext: dataInstallRead,
 		Schema: map[string]*schema.Schema{
 			"target_path": {
-				Description: "Path to use when computing manifest file path.",
+				Description: "Relative path to the Git repository root where Flux manifests are committed.",
 				Type:        schema.TypeString,
 				Required:    true,
 			},
 			"version": {
-				Description: "Toolkit version.",
+				Description: "Flux version.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     installDefaults.Version,

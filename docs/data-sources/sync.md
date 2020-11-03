@@ -2,12 +2,12 @@
 page_title: "flux_sync Data Source - terraform-provider-flux"
 subcategory: ""
 description: |-
-  flux_sync can be used to get sync manifests for Flux.
+  flux_sync can be used to generate manifests for reconciling the specified repository path on the cluster.
 ---
 
 # Data Source `flux_sync`
 
-`flux_sync` can be used to get sync manifests for Flux.
+`flux_sync` can be used to generate manifests for reconciling the specified repository path on the cluster.
 
 ## Example Usage
 
@@ -30,7 +30,7 @@ data "flux_sync" "main" {
 
 ### Required
 
-- **target_path** (String, Required) Path to use when computing manifest file path.
+- **target_path** (String, Required) Relative path to the Git repository root where the sync manifests are committed.
 - **url** (String, Required) Git repository clone url.
 
 ### Optional
