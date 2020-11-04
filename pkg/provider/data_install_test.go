@@ -36,6 +36,16 @@ func TestAccDataInstall_basic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`The argument "target_path" is required, but no definition was found\.`),
 			},
 			{
+				// With invalid log level
+				Config:      testAccDataInstallLogLevel,
+				ExpectError: regexp.MustCompile(`Error: expected log_level to be one of \[info debug error\], got warn`),
+			},
+			{
+				// With invalid arch set
+				Config:      testAccDataInstallArch,
+				ExpectError: regexp.MustCompile(`Error: expected arch to be one of \[amd64 arm64 arm\], got powerpc`),
+			},
+			{
 				// Check default values
 				Config: testAccDataInstallBasic,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -85,6 +95,18 @@ const (
 	testAccDataInstallBasic = `
 		data "flux_install" "main" {
 			target_path = "staging-cluster"
+		}
+	`
+	testAccDataInstallLogLevel = `
+		data "flux_install" "main" {
+			target_path = "staging-cluster"
+			log_level   = "warn"
+		}
+	`
+	testAccDataInstallArch = `
+		data "flux_install" "main" {
+			target_path = "staging-cluster"
+			arch        = "powerpc"
 		}
 	`
 )

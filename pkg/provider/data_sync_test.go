@@ -42,6 +42,11 @@ func TestAccDataSync_basic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`The argument "url" is required, but no definition was found\.`),
 			},
 			{
+				// Incorrect url syntax
+				Config:      testAccDataSyncInCorrectURL,
+				ExpectError: regexp.MustCompile(`Error: expected "url" to have a url with schema of: "http,https,ssh", got ftp://git@example.com`),
+			},
+			{
 				// Check default values
 				Config: testAccDataSyncBasic,
 				Check: resource.ComposeTestCheckFunc(
@@ -80,6 +85,12 @@ const (
 		data "flux_sync" "main" {
 			target_path = "staging-cluster"
 			url = "ssh://git@example.com"
+		}
+	`
+	testAccDataSyncInCorrectURL = `
+		data "flux_sync" "main" {
+			target_path = "staging-cluster"
+			url = "ftp://git@example.com"
 		}
 	`
 )
