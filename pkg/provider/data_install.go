@@ -75,10 +75,11 @@ func DataInstall() *schema.Resource {
 				Default:     installDefaults.ImagePullSecret,
 			},
 			"arch": {
-				Description: "Cluster architecture for toolkit container images.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     installDefaults.Arch,
+				Description:  "Cluster architecture for toolkit container images.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      installDefaults.Arch,
+				ValidateFunc: validation.StringInSlice([]string{"amd64", "arm64", "arm"}, false),
 			},
 			"watch_all_namespaces": {
 				Description: "If true watch for custom resources in all namespaces.",
