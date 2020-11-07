@@ -23,6 +23,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/fluxcd/flux2/pkg/manifestgen/install"
 )
@@ -74,10 +75,11 @@ func DataInstall() *schema.Resource {
 				Default:     installDefaults.ImagePullSecret,
 			},
 			"arch": {
-				Description: "Cluster architecture for toolkit container images.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     installDefaults.Arch,
+				Description:  "Cluster architecture for toolkit container images.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      installDefaults.Arch,
+				ValidateFunc: validation.StringInSlice([]string{"amd64", "arm64", "arm"}, false),
 			},
 			"watch_all_namespaces": {
 				Description: "If true watch for custom resources in all namespaces.",
@@ -92,10 +94,11 @@ func DataInstall() *schema.Resource {
 				Default:     installDefaults.NetworkPolicy,
 			},
 			"log_level": {
-				Description: "Log level for toolkit components.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     installDefaults.LogLevel,
+				Description:  "Log level for toolkit components.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      installDefaults.LogLevel,
+				ValidateFunc: validation.StringInSlice([]string{"info", "debug", "error"}, false),
 			},
 			"path": {
 				Description: "Expected path of content in git repository.",

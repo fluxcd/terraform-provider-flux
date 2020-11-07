@@ -25,6 +25,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/fluxcd/flux2/pkg/manifestgen/install"
 	"github.com/fluxcd/flux2/pkg/manifestgen/sync"
@@ -46,9 +47,10 @@ func DataSync() *schema.Resource {
 				Default:     syncDefaults.Namespace,
 			},
 			"url": {
-				Description: "Git repository clone url.",
-				Type:        schema.TypeString,
-				Required:    true,
+				Description:  "Git repository clone url.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsURLWithScheme([]string{"http", "https", "ssh"}),
 			},
 			"branch": {
 				Description: "Default branch to sync from.",
