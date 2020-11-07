@@ -73,6 +73,10 @@ resource "kubernetes_secret" "main" {
 }
 ```
 
+## Manual installation
+
+If you want to build from source, you can simply use `make install` in the root of the repository.
+
 ## Community
 
 The Flux project is always looking for new contributors and there are a multitude of ways to get involved.
