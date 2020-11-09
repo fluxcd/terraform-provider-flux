@@ -19,7 +19,9 @@ terraform {
 
 provider "flux" {}
 
-provider "kubectl" {}
+provider "kubectl" {
+  apply_retry_count = 15
+}
 
 # Flux
 data "flux_install" "main" {
