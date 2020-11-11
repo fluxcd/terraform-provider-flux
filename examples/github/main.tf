@@ -23,9 +23,7 @@ terraform {
 
 provider "flux" {}
 
-provider "kubectl" {
-  apply_retry_count = 15
-}
+provider "kubectl" {}
 
 provider "kubernetes" {}
 
@@ -51,12 +49,20 @@ data "flux_sync" "main" {
 }
 
 # Kubernetes
+resource "kubernetes_namespace" "flux_system" {
+  metadata {
+    name = "flux-system"
+  }
+}
+
 data "kubectl_file_documents" "install" {
   content = data.flux_install.main.content
 }
 
 resource "kubectl_manifest" "install" {
   for_each  = { for v in data.kubectl_file_documents.install.documents : sha1(v) => v }
+  depends_on = [kubernetes_namespace.flux_system]
+
   yaml_body = each.value
 }
 
@@ -65,9 +71,9 @@ data "kubectl_file_documents" "sync" {
 }
 
 resource "kubectl_manifest" "sync" {
-  depends_on = [kubectl_manifest.install]
-
   for_each  = { for v in data.kubectl_file_documents.sync.documents : sha1(v) => v }
+  depends_on = [kubectl_manifest.install, kubernetes_namespace.flux_system]
+
   yaml_body = each.value
 }
 
