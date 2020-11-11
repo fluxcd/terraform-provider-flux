@@ -1,0 +1,17 @@
+---
+subcategory: ""
+page_title: "Bootstrap a cluster with generic git repo"
+description: |-
+    An example of how to bootstrap a Kubernetes cluster and sync it with a generic git repository.
+---
+
+# Bootstrap a cluster with generic git repo
+
+__Note:__ This is only a partial example focusing on pushing the flux manifests to a generic repo installing the manifests in the cluster is covered by the Github example.
+
+In order to follow the guide you'll need a `generic` git account and a `deployment key` or `ssh key` configured
+that can create write to the repository.
+
+{{ tffile "examples/generic/variables.tf" }}
+
+{{ tffile "examples/generic/main.tf" }}
