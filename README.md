@@ -20,6 +20,12 @@ data "flux_install" "main" {
   version        = "latest"
 }
 
+resource "kubernetes_namespace" "flux_system" {
+  metadata {
+    name = "flux-system"
+  }
+}
+
 # Split multi-doc YAML with
 # https://registry.terraform.io/providers/gavinbunney/kubectl/latest
 data "kubectl_file_documents" "apply" {
@@ -29,6 +35,8 @@ data "kubectl_file_documents" "apply" {
 # Apply manifests on the cluster
 resource "kubectl_manifest" "apply" {
   for_each  = { for v in data.kubectl_file_documents.apply.documents : sha1(v) => v }
+  depends_on = [kubernetes_namespace.flux_system]
+
   yaml_body = each.value
 }
 ```
@@ -51,9 +59,9 @@ data "kubectl_file_documents" "sync" {
 
 # Apply manifests on the cluster
 resource "kubectl_manifest" "sync" {
-  depends_on = [kubectl_manifest.apply]
-
   for_each  = { for v in data.kubectl_file_documents.sync.documents : sha1(v) => v }
+  depends_on = [kubectl_manifest.apply, kubernetes_namespace.flux_system]
+
   yaml_body = each.value
 }
 
