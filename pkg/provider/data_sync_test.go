@@ -67,6 +67,10 @@ func TestAccDataSync_basic(t *testing.T) {
 				Check:  resource.TestCheckResourceAttr(resourceName, "namespace", "test-system"),
 			},
 			{
+				Config: testAccDataSyncWithArg("name", "my-flux-install"),
+				Check:  resource.TestCheckResourceAttr(resourceName, "name", "my-flux-install"),
+			},
+			{
 				Config: testAccDataSyncWithArg("branch", "develop"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "branch", "develop"),
 			},

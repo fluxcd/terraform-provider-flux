@@ -40,6 +40,12 @@ func DataSync() *schema.Resource {
 		Description: "`flux_sync` can be used to generate manifests for reconciling the specified repository path on the cluster.",
 		ReadContext: dataSyncRead,
 		Schema: map[string]*schema.Schema{
+			"name": {
+				Description: "The kubernetes resources name",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     syncDefaults.Namespace,
+			},
 			"namespace": {
 				Description: "The namespace scope for this operation.",
 				Type:        schema.TypeString,
@@ -98,7 +104,7 @@ func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 	interval := d.Get("interval").(int)
 	opt.Interval = time.Duration(interval)
 	opt.URL = d.Get("url").(string)
-	opt.Name = d.Get("namespace").(string)
+	opt.Name = d.Get("name").(string)
 	opt.Namespace = d.Get("namespace").(string)
 	opt.Branch = d.Get("branch").(string)
 	opt.TargetPath = d.Get("target_path").(string)
