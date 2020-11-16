@@ -53,10 +53,10 @@ data "flux_sync" "main" {
 }
 
 # Git: Create the files and commit them to the repository
-resource "gitfile_checkout" "example" {
+resource "gitfile_checkout" "main" {
   repo   = var.repository_url
   branch = var.branch
-  path   = "${path.root}/git_checkouts/cluster-init"
+  path   = "${path.module}/git_checkouts/cluster-init"
 }
 
 resource "gitfile_file" "install" {
