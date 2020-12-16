@@ -30,6 +30,7 @@ data "flux_install" "main" {
 ### Optional
 
 - **arch** (String, Optional) Cluster architecture for toolkit container images. Defaults to `amd64`.
+- **cluster_domain** (String, Optional) The internal cluster domain. Defaults to `cluster.local`.
 - **components** (Set of String, Optional) Toolkit components to include in the install manifests.
 - **id** (String, Optional) The ID of this resource.
 - **image_pull_secrets** (String, Optional) Kubernetes secret name used for pulling the toolkit images from a private registry. Defaults to ``.

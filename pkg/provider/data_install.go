@@ -54,6 +54,12 @@ func DataInstall() *schema.Resource {
 				Optional:    true,
 				Default:     installDefaults.Namespace,
 			},
+			"cluster_domain": {
+				Description: "The internal cluster domain.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     installDefaults.ClusterDomain,
+			},
 			"components": {
 				Description: "Toolkit components to include in the install manifests.",
 				Type:        schema.TypeSet,
@@ -123,6 +129,7 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	opt := install.MakeDefaultOptions()
 	opt.Version = d.Get("version").(string)
 	opt.Namespace = d.Get("namespace").(string)
+	opt.ClusterDomain = d.Get("cluster_domain").(string)
 	opt.Components = components
 	opt.Registry = d.Get("registry").(string)
 	opt.ImagePullSecret = d.Get("image_pull_secrets").(string)

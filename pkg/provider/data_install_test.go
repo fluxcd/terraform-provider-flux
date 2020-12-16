@@ -53,6 +53,7 @@ func TestAccDataInstall_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "arch", "amd64"),
 					resource.TestCheckResourceAttr(resourceName, "log_level", "info"),
 					resource.TestCheckResourceAttr(resourceName, "namespace", "flux-system"),
+					resource.TestCheckResourceAttr(resourceName, "cluster_domain", "cluster.local"),
 					resource.TestCheckResourceAttr(resourceName, "network_policy", "true"),
 					resource.TestCheckResourceAttr(resourceName, "path", "staging-cluster/flux-system/gotk-components.yaml"),
 					resource.TestCheckResourceAttr(resourceName, "registry", "ghcr.io/fluxcd"),
@@ -73,6 +74,10 @@ func TestAccDataInstall_basic(t *testing.T) {
 			{
 				Config: testAccDataInstallWithArg("namespace", "test-system"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "namespace", "test-system"),
+			},
+			{
+				Config: testAccDataInstallWithArg("cluster_domain", "k8s.local"),
+				Check:  resource.TestCheckResourceAttr(resourceName, "cluster_domain", "k8s.local"),
 			},
 			{
 				Config: testAccDataInstallWithArg("network_policy", "false"),
