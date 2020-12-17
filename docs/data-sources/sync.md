@@ -37,7 +37,7 @@ data "flux_sync" "main" {
 
 - **branch** (String, Optional) Default branch to sync from. Defaults to `main`.
 - **id** (String, Optional) The ID of this resource.
-- **interval** (Number, Optional) Sync interval. Defaults to `1m0s`.
+- **interval** (Number, Optional) Sync interval in minutes. Defaults to `1`.
 - **name** (String, Optional) The kubernetes resources name Defaults to `flux-system`.
 - **namespace** (String, Optional) The namespace scope for this operation. Defaults to `flux-system`.
 

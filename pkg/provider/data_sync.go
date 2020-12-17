@@ -70,10 +70,10 @@ func DataSync() *schema.Resource {
 				Required:    true,
 			},
 			"interval": {
-				Description: "Sync interval.",
+				Description: "Sync interval in minutes.",
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     syncDefaults.Interval,
+				Default:     fmt.Sprintf("%d", int64(syncDefaults.Interval.Minutes())),
 			},
 			"path": {
 				Description: "Expected path of content in git repository.",
@@ -102,7 +102,7 @@ func DataSync() *schema.Resource {
 func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	opt := sync.MakeDefaultOptions()
 	interval := d.Get("interval").(int)
-	opt.Interval = time.Duration(interval)
+	opt.Interval = time.Duration(interval) * time.Minute
 	opt.URL = d.Get("url").(string)
 	opt.Name = d.Get("name").(string)
 	opt.Namespace = d.Get("namespace").(string)
