@@ -38,7 +38,7 @@ data "kubectl_file_documents" "install" {
 }
 
 resource "kubectl_manifest" "install" {
-  for_each  = { for v in data.kubectl_file_documents.install.documents : sha1(v) => v }
+  for_each   = { for v in data.kubectl_file_documents.install.documents : sha1(v) => v }
   depends_on = [kubernetes_namespace.flux_system]
 
   yaml_body = each.value
