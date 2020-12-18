@@ -4,7 +4,7 @@ terraform {
   required_providers {
     github = {
       source  = "hashicorp/github"
-      version = ">= 3.1.0"
+      version = ">= 4.1.0"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -46,6 +46,7 @@ data "flux_install" "main" {
 data "flux_sync" "main" {
   target_path = var.target_path
   url         = "ssh://git@github.com/${var.github_owner}/${var.repository_name}.git"
+  branch = var.branch
 }
 
 # Kubernetes
@@ -106,8 +107,12 @@ resource "kubernetes_secret" "main" {
 resource "github_repository" "main" {
   name           = var.repository_name
   visibility     = var.repository_visibility
-  default_branch = var.branch
   auto_init      = true
+}
+
+resource "github_branch_default" "main"{
+  repository = github_repository.main.name
+  branch     = var.branch
 }
 
 resource "github_repository_deploy_key" "main" {
