@@ -14,10 +14,10 @@ code.
 By contributing to the Flux project you agree to the Developer Certificate of
 Origin (DCO). This document was created by the Linux Kernel community and is a
 simple statement that you, as a contributor, have the legal right to make the
-contribution. 
+contribution.
 
 We require all commits to be signed. By signing off with your signature, you
-certify that you wrote the patch or otherwise have the right to contribute the 
+certify that you wrote the patch or otherwise have the right to contribute the
 material by the rules of the [DCO](DCO):
 
 `Signed-off-by: Jane Doe <jane.doe@example.com>`
@@ -42,12 +42,22 @@ to join the conversation (there you can also add calendar invites
 to your Google calendar for our [Flux
 meeting](https://docs.google.com/document/d/1l_M0om0qUEN_NNiGgpqJ2tvsF2iioHkaARDeh6b70B0/view)).
 
-### How to run the test suite
+## Developing
 
-You can run the unit tests by simply doing
+Install the required tools.
 
 ```bash
-make test
+make tools
+```
+
+Run the unit tests and acceptance tests.
+```bash
+make testacc
+```
+
+Generate the docs if you have made changes to any of the schemas or guides.
+```
+make docs
 ```
 
 ## Acceptance policy

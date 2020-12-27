@@ -30,22 +30,22 @@ data "flux_sync" "main" {
 
 ### Required
 
-- **target_path** (String, Required) Relative path to the Git repository root where the sync manifests are committed.
-- **url** (String, Required) Git repository clone url.
+- **target_path** (String) Relative path to the Git repository root where the sync manifests are committed.
+- **url** (String) Git repository clone url.
 
 ### Optional
 
-- **branch** (String, Optional) Default branch to sync from. Defaults to `main`.
-- **id** (String, Optional) The ID of this resource.
-- **interval** (Number, Optional) Sync interval in minutes. Defaults to `1`.
-- **name** (String, Optional) The kubernetes resources name Defaults to `flux-system`.
-- **namespace** (String, Optional) The namespace scope for this operation. Defaults to `flux-system`.
+- **branch** (String) Default branch to sync from. Defaults to `main`.
+- **id** (String) The ID of this resource.
+- **interval** (Number) Sync interval in minutes. Defaults to `1`.
+- **name** (String) The kubernetes resources name Defaults to `flux-system`.
+- **namespace** (String) The namespace scope for this operation. Defaults to `flux-system`.
 
 ### Read-only
 
-- **content** (String, Read-only) Manifests in multi-doc yaml format.
-- **kustomize_content** (String, Read-only) Kustomize yaml document.
-- **kustomize_path** (String, Read-only) Expected path of kustomize content in git repository.
-- **path** (String, Read-only) Expected path of content in git repository.
+- **content** (String) Manifests in multi-doc yaml format.
+- **kustomize_content** (String) Kustomize yaml document.
+- **kustomize_path** (String) Expected path of kustomize content in git repository.
+- **path** (String) Expected path of content in git repository.
 
 
