@@ -20,7 +20,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"path/filepath"
+	"path"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -113,8 +113,8 @@ func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 		return diag.FromErr(err)
 	}
 
-	basePath := filepath.Dir(manifest.Path)
-	kustomizePath := filepath.Join(basePath, "kustomization.yaml")
+	basePath := path.Dir(manifest.Path)
+	kustomizePath := path.Join(basePath, "kustomization.yaml")
 	paths := []string{opt.ManifestFile, install.MakeDefaultOptions().ManifestFile}
 	kustomizeContent, err := generateKustomizationYaml(paths)
 	if err != nil {
