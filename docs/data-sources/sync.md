@@ -36,6 +36,7 @@ data "flux_sync" "main" {
 ### Optional
 
 - **branch** (String) Default branch to sync from. Defaults to `main`.
+- **git_implementation** (String) The git implementation to use, can be `go-git` or `libgit2`. Defaults to `go-git`.
 - **id** (String) The ID of this resource.
 - **interval** (Number) Sync interval in minutes. Defaults to `1`.
 - **name** (String) The kubernetes resources name Defaults to `flux-system`.
