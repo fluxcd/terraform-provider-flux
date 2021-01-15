@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -47,6 +48,14 @@ func DataInstall() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     installDefaults.Version,
+				ValidateFunc: func(val interface{}, key string) ([]string, []error) {
+					errs := []error{}
+					v := val.(string)
+					if v != "latest" && !strings.HasPrefix(v, "v") {
+						errs = append(errs, fmt.Errorf("%q must either be latest or have the prefix 'v', got: %s", key, v))
+					}
+					return []string{}, errs
+				},
 			},
 			"namespace": {
 				Description: "The namespace scope for install manifests.",
