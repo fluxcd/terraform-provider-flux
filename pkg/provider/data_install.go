@@ -80,13 +80,6 @@ func DataInstall() *schema.Resource {
 				Optional:    true,
 				Default:     installDefaults.ImagePullSecret,
 			},
-			"arch": {
-				Description:  "Cluster architecture for toolkit container images.",
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      installDefaults.Arch,
-				ValidateFunc: validation.StringInSlice([]string{"amd64", "arm64", "arm"}, false),
-			},
 			"watch_all_namespaces": {
 				Description: "If true watch for custom resources in all namespaces.",
 				Type:        schema.TypeBool,
@@ -133,7 +126,6 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	opt.Components = components
 	opt.Registry = d.Get("registry").(string)
 	opt.ImagePullSecret = d.Get("image_pull_secrets").(string)
-	opt.Arch = d.Get("arch").(string)
 	opt.WatchAllNamespaces = d.Get("watch_all_namespaces").(bool)
 	opt.NetworkPolicy = d.Get("network_policy").(bool)
 	opt.LogLevel = d.Get("log_level").(string)

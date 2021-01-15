@@ -41,16 +41,10 @@ func TestAccDataInstall_basic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`Error: expected log_level to be one of \[info debug error\], got warn`),
 			},
 			{
-				// With invalid arch set
-				Config:      testAccDataInstallArch,
-				ExpectError: regexp.MustCompile(`Error: expected arch to be one of \[amd64 arm64 arm\], got powerpc`),
-			},
-			{
 				// Check default values
 				Config: testAccDataInstallBasic,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "content"),
-					resource.TestCheckResourceAttr(resourceName, "arch", "amd64"),
 					resource.TestCheckResourceAttr(resourceName, "log_level", "info"),
 					resource.TestCheckResourceAttr(resourceName, "namespace", "flux-system"),
 					resource.TestCheckResourceAttr(resourceName, "cluster_domain", "cluster.local"),
@@ -63,10 +57,6 @@ func TestAccDataInstall_basic(t *testing.T) {
 				),
 			},
 			// Ensure attribute value changes are propagated correctly into the state
-			{
-				Config: testAccDataInstallWithArg("arch", "arm64"),
-				Check:  resource.TestCheckResourceAttr(resourceName, "arch", "arm64"),
-			},
 			{
 				Config: testAccDataInstallWithArg("log_level", "debug"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "log_level", "debug"),
@@ -106,12 +96,6 @@ const (
 		data "flux_install" "main" {
 			target_path = "staging-cluster"
 			log_level   = "warn"
-		}
-	`
-	testAccDataInstallArch = `
-		data "flux_install" "main" {
-			target_path = "staging-cluster"
-			arch        = "powerpc"
 		}
 	`
 )
