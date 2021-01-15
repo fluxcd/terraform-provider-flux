@@ -29,7 +29,6 @@ data "flux_install" "main" {
 
 ### Optional
 
-- **arch** (String) Cluster architecture for toolkit container images. Defaults to `amd64`.
 - **cluster_domain** (String) The internal cluster domain. Defaults to `cluster.local`.
 - **components** (Set of String) Toolkit components to include in the install manifests.
 - **id** (String) The ID of this resource.
