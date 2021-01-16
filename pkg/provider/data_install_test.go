@@ -19,9 +19,11 @@ package provider
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataInstall_basic(t *testing.T) {
@@ -74,12 +76,36 @@ func TestAccDataInstall_basic(t *testing.T) {
 				Check:  resource.TestCheckResourceAttr(resourceName, "network_policy", "false"),
 			},
 			{
-				Config: testAccDataInstallWithArg("version", "0.2.1"),
-				Check:  resource.TestCheckResourceAttr(resourceName, "version", "0.2.1"),
-			},
-			{
 				Config: testAccDataInstallWithArg("watch_all_namespaces", "false"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "watch_all_namespaces", "false"),
+			},
+			{
+				Config:      testAccDataInstallWithArg("version", "foo"),
+				ExpectError: regexp.MustCompile("\"version\" must either be latest or have the prefix 'v', got: foo"),
+			},
+			{
+				Config: testAccDataInstallWithArg("version", "v0.5.3"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "version", "v0.5.3"),
+					func(s *terraform.State) error {
+						install, ok := s.RootModule().Resources["data.flux_install.main"]
+						if !ok {
+							return fmt.Errorf("did not find expected flux_install datasource")
+						}
+
+						content := install.Primary.Attributes["content"]
+						fmt.Println(content)
+						images := []string{"source-controller:v0.5.4", "kustomize-controller:v0.5.0", "notification-controller:v0.5.0", "helm-controller:v0.4.3"}
+						for _, image := range images {
+							imageKey := fmt.Sprintf("ghcr.io/fluxcd/%s", image)
+							if !strings.Contains(content, imageKey) {
+								return fmt.Errorf("expected %q to be present in the manifest content", imageKey)
+							}
+						}
+
+						return nil
+					},
+				),
 			},
 		},
 	})
