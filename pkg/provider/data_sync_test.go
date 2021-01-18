@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -56,9 +55,10 @@ func TestAccDataSync_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "url", "ssh://git@example.com"),
 					resource.TestCheckResourceAttr(resourceName, "branch", "main"),
 					resource.TestCheckResourceAttr(resourceName, "target_path", "staging-cluster"),
-					resource.TestCheckResourceAttr(resourceName, "interval", fmt.Sprintf("%d", time.Minute)),
+					resource.TestCheckResourceAttr(resourceName, "interval", "1"),
 					resource.TestCheckResourceAttr(resourceName, "path", "staging-cluster/flux-system/gotk-sync.yaml"),
 					resource.TestCheckResourceAttr(resourceName, "kustomize_path", "staging-cluster/flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttr(resourceName, "content", testAccDataSyncBasicExpectedContent),
 				),
 			},
 			// Ensure attribute value changes are propagated correctly into the state
@@ -75,8 +75,11 @@ func TestAccDataSync_basic(t *testing.T) {
 				Check:  resource.TestCheckResourceAttr(resourceName, "branch", "develop"),
 			},
 			{
-				Config: testAccDataSyncWithArg("interval", "90000000000"),
-				Check:  resource.TestCheckResourceAttr(resourceName, "interval", "90000000000"),
+				Config: testAccDataSyncWithArg("interval", "5"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "interval", "5"),
+					resource.TestCheckResourceAttr(resourceName, "content", testAccDataSyncIntervalExpectedContent),
+				),
 			},
 		},
 	})
@@ -97,6 +100,64 @@ const (
 			url = "ftp://git@example.com"
 		}
 	`
+	testAccDataSyncBasicExpectedContent = `---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  gitImplementation: go-git
+  interval: 1m0s
+  ref:
+    branch: main
+  secretRef:
+    name: flux-system
+  url: ssh://git@example.com
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./staging-cluster
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  validation: client
+`
+	testAccDataSyncIntervalExpectedContent = `---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  gitImplementation: go-git
+  interval: 5m0s
+  ref:
+    branch: main
+  secretRef:
+    name: flux-system
+  url: ssh://git@example.com
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./staging-cluster
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  validation: client
+`
 )
 
 func testAccDataSyncWithArg(attr string, value string) string {

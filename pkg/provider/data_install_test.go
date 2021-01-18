@@ -19,9 +19,11 @@ package provider
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataInstall_basic(t *testing.T) {
@@ -41,18 +43,13 @@ func TestAccDataInstall_basic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`Error: expected log_level to be one of \[info debug error\], got warn`),
 			},
 			{
-				// With invalid arch set
-				Config:      testAccDataInstallArch,
-				ExpectError: regexp.MustCompile(`Error: expected arch to be one of \[amd64 arm64 arm\], got powerpc`),
-			},
-			{
 				// Check default values
 				Config: testAccDataInstallBasic,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "content"),
-					resource.TestCheckResourceAttr(resourceName, "arch", "amd64"),
 					resource.TestCheckResourceAttr(resourceName, "log_level", "info"),
 					resource.TestCheckResourceAttr(resourceName, "namespace", "flux-system"),
+					resource.TestCheckResourceAttr(resourceName, "cluster_domain", "cluster.local"),
 					resource.TestCheckResourceAttr(resourceName, "network_policy", "true"),
 					resource.TestCheckResourceAttr(resourceName, "path", "staging-cluster/flux-system/gotk-components.yaml"),
 					resource.TestCheckResourceAttr(resourceName, "registry", "ghcr.io/fluxcd"),
@@ -63,10 +60,6 @@ func TestAccDataInstall_basic(t *testing.T) {
 			},
 			// Ensure attribute value changes are propagated correctly into the state
 			{
-				Config: testAccDataInstallWithArg("arch", "arm64"),
-				Check:  resource.TestCheckResourceAttr(resourceName, "arch", "arm64"),
-			},
-			{
 				Config: testAccDataInstallWithArg("log_level", "debug"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "log_level", "debug"),
 			},
@@ -75,16 +68,44 @@ func TestAccDataInstall_basic(t *testing.T) {
 				Check:  resource.TestCheckResourceAttr(resourceName, "namespace", "test-system"),
 			},
 			{
+				Config: testAccDataInstallWithArg("cluster_domain", "k8s.local"),
+				Check:  resource.TestCheckResourceAttr(resourceName, "cluster_domain", "k8s.local"),
+			},
+			{
 				Config: testAccDataInstallWithArg("network_policy", "false"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "network_policy", "false"),
 			},
 			{
-				Config: testAccDataInstallWithArg("version", "0.2.1"),
-				Check:  resource.TestCheckResourceAttr(resourceName, "version", "0.2.1"),
-			},
-			{
 				Config: testAccDataInstallWithArg("watch_all_namespaces", "false"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "watch_all_namespaces", "false"),
+			},
+			{
+				Config:      testAccDataInstallWithArg("version", "foo"),
+				ExpectError: regexp.MustCompile("\"version\" must either be latest or have the prefix 'v', got: foo"),
+			},
+			{
+				Config: testAccDataInstallWithArg("version", "v0.5.3"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "version", "v0.5.3"),
+					func(s *terraform.State) error {
+						install, ok := s.RootModule().Resources["data.flux_install.main"]
+						if !ok {
+							return fmt.Errorf("did not find expected flux_install datasource")
+						}
+
+						content := install.Primary.Attributes["content"]
+						fmt.Println(content)
+						images := []string{"source-controller:v0.5.4", "kustomize-controller:v0.5.0", "notification-controller:v0.5.0", "helm-controller:v0.4.3"}
+						for _, image := range images {
+							imageKey := fmt.Sprintf("ghcr.io/fluxcd/%s", image)
+							if !strings.Contains(content, imageKey) {
+								return fmt.Errorf("expected %q to be present in the manifest content", imageKey)
+							}
+						}
+
+						return nil
+					},
+				),
 			},
 		},
 	})
@@ -101,12 +122,6 @@ const (
 		data "flux_install" "main" {
 			target_path = "staging-cluster"
 			log_level   = "warn"
-		}
-	`
-	testAccDataInstallArch = `
-		data "flux_install" "main" {
-			target_path = "staging-cluster"
-			arch        = "powerpc"
 		}
 	`
 )

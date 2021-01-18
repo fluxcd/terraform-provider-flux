@@ -20,7 +20,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"path/filepath"
+	"path"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -70,10 +70,16 @@ func DataSync() *schema.Resource {
 				Required:    true,
 			},
 			"interval": {
-				Description: "Sync interval.",
+				Description: "Sync interval in minutes.",
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     syncDefaults.Interval,
+				Default:     fmt.Sprintf("%d", int64(syncDefaults.Interval.Minutes())),
+			},
+			"git_implementation": {
+				Description: "The git implementation to use, can be `go-git` or `libgit2`.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     syncDefaults.GitImplementation,
 			},
 			"path": {
 				Description: "Expected path of content in git repository.",
@@ -102,19 +108,20 @@ func DataSync() *schema.Resource {
 func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	opt := sync.MakeDefaultOptions()
 	interval := d.Get("interval").(int)
-	opt.Interval = time.Duration(interval)
+	opt.Interval = time.Duration(interval) * time.Minute
 	opt.URL = d.Get("url").(string)
 	opt.Name = d.Get("name").(string)
 	opt.Namespace = d.Get("namespace").(string)
 	opt.Branch = d.Get("branch").(string)
 	opt.TargetPath = d.Get("target_path").(string)
+	opt.GitImplementation = d.Get("git_implementation").(string)
 	manifest, err := sync.Generate(opt)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	basePath := filepath.Dir(manifest.Path)
-	kustomizePath := filepath.Join(basePath, "kustomization.yaml")
+	basePath := path.Dir(manifest.Path)
+	kustomizePath := path.Join(basePath, "kustomization.yaml")
 	paths := []string{opt.ManifestFile, install.MakeDefaultOptions().ManifestFile}
 	kustomizeContent, err := generateKustomizationYaml(paths)
 	if err != nil {

@@ -42,12 +42,22 @@ to join the conversation (there you can also add calendar invites
 to your Google calendar for our [Flux
 meeting](https://docs.google.com/document/d/1l_M0om0qUEN_NNiGgpqJ2tvsF2iioHkaARDeh6b70B0/view)).
 
-### How to run the test suite
+## Developing
 
-You can run the unit tests by simply doing
+Install the required tools.
 
 ```bash
-make test
+make tools
+```
+
+Run the unit tests and acceptance tests.
+```bash
+make testacc
+```
+
+Generate the docs if you have made changes to any of the schemas or guides.
+```
+make docs
 ```
 
 ## Acceptance policy

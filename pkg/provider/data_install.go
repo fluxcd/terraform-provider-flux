@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -47,12 +48,26 @@ func DataInstall() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     installDefaults.Version,
+				ValidateFunc: func(val interface{}, key string) ([]string, []error) {
+					errs := []error{}
+					v := val.(string)
+					if v != "latest" && !strings.HasPrefix(v, "v") {
+						errs = append(errs, fmt.Errorf("%q must either be latest or have the prefix 'v', got: %s", key, v))
+					}
+					return []string{}, errs
+				},
 			},
 			"namespace": {
 				Description: "The namespace scope for install manifests.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     installDefaults.Namespace,
+			},
+			"cluster_domain": {
+				Description: "The internal cluster domain.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     installDefaults.ClusterDomain,
 			},
 			"components": {
 				Description: "Toolkit components to include in the install manifests.",
@@ -73,13 +88,6 @@ func DataInstall() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     installDefaults.ImagePullSecret,
-			},
-			"arch": {
-				Description:  "Cluster architecture for toolkit container images.",
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      installDefaults.Arch,
-				ValidateFunc: validation.StringInSlice([]string{"amd64", "arm64", "arm"}, false),
 			},
 			"watch_all_namespaces": {
 				Description: "If true watch for custom resources in all namespaces.",
@@ -123,10 +131,10 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	opt := install.MakeDefaultOptions()
 	opt.Version = d.Get("version").(string)
 	opt.Namespace = d.Get("namespace").(string)
+	opt.ClusterDomain = d.Get("cluster_domain").(string)
 	opt.Components = components
 	opt.Registry = d.Get("registry").(string)
 	opt.ImagePullSecret = d.Get("image_pull_secrets").(string)
-	opt.Arch = d.Get("arch").(string)
 	opt.WatchAllNamespaces = d.Get("watch_all_namespaces").(bool)
 	opt.NetworkPolicy = d.Get("network_policy").(bool)
 	opt.LogLevel = d.Get("log_level").(string)

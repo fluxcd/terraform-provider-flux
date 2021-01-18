@@ -63,7 +63,7 @@ terraform {
   required_providers {
     github = {
       source  = "hashicorp/github"
-      version = ">= 3.1.0"
+      version = ">= 4.1.0"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -105,12 +105,19 @@ data "flux_install" "main" {
 data "flux_sync" "main" {
   target_path = var.target_path
   url         = "ssh://git@github.com/${var.github_owner}/${var.repository_name}.git"
+  branch      = var.branch
 }
 
 # Kubernetes
 resource "kubernetes_namespace" "flux_system" {
   metadata {
     name = "flux-system"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+    ]
   }
 }
 
@@ -119,7 +126,7 @@ data "kubectl_file_documents" "install" {
 }
 
 resource "kubectl_manifest" "install" {
-  for_each  = { for v in data.kubectl_file_documents.install.documents : sha1(v) => v }
+  for_each   = { for v in data.kubectl_file_documents.install.documents : sha1(v) => v }
   depends_on = [kubernetes_namespace.flux_system]
 
   yaml_body = each.value
@@ -130,7 +137,7 @@ data "kubectl_file_documents" "sync" {
 }
 
 resource "kubectl_manifest" "sync" {
-  for_each  = { for v in data.kubectl_file_documents.sync.documents : sha1(v) => v }
+  for_each   = { for v in data.kubectl_file_documents.sync.documents : sha1(v) => v }
   depends_on = [kubectl_manifest.install, kubernetes_namespace.flux_system]
 
   yaml_body = each.value
@@ -157,10 +164,14 @@ resource "kubernetes_secret" "main" {
 
 # GitHub
 resource "github_repository" "main" {
-  name           = var.repository_name
-  visibility     = var.repository_visibility
-  default_branch = var.branch
-  auto_init      = true
+  name       = var.repository_name
+  visibility = var.repository_visibility
+  auto_init  = true
+}
+
+resource "github_branch_default" "main" {
+  repository = github_repository.main.name
+  branch     = var.branch
 }
 
 resource "github_repository_deploy_key" "main" {

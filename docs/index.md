@@ -6,5 +6,4 @@ description: |-
 ---
 
 # Flux Provider
-
 The Flux provider provides data sources to bootstrap a Kubernetes cluster with Flux.
