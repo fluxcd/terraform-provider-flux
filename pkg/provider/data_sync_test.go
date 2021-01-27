@@ -107,7 +107,6 @@ metadata:
   name: flux-system
   namespace: flux-system
 spec:
-  gitImplementation: go-git
   interval: 1m0s
   ref:
     branch: main
@@ -136,7 +135,6 @@ metadata:
   name: flux-system
   namespace: flux-system
 spec:
-  gitImplementation: go-git
   interval: 5m0s
   ref:
     branch: main

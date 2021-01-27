@@ -1,15 +1,14 @@
-# terraform-provider-flux
+# Terraform provider flux
 
-This is the Terraform provider for Flux v2.
-The provider allows you to install Flux on Kubernetes
+This is the Terraform provider for Flux v2. The provider allows you to install Flux on Kubernetes
 and configure it to reconcile the cluster state from a Git repository.
 
-## Example Usage
+## Get started
 
-The provider consists of two data sources `flux_install` and `flux_sync`,
-the data sources are corresponding to [fluxv2 manifests](https://pkg.go.dev/github.com/fluxcd/flux2@v0.2.1/pkg/manifestgen).
+The provider consists of two data sources `flux_install` and `flux_sync`, which output the manifests
+required to install Flux.
 
-The `flux_install` data source generates a multi-doc YAML with Kubernetes manifests that can be used to install or upgrade Flux:
+The `flux_install` data source generates a multi-doc YAML with Kubernetes manifests that can be used to install or upgrade Flux.
 
 ```hcl
 # Generate manifests
@@ -37,17 +36,25 @@ data "kubectl_file_documents" "apply" {
   content = data.flux_install.main.content
 }
 
+# Convert documents list to include parsed yaml data
+locals {
+  apply = [ for v in data.kubectl_file_documents.main.documents : {
+      data: yamldecode(v)
+      content: v
+    }
+  ]
+}
+
 # Apply manifests on the cluster
 resource "kubectl_manifest" "apply" {
-  for_each  = { for v in data.kubectl_file_documents.apply.documents : sha1(v) => v }
+  for_each   = { for v in local.apply : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
   depends_on = [kubernetes_namespace.flux_system]
-
   yaml_body = each.value
 }
 ```
 
 The `flux_sync` data source generates a multi-doc YAML containing the `GitRepository` and `Kustomization`
-manifests that configure Flux to sync the cluster with the specified repository:
+manifests that configures Flux to sync the cluster with the specified repository.
 
 ```hcl
 # Generate manifests
@@ -62,11 +69,19 @@ data "kubectl_file_documents" "sync" {
   content = data.flux_sync.main.content
 }
 
+# Convert documents list to include parsed yaml data
+locals {
+  sync = [ for v in data.kubectl_file_documents.main.documents : {
+      data: yamldecode(v)
+      content: v
+    }
+  ]
+}
+
 # Apply manifests on the cluster
 resource "kubectl_manifest" "sync" {
-  for_each  = { for v in data.kubectl_file_documents.sync.documents : sha1(v) => v }
-  depends_on = [kubectl_manifest.apply, kubernetes_namespace.flux_system]
-
+  for_each   = { for v in local.sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
+  depends_on = [kubernetes_namespace.flux_system]
   yaml_body = each.value
 }
 
@@ -85,15 +100,3 @@ resource "kubernetes_secret" "main" {
   }
 }
 ```
-
-## Community
-
-The Flux project is always looking for new contributors and there are a multitude of ways to get involved.
-Depending on what you want to do, some of the following bits might be your first steps:
-
-- Join our upcoming dev meetings ([meeting access and agenda](https://docs.google.com/document/d/1l_M0om0qUEN_NNiGgpqJ2tvsF2iioHkaARDeh6b70B0/view))
-- Talk to us in the #flux channel on [CNCF Slack](https://slack.cncf.io/)
-- Join the [planning discussions](https://github.com/fluxcd/flux2/discussions)
-- And if you are completely new to Flux and the GitOps Toolkit, take a look at our [Get Started guide](https://toolkit.fluxcd.io/get-started/) and give us feedback
-- To be part of the conversation about Flux's development, [join the flux-dev mailing list](https://lists.cncf.io/g/cncf-flux-dev).
-- Check out [how to contribute](CONTRIBUTING.md) to the project
