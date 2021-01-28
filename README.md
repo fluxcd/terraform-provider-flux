@@ -38,8 +38,14 @@ data "kubectl_file_documents" "apply" {
 }
 
 # Apply manifests on the cluster
-resource "kubectl_manifest" "apply" {
-  for_each  = { for v in data.kubectl_file_documents.apply.documents : sha1(v) => v }
+resource "kubectl_manifest" "install" {
+  for_each   = { for v in data.kubectl_file_documents.install.documents : 
+                          # format to namespace-kind-name to create IDs that wont change when the yaml body does.
+                          format("%s-%s-%s",  
+                          lookup(yamldecode(v)["metadata"], "namespace", "none"), 
+                          yamldecode(v)["kind"], 
+                          yamldecode(v)["metadata"]["name"]) 
+                  => v }
   depends_on = [kubernetes_namespace.flux_system]
 
   yaml_body = each.value
