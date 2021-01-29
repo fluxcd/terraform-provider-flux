@@ -42,8 +42,7 @@ jobs:
           fi
       - name: Run install terraform
         run: |
-          mkdir -p ./examples/install/.terraform/plugins/registry.terraform.io/fluxcd/flux/0.0.1/linux_amd64
-          cp ./bin/flux ./examples/install/.terraform/plugins/registry.terraform.io/fluxcd/flux/0.0.1/linux_amd64/terraform-provider-flux_v0.0.1
+          make install
           cd examples/install
           terraform init
           terraform apply -auto-approve

@@ -22,8 +22,12 @@ testacc: tidy fmt vet
 build:
 	CGO_ENABLED=0 go build -o ./bin/flux main.go
 
+install: build
+	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/fluxcd/flux/0.0.0-dev/$${GOOS}_$${GOARCH}
+	cp ./bin/flux ~/.terraform.d/plugins/registry.terraform.io/fluxcd/flux/0.0.0-dev/$${GOOS}_$${GOARCH}/terraform-provider-flux
+
 .PHONY: docs
-docs:
+docs: tools
 	tfplugindocs generate
 
 tools:

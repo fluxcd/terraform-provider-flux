@@ -4,7 +4,7 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = ">= 1.13.3"
+      version = ">= 2.0.1"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
@@ -12,7 +12,7 @@ terraform {
     }
     flux = {
       source  = "fluxcd/flux"
-      version = ">= 0.0.7"
+      version = ">= 0.0.10"
     }
   }
 }
@@ -20,6 +20,10 @@ terraform {
 provider "flux" {}
 
 provider "kubectl" {}
+
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+}
 
 # Flux
 data "flux_install" "main" {
@@ -37,9 +41,16 @@ data "kubectl_file_documents" "install" {
   content = data.flux_install.main.content
 }
 
-resource "kubectl_manifest" "install" {
-  for_each   = { for v in data.kubectl_file_documents.install.documents : sha1(v) => v }
-  depends_on = [kubernetes_namespace.flux_system]
+locals {
+  install = [ for v in data.kubectl_file_documents.install.documents : {
+      data: yamldecode(v)
+      content: v
+    }
+  ]
+}
 
+resource "kubectl_manifest" "install" {
+  for_each   = { for v in local.install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
+  depends_on = [kubernetes_namespace.flux_system]
   yaml_body = each.value
 }

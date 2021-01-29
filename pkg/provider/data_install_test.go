@@ -94,7 +94,6 @@ func TestAccDataInstall_basic(t *testing.T) {
 						}
 
 						content := install.Primary.Attributes["content"]
-						fmt.Println(content)
 						images := []string{"source-controller:v0.5.4", "kustomize-controller:v0.5.0", "notification-controller:v0.5.0", "helm-controller:v0.4.3"}
 						for _, image := range images {
 							imageKey := fmt.Sprintf("ghcr.io/fluxcd/%s", image)
