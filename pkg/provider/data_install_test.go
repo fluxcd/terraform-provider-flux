@@ -106,6 +106,10 @@ func TestAccDataInstall_basic(t *testing.T) {
 					},
 				),
 			},
+			{
+				Config: testAccDataInstallTolerationKeys,
+				Check:  resource.TestCheckResourceAttr(resourceName, "toleration_keys.#", "2"),
+			},
 		},
 	})
 }
@@ -121,6 +125,12 @@ const (
 		data "flux_install" "main" {
 			target_path = "staging-cluster"
 			log_level   = "warn"
+		}
+	`
+	testAccDataInstallTolerationKeys = `
+		data "flux_install" "main" {
+			target_path = "staging-cluster"
+			toleration_keys = ["foo", "bar"]
 		}
 	`
 )

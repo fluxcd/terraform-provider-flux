@@ -8,3 +8,5 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.3.0
 	github.com/stretchr/testify v1.6.1
 )
+
+replace github.com/fluxcd/flux2 => github.com/fluxcd/flux2 v0.7.8-0.20210211132019-37f558708523
