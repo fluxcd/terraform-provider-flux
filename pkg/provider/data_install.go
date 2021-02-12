@@ -108,6 +108,14 @@ func DataInstall() *schema.Resource {
 				Default:      installDefaults.LogLevel,
 				ValidateFunc: validation.StringInSlice([]string{"info", "debug", "error"}, false),
 			},
+			"toleration_keys": {
+				Description: "List of toleration keys used to schedule the components pods onto nodes with matching taints.",
+				Type:        schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+			},
 			"path": {
 				Description: "Expected path of content in git repository.",
 				Type:        schema.TypeString,
@@ -128,6 +136,11 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 		components = installDefaults.Components
 	}
 
+	tolerationKeys := toStringList(d.Get("toleration_keys"))
+	if len(tolerationKeys) == 0 {
+		tolerationKeys = installDefaults.TolerationKeys
+	}
+
 	opt := install.MakeDefaultOptions()
 	opt.Version = d.Get("version").(string)
 	opt.Namespace = d.Get("namespace").(string)
@@ -139,6 +152,7 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	opt.NetworkPolicy = d.Get("network_policy").(bool)
 	opt.LogLevel = d.Get("log_level").(string)
 	opt.TargetPath = d.Get("target_path").(string)
+	opt.TolerationKeys = tolerationKeys
 	manifest, err := install.Generate(opt)
 	if err != nil {
 		return diag.FromErr(err)
