@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.0.12
+
+**Release date:** 2021-02-12
+
+A new `toleration_keys` parameter has been added to the install
+data source to enable installtion in cluster with node taints.
+
+Improvements:
+* Add tolerations parameter to install datasource
+  [#96](https://github.com/fluxcd/terraform-provider-flux/pull/96)
+* Fix resource name
+  [#90](https://github.com/fluxcd/terraform-provider-flux/pull/90)
+
 ## 0.0.11
 
 **Release date:** 2021-01-29
