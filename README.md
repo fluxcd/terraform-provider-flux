@@ -38,7 +38,7 @@ data "kubectl_file_documents" "apply" {
 
 # Convert documents list to include parsed yaml data
 locals {
-  apply = [ for v in data.kubectl_file_documents.main.documents : {
+  apply = [ for v in data.kubectl_file_documents.apply.documents : {
       data: yamldecode(v)
       content: v
     }
@@ -71,7 +71,7 @@ data "kubectl_file_documents" "sync" {
 
 # Convert documents list to include parsed yaml data
 locals {
-  sync = [ for v in data.kubectl_file_documents.main.documents : {
+  sync = [ for v in data.kubectl_file_documents.sync.documents : {
       data: yamldecode(v)
       content: v
     }
