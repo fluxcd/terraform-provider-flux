@@ -153,7 +153,7 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	opt.LogLevel = d.Get("log_level").(string)
 	opt.TargetPath = d.Get("target_path").(string)
 	opt.TolerationKeys = tolerationKeys
-	manifest, err := install.Generate(opt)
+	manifest, err := install.Generate(opt, "")
 	if err != nil {
 		return diag.FromErr(err)
 	}
