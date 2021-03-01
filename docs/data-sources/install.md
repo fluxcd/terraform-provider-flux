@@ -6,7 +6,7 @@ description: |-
   flux_install can be used to generate Kubernetes manifests for deploying Flux.
 ---
 
-# Data Source `flux_install`
+# flux_install (Data Source)
 
 `flux_install` can be used to generate Kubernetes manifests for deploying Flux.
 
@@ -43,7 +43,7 @@ data "flux_install" "main" {
 - **version** (String) Flux version. Defaults to `latest`.
 - **watch_all_namespaces** (Boolean) If true watch for custom resources in all namespaces. Defaults to `true`.
 
-### Read-only
+### Read-Only
 
 - **content** (String) Manifests in multi-doc yaml format.
 - **path** (String) Expected path of content in git repository.
