@@ -6,7 +6,7 @@ description: |-
   flux_sync can be used to generate manifests for reconciling the specified repository path on the cluster.
 ---
 
-# Data Source `flux_sync`
+# flux_sync (Data Source)
 
 `flux_sync` can be used to generate manifests for reconciling the specified repository path on the cluster.
 
@@ -44,7 +44,7 @@ data "flux_sync" "main" {
 - **name** (String) The kubernetes resources name Defaults to `flux-system`.
 - **namespace** (String) The namespace scope for this operation. Defaults to `flux-system`.
 
-### Read-only
+### Read-Only
 
 - **content** (String) Manifests in multi-doc yaml format.
 - **kustomize_content** (String) Kustomize yaml document.
