@@ -36,6 +36,7 @@ jobs:
             commit-message: Update manifestgen dependency
             committer: GitHub <noreply@github.com>
             author: fluxcdbot <fluxcdbot@users.noreply.github.com>
+            signoff: true
             title: Update manifestgen dependency
             body: |
               ${{ steps.update.outputs.pr_body }}
@@ -44,6 +45,8 @@ jobs:
 
               [1]: https://github.com/peter-evans/create-pull-request
             branch: update-components
+            labels: |
+              area/build
             reviewers: ${{ secrets.ASSIGNEES }}
       - name: Check output
         run: |
