@@ -3,7 +3,7 @@ terraform {
 
   required_providers {
     github = {
-      source  = "integrations/github"
+      source = "integrations/github"
       # 4.3.1 is broken for personal account users
       version = "4.3.0"
     }
@@ -19,6 +19,11 @@ terraform {
       source  = "fluxcd/flux"
       version = ">= 0.0.10"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "3.1.0"
+    }
+
   }
 }
 
@@ -27,7 +32,7 @@ provider "flux" {}
 provider "kubectl" {}
 
 provider "kubernetes" {
-  config_path    = "~/.kube/config"
+  config_path = "~/.kube/config"
 }
 
 provider "github" {
@@ -78,14 +83,14 @@ data "kubectl_file_documents" "sync" {
 }
 
 locals {
-  install = [ for v in data.kubectl_file_documents.install.documents : {
-      data: yamldecode(v)
-      content: v
+  install = [for v in data.kubectl_file_documents.install.documents : {
+    data : yamldecode(v)
+    content : v
     }
   ]
-  sync = [ for v in data.kubectl_file_documents.sync.documents : {
-      data: yamldecode(v)
-      content: v
+  sync = [for v in data.kubectl_file_documents.sync.documents : {
+    data : yamldecode(v)
+    content : v
     }
   ]
 }
@@ -93,13 +98,13 @@ locals {
 resource "kubectl_manifest" "install" {
   for_each   = { for v in local.install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
   depends_on = [kubernetes_namespace.flux_system]
-  yaml_body = each.value
+  yaml_body  = each.value
 }
 
 resource "kubectl_manifest" "sync" {
   for_each   = { for v in local.sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
   depends_on = [kubernetes_namespace.flux_system]
-  yaml_body = each.value
+  yaml_body  = each.value
 }
 
 resource "kubernetes_secret" "main" {

@@ -14,20 +14,22 @@ to share the same repository for the Flux deployments in the different environme
 to manually create the repository and then use a datasource instead of a resource.
 
 ```terraform
-variable "repository_name" {
-  description = "Name of GitHub repository"
-  type = string
+terraform {
+  required_version = ">= 0.13"
+
+  required_providers {
+    github = {
+      source = "integrations/github"
+      # 4.3.1 is broken for personal account users
+      version = "4.3.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "3.1.0"
+    }
+  }
 }
 
-variable "branch" {
-  description = "Name of git branch"
-  type = string
-}
-
-variable "environment" {
-  description = "Environment being deployed"
-  type = string
-}
 
 data "github_repository" "main" {
   name = var.repository_name

@@ -47,3 +47,15 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v2
+      - name: Setup TFLint
+        uses: lablabs/setup-tflint@v1.0.2
+        with:
+          tflint_version: v0.24.1
+      - name: Run lint
+        run: |
+          make lint

@@ -42,9 +42,9 @@ data "kubectl_file_documents" "install" {
 }
 
 locals {
-  install = [ for v in data.kubectl_file_documents.install.documents : {
-      data: yamldecode(v)
-      content: v
+  install = [for v in data.kubectl_file_documents.install.documents : {
+    data : yamldecode(v)
+    content : v
     }
   ]
 }
@@ -52,5 +52,5 @@ locals {
 resource "kubectl_manifest" "install" {
   for_each   = { for v in local.install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
   depends_on = [kubernetes_namespace.flux_system]
-  yaml_body = each.value
+  yaml_body  = each.value
 }
