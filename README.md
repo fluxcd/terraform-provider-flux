@@ -13,9 +13,8 @@ The `flux_install` data source generates a multi-doc YAML with Kubernetes manife
 ```hcl
 # Generate manifests
 data "flux_install" "main" {
-  target_path    = "production"
+  target_path    = "clusters/my-cluster"
   network_policy = false
-  version        = "latest"
 }
 
 resource "kubernetes_namespace" "flux_system" {
@@ -59,7 +58,7 @@ manifests that configures Flux to sync the cluster with the specified repository
 ```hcl
 # Generate manifests
 data "flux_sync" "main" {
-  target_path = "production"
+  target_path = "clusters/my-cluster"
   url         = "https://github.com/${var.github_owner}/${var.repository_name}"
 }
 
