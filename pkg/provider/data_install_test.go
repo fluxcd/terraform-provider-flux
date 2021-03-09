@@ -54,7 +54,6 @@ func TestAccDataInstall_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "path", "staging-cluster/flux-system/gotk-components.yaml"),
 					resource.TestCheckResourceAttr(resourceName, "registry", "ghcr.io/fluxcd"),
 					resource.TestCheckResourceAttr(resourceName, "target_path", "staging-cluster"),
-					resource.TestCheckResourceAttr(resourceName, "version", "latest"),
 					resource.TestCheckResourceAttr(resourceName, "watch_all_namespaces", "true"),
 				),
 			},

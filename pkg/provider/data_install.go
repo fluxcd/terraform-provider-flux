@@ -47,7 +47,7 @@ func DataInstall() *schema.Resource {
 				Description: "Flux version.",
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     installDefaults.Version,
+				Default:     "v0.9.1",
 				ValidateFunc: func(val interface{}, key string) ([]string, []error) {
 					errs := []error{}
 					v := val.(string)
