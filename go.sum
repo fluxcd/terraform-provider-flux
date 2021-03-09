@@ -210,9 +210,9 @@ github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d/go.mod h1:ZZM
 github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
-github.com/fluxcd/flux2 v0.9.0 h1:LNWl7WoFLG8uhq6htj/OD63qweuecIvrguzsj4V2aZE=
-github.com/fluxcd/flux2 v0.9.0/go.mod h1:nGokpRRpFoIzp3PjqBvZstLeSdMWbUPIw2oekp25X9Q=
-github.com/fluxcd/helm-controller/api v0.8.0/go.mod h1:cFceNc/mOBa+Qi3NE8NDY2w3FAEectauTm8c10mcBis=
+github.com/fluxcd/flux2 v0.9.1 h1:zF3PsIDYGCRUYnAGcbvGaUNyxEsTOUXgmRaWPbic7yU=
+github.com/fluxcd/flux2 v0.9.1/go.mod h1:s2L0qDRCPpbDzEL4q3U7ocb8nQc9zWgyMSUJbN1DBVU=
+github.com/fluxcd/helm-controller/api v0.8.1/go.mod h1:cFceNc/mOBa+Qi3NE8NDY2w3FAEectauTm8c10mcBis=
 github.com/fluxcd/image-automation-controller/api v0.6.1/go.mod h1:8Q/baOONPrSJFMq7+zxp/t2WGrqVFRUx4HnTrg37pNE=
 github.com/fluxcd/image-reflector-controller/api v0.7.0/go.mod h1:KHWknF2xu/GZ4uLSQcAmfONZYjsbwNqyk3OvMQTmMsA=
 github.com/fluxcd/kustomize-controller/api v0.9.1 h1:o6cxtLiXUdEeTJMxoeoLdld7hsgf7L4mNO6+i2MD2U8=
