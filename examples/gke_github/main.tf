@@ -3,7 +3,7 @@ terraform {
 
   required_providers {
     github = {
-      source  = "hashicorp/github"
+      source  = "integrations/github"
       version = ">= 4.5.1"
     }
     kubernetes = {
@@ -110,7 +110,13 @@ resource "kubernetes_secret" "main" {
 # Github
 provider "github" {
   token        = var.github_token
+  owner        = var.github_owner
   organization = var.organization
+}
+
+# To make sure the repository exists and the correct permissions are set.
+data "github_repository" "permission_check" {
+  full_name = "${var.organization}/${repository_name}"
 }
 
 resource "github_repository_file" "install" {
