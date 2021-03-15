@@ -73,19 +73,32 @@ data "kubectl_file_documents" "install" {
   content = data.flux_install.main.content
 }
 
-resource "kubectl_manifest" "install" {
-  depends_on = [kubernetes_namespace.flux_system]
-  for_each   = { for v in data.kubectl_file_documents.install.documents : sha1(v) => v }
-  yaml_body  = each.value
-}
-
 data "kubectl_file_documents" "sync" {
   content = data.flux_sync.main.content
 }
 
+locals {
+  install = [for v in data.kubectl_file_documents.install.documents : {
+    data : yamldecode(v)
+    content : v
+    }
+  ]
+  sync = [for v in data.kubectl_file_documents.sync.documents : {
+    data : yamldecode(v)
+    content : v
+    }
+  ]
+}
+
+resource "kubectl_manifest" "install" {
+  depends_on = [kubernetes_namespace.flux_system]
+  for_each   = { for v in local.install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
+  yaml_body  = each.value
+}
+
 resource "kubectl_manifest" "sync" {
   depends_on = [kubectl_manifest.install, kubernetes_namespace.flux_system]
-  for_each   = { for v in data.kubectl_file_documents.sync.documents : sha1(v) => v }
+  for_each   = { for v in local.sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
   yaml_body  = each.value
 }
 
