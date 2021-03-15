@@ -43,6 +43,7 @@ data "flux_sync" "main" {
 - **interval** (Number) Sync interval in minutes. Defaults to `1`.
 - **name** (String) The kubernetes resources name Defaults to `flux-system`.
 - **namespace** (String) The namespace scope for this operation. Defaults to `flux-system`.
+- **secret** (String) The name of the secret that is referenced by GitRepository as SecretRef. Defaults to `flux-system`.
 
 ### Read-Only
 

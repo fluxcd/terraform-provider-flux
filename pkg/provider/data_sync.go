@@ -64,6 +64,12 @@ func DataSync() *schema.Resource {
 				Optional:    true,
 				Default:     syncDefaults.Branch,
 			},
+			"secret": {
+				Description: "The name of the secret that is referenced by GitRepository as SecretRef.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     syncDefaults.Secret,
+			},
 			"target_path": {
 				Description: "Relative path to the Git repository root where the sync manifests are committed.",
 				Type:        schema.TypeString,
@@ -115,6 +121,7 @@ func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 	opt.Branch = d.Get("branch").(string)
 	opt.TargetPath = d.Get("target_path").(string)
 	opt.GitImplementation = d.Get("git_implementation").(string)
+	opt.Secret = d.Get("secret").(string)
 	manifest, err := sync.Generate(opt)
 	if err != nil {
 		return diag.FromErr(err)
