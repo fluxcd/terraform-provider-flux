@@ -1,10 +1,10 @@
 terraform {
-  required_version = ">= 0.12.10"
+  required_version = ">= 0.13"
 
   required_providers {
     github = {
       source  = "integrations/github"
-      version = ">= 4.5.1"
+      version = ">= 4.5.2"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -110,7 +110,7 @@ resource "kubernetes_secret" "main" {
   depends_on = [kubectl_manifest.install]
 
   metadata {
-    name      = data.flux_sync.main.name
+    name      = data.flux_sync.main.secret
     namespace = data.flux_sync.main.namespace
   }
 

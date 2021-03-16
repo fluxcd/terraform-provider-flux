@@ -69,20 +69,19 @@ terraform {
   required_providers {
     github = {
       source = "integrations/github"
-      # 4.3.1 is broken for personal account users
-      version = "4.3.0"
+      version = ">= 4.5.2"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = ">= 2.0.1"
+      version = ">= 2.0.2"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
-      version = ">= 1.9.1"
+      version = ">= 1.10.0"
     }
     flux = {
       source  = "fluxcd/flux"
-      version = ">= 0.0.10"
+      version = ">= 0.0.13"
     }
     tls = {
       source  = "hashicorp/tls"
@@ -176,7 +175,7 @@ resource "kubernetes_secret" "main" {
   depends_on = [kubectl_manifest.install]
 
   metadata {
-    name      = data.flux_sync.main.name
+    name      = data.flux_sync.main.secret
     namespace = data.flux_sync.main.namespace
   }
 
