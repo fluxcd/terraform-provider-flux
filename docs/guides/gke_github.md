@@ -15,28 +15,34 @@ And you must have a cluster on GKE.
 With the following variables default values are set for all but `github_owner` and `github_token`.
 ```terraform
 variable "project_id" {
-  type = string
+  description = "project id"
+  type        = string
 }
 
 variable "github_token" {
-  type = string
+  description = "token for github"
+  type        = string
 }
 
 variable "github_owner" {
-  type = string
+  description = "github owner"
+  type        = string
 }
 
 variable "repository_name" {
-  type = string
+  description = "repository name"
+  type        = string
 }
 
 variable "organization" {
-  type = string
+  description = "organization"
+  type        = string
 }
 
 variable "branch" {
-  type    = string
-  default = "main"
+  description = "branch"
+  type        = string
+  default     = "main"
 }
 
 variable "target_path" {
@@ -45,16 +51,19 @@ variable "target_path" {
 }
 
 variable "flux_namespace" {
-  type    = string
-  default = "flux-system"
+  type        = string
+  default     = "flux-system"
+  description = "the flux namespace"
 }
 
 variable "cluster_name" {
-  type = string
+  type        = string
+  description = "cluster name"
 }
 
 variable "cluster_region" {
-  type = string
+  type        = string
+  description = "cluster region"
 }
 
 variable "use_private_endpoint" {
@@ -204,12 +213,12 @@ provider "github" {
 }
 
 # To make sure the repository exists and the correct permissions are set.
-data "github_repository" "permission_check" {
+data "github_repository" "main" {
   full_name = "${var.organization}/${repository_name}"
 }
 
 resource "github_repository_file" "install" {
-  repository          = var.repository_name
+  repository          = data.github_repository.main.name
   file                = data.flux_install.main.path
   content             = data.flux_install.main.content
   branch              = var.branch

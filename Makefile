@@ -1,3 +1,6 @@
+.ONESHELL:
+SHELL := /bin/bash
+
 TEST_COUNT?=1
 ACCTEST_PARALLELISM?=4
 ACCTEST_TIMEOUT?=10m
@@ -32,3 +35,17 @@ docs: tools
 
 tools:
 	GO111MODULE=on go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+
+.SILENT:
+lint:
+	set -e
+	echo lint: Start
+	EXAMPLES=$$(find examples -mindepth 1 -maxdepth 1 -type d)
+	DELETE=examples/data-sources
+	echo $${array[@]/$$DELETE}
+	EXAMPLES=( "$${EXAMPLES[@]/$$DELETE}" )
+	for EXAMPLE in $${EXAMPLES}; do
+		echo $$EXAMPLE
+		tflint -c examples/.tflint.hcl $${EXAMPLE}
+	done
+	echo lint: Success

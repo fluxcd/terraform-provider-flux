@@ -19,31 +19,37 @@ kubectl cluster-info --context kind-staging
 With the following variables default values are set for all but `github_owner` and `github_token`.
 ```terraform
 variable "github_owner" {
-  type = string
+  type        = string
+  description = "github owner"
 }
 
 variable "github_token" {
-  type = string
+  type        = string
+  description = "github token"
 }
 
 variable "repository_name" {
-  type    = string
-  default = "test-provider"
+  type        = string
+  default     = "test-provider"
+  description = "github repository name"
 }
 
 variable "repository_visibility" {
-  type    = string
-  default = "private"
+  type        = string
+  default     = "private"
+  description = "How visiable is the github repo"
 }
 
 variable "branch" {
-  type    = string
-  default = "main"
+  type        = string
+  default     = "main"
+  description = "branch name"
 }
 
 variable "target_path" {
-  type    = string
-  default = "staging-cluster"
+  type        = string
+  default     = "staging-cluster"
+  description = "flux sync target path"
 }
 ```
 
@@ -62,7 +68,7 @@ terraform {
 
   required_providers {
     github = {
-      source  = "integrations/github"
+      source = "integrations/github"
       # 4.3.1 is broken for personal account users
       version = "4.3.0"
     }
@@ -78,6 +84,11 @@ terraform {
       source  = "fluxcd/flux"
       version = ">= 0.0.10"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "3.1.0"
+    }
+
   }
 }
 
@@ -86,7 +97,7 @@ provider "flux" {}
 provider "kubectl" {}
 
 provider "kubernetes" {
-  config_path    = "~/.kube/config"
+  config_path = "~/.kube/config"
 }
 
 provider "github" {
@@ -137,14 +148,14 @@ data "kubectl_file_documents" "sync" {
 }
 
 locals {
-  install = [ for v in data.kubectl_file_documents.install.documents : {
-      data: yamldecode(v)
-      content: v
+  install = [for v in data.kubectl_file_documents.install.documents : {
+    data : yamldecode(v)
+    content : v
     }
   ]
-  sync = [ for v in data.kubectl_file_documents.sync.documents : {
-      data: yamldecode(v)
-      content: v
+  sync = [for v in data.kubectl_file_documents.sync.documents : {
+    data : yamldecode(v)
+    content : v
     }
   ]
 }
@@ -152,13 +163,13 @@ locals {
 resource "kubectl_manifest" "install" {
   for_each   = { for v in local.install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
   depends_on = [kubernetes_namespace.flux_system]
-  yaml_body = each.value
+  yaml_body  = each.value
 }
 
 resource "kubectl_manifest" "sync" {
   for_each   = { for v in local.sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
   depends_on = [kubernetes_namespace.flux_system]
-  yaml_body = each.value
+  yaml_body  = each.value
 }
 
 resource "kubernetes_secret" "main" {
