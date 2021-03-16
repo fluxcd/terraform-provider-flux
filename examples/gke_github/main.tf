@@ -128,12 +128,12 @@ provider "github" {
 }
 
 # To make sure the repository exists and the correct permissions are set.
-data "github_repository" "permission_check" {
+data "github_repository" "main" {
   full_name = "${var.organization}/${repository_name}"
 }
 
 resource "github_repository_file" "install" {
-  repository          = var.repository_name
+  repository          = data.github_repository.main.name
   file                = data.flux_install.main.path
   content             = data.flux_install.main.content
   branch              = var.branch
