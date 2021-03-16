@@ -77,6 +77,14 @@ func DataInstall() *schema.Resource {
 				},
 				Optional: true,
 			},
+			"components_extra": {
+				Description: "List of extra components to include in the install manifests.",
+				Type:        schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+			},
 			"registry": {
 				Description: "Container registry where the toolkit images are published.",
 				Type:        schema.TypeString,
@@ -135,6 +143,10 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	if len(components) == 0 {
 		components = installDefaults.Components
 	}
+	componentsExtra := toStringList(d.Get("components_extra"))
+	if len(componentsExtra) == 0 {
+		componentsExtra = installDefaults.ComponentsExtra
+	}
 
 	tolerationKeys := toStringList(d.Get("toleration_keys"))
 	if len(tolerationKeys) == 0 {
@@ -146,6 +158,7 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	opt.Namespace = d.Get("namespace").(string)
 	opt.ClusterDomain = d.Get("cluster_domain").(string)
 	opt.Components = components
+	opt.ComponentsExtra = componentsExtra
 	opt.Registry = d.Get("registry").(string)
 	opt.ImagePullSecret = d.Get("image_pull_secrets").(string)
 	opt.WatchAllNamespaces = d.Get("watch_all_namespaces").(bool)
