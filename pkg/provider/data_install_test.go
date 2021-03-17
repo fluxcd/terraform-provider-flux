@@ -71,6 +71,21 @@ func TestAccDataInstall_basic(t *testing.T) {
 				Check:  resource.TestCheckResourceAttr(resourceName, "cluster_domain", "k8s.local"),
 			},
 			{
+				Config: testAccDataInstallWithListArg("components", []string{"source-controller", "kustomize-controller"}),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "components.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "components.0", "kustomize-controller"),
+					resource.TestCheckResourceAttr(resourceName, "components.1", "source-controller"),
+				),
+			},
+			{
+				Config: testAccDataInstallWithListArg("components_extra", []string{"image-automation-controller"}),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "components_extra.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "components_extra.0", "image-automation-controller"),
+				),
+			},
+			{
 				Config: testAccDataInstallWithArg("network_policy", "false"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "network_policy", "false"),
 			},
@@ -141,4 +156,13 @@ func testAccDataInstallWithArg(attr string, value string) string {
 			%s = %q
 		}
 	`, attr, value)
+}
+
+func testAccDataInstallWithListArg(attr string, value []string) string {
+	return fmt.Sprintf(`
+		data "flux_install" "main" {
+			target_path = "staging-cluster"
+			%s = ["%s"]
+		}
+	`, attr, strings.Join(value, "\",\""))
 }
