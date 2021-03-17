@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.0.14
+
+**Release date:** 2021-03-17
+
+This prerelease adds two new properties to new properties, one
+for each datasource. A notable change is that the name property in
+data sync no longer set the sync secret name. Instead this should
+be done with the secret property.
+
+Improvements:
+* Add components extra to data sync data source
+  [#115](https://github.com/fluxcd/terraform-provider-flux/pull/115)
+* Make secret ref configurable
+  [#113](https://github.com/fluxcd/terraform-provider-flux/pull/113)
+* Add an example for GKE and Github
+  [#112](https://github.com/fluxcd/terraform-provider-flux/pull/112)
+
 ## 0.0.13
 
 **Release date:** 2021-03-09
