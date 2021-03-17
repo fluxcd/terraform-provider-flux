@@ -20,8 +20,7 @@ terraform {
   required_providers {
     github = {
       source = "integrations/github"
-      # 4.3.1 is broken for personal account users
-      version = "4.3.0"
+      version = "4.5.2"
     }
     tls = {
       source  = "hashicorp/tls"
