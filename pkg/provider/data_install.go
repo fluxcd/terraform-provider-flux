@@ -147,6 +147,7 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	if len(componentsExtra) == 0 {
 		componentsExtra = installDefaults.ComponentsExtra
 	}
+	components = append(components, componentsExtra...)
 
 	tolerationKeys := toStringList(d.Get("toleration_keys"))
 	if len(tolerationKeys) == 0 {
