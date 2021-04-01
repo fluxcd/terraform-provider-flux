@@ -129,7 +129,7 @@ provider "github" {
 
 # To make sure the repository exists and the correct permissions are set.
 data "github_repository" "main" {
-  full_name = "${var.organization}/${repository_name}"
+  full_name = "${var.organization}/${var.repository_name}"
 }
 
 resource "github_repository_file" "install" {
