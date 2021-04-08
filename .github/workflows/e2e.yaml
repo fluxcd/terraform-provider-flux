@@ -45,7 +45,7 @@ jobs:
           make install
           cd examples/install
           terraform init
-          terraform apply -auto-approve
+          terraform apply -auto-approve -var "components_extra=[\"image-reflector-controller\", \"image-automation-controller\"]"
 
   lint:
     runs-on: ubuntu-latest

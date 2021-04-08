@@ -145,7 +145,7 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	}
 	componentsExtra := toStringList(d.Get("components_extra"))
 	if len(componentsExtra) == 0 {
-		componentsExtra = installDefaults.ComponentsExtra
+		componentsExtra = []string{}
 	}
 	components = append(components, componentsExtra...)
 
