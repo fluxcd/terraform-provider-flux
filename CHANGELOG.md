@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.3
+
+**Release date:** 2021-04-08
+
+Remove `image-reflector-controller` and `image-automation-controller` as default values
+for `components_extra` to reflect the behavior of the CLI.
+
 ## 0.1.2
 
 **Release date:** 2021-04-08
