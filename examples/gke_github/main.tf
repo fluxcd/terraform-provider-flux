@@ -18,6 +18,10 @@ terraform {
       source  = "fluxcd/flux"
       version = ">= 0.0.13"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "3.1.0"
+    }
   }
 }
 
@@ -106,6 +110,11 @@ locals {
   known_hosts = "github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=="
 }
 
+resource "tls_private_key" "github_deploy_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 resource "kubernetes_secret" "main" {
   depends_on = [kubectl_manifest.install]
 
@@ -115,8 +124,9 @@ resource "kubernetes_secret" "main" {
   }
 
   data = {
-    known_hosts = local.known_hosts
-    password    = var.github_token
+    known_hosts    = local.known_hosts
+    identity       = tls_private_key.github_deploy_key.private_key_pem
+    "identity.pub" = tls_private_key.github_deploy_key.public_key_openssh
   }
 }
 
@@ -154,4 +164,12 @@ resource "github_repository_file" "kustomize" {
   content             = data.flux_sync.main.kustomize_content
   branch              = var.branch
   overwrite_on_create = true
+}
+
+# For flux to fetch source
+resource "github_repository_deploy_key" "flux" {
+  title      = var.github_deploy_key_title
+  repository = data.github_repository.main.name
+  key        = tls_private_key.github_deploy_key.public_key_openssh
+  read_only  = true
 }
