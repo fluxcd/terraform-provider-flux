@@ -206,8 +206,8 @@ github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d/go.mod h1:ZZM
 github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
-github.com/fluxcd/flux2 v0.13.0 h1:1wLzNIvXul0lDmfs5A4T/9tZxSoPeUf29TNozGV52dI=
-github.com/fluxcd/flux2 v0.13.0/go.mod h1:6ppfAv4avbAErY2Ky+qMTdnYT6uxHjp1au9V9cHdCpE=
+github.com/fluxcd/flux2 v0.13.1 h1:tH5QUfKZATC63EOBa7OHD3KexW/HloDvj9JHhNionOQ=
+github.com/fluxcd/flux2 v0.13.1/go.mod h1:38DvNwHlc/4iddvDyYhTG5xbp7QM4jHLRt2Vl+bURdI=
 github.com/fluxcd/go-git-providers v0.0.3/go.mod h1:iaXf3nEq8MB/LzxfbNcCl48sAtIReUU7jqjJ7CEnfFQ=
 github.com/fluxcd/helm-controller/api v0.10.0/go.mod h1:IZ/d5VdxolemPILdN4xeVnHO7kXpUTND/9vJ/rnS/7U=
 github.com/fluxcd/image-automation-controller/api v0.9.0/go.mod h1:gpz1FCM/zK4cqvGsyV4OJovFEFLm2lFI7IvJG2BeLgg=
@@ -225,8 +225,9 @@ github.com/fluxcd/pkg/ssh v0.0.5/go.mod h1:7jXPdXZpc0ttMNz2kD9QuMi3RNn/e0DOFbj0T
 github.com/fluxcd/pkg/untar v0.0.5 h1:UGI3Ch1UIEIaqQvMicmImL1s9npQa64DJ/ozqHKB7gk=
 github.com/fluxcd/pkg/untar v0.0.5/go.mod h1:O6V9+rtl8c1mHBafgqFlJN6zkF1HS5SSYn7RpQJ/nfw=
 github.com/fluxcd/pkg/version v0.0.1/go.mod h1:WAF4FEEA9xyhngF8TDxg3UPu5fA1qhEYV8Pmi2Il01Q=
-github.com/fluxcd/source-controller/api v0.12.0 h1:ATzWCIXE96Q1iOHElzM0V4xCVEn95QLKpOSmVLiY/lo=
 github.com/fluxcd/source-controller/api v0.12.0/go.mod h1:+EPyhxC7Y+hUnq7EwAkkLtfbwCxJxF5yfmiyzDk43KY=
+github.com/fluxcd/source-controller/api v0.12.1 h1:ubO3gwGaxnXwayJeDHpdsh96NXwOLpFcbLjZo/pqWCg=
+github.com/fluxcd/source-controller/api v0.12.1/go.mod h1:+EPyhxC7Y+hUnq7EwAkkLtfbwCxJxF5yfmiyzDk43KY=
 github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568/go.mod h1:xEzjJPgXI435gkrCt3MPfRiAkVrwSbHsst4LCFVfpJc=
 github.com/form3tech-oss/jwt-go v3.2.2+incompatible/go.mod h1:pbq4aXjuKjdthFRnoDwaVPLA+WlJuPGy+QneDUgJi2k=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
