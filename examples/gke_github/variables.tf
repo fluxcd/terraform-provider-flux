@@ -55,3 +55,8 @@ variable "use_private_endpoint" {
   description = "Connect on the private GKE cluster endpoint"
   default     = false
 }
+
+variable "github_deploy_key_title" {
+  type        = string
+  description = "Name of github deploy key"
+}
