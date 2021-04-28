@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.4
+
+**Release date:** 2021-04-28
+
+**Breaking changes**
+In this version the image automation APIs have been promoted to `v1alpha2`.
+The new APIs come with breaking changes, please follow the [image automation upgrade guide](https://github.com/fluxcd/flux2/discussions/1333).
+
 ## 0.1.3
 
 **Release date:** 2021-04-08
