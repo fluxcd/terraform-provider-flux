@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 **Release date:** 2021-04-28
 
+This prerelease includes flux2 [v0.13.1](https://github.com/fluxcd/flux2/releases/tag/v0.13.1).
+
 **Breaking changes**
 In this version the image automation APIs have been promoted to `v1alpha2`.
 The new APIs come with breaking changes, please follow the [image automation upgrade guide](https://github.com/fluxcd/flux2/discussions/1333).
