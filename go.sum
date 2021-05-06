@@ -206,11 +206,11 @@ github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d/go.mod h1:ZZM
 github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
-github.com/fluxcd/flux2 v0.13.2 h1:HS99lQ0fXM0wRxn0gIqy6vVz0X4fIqmu/5WVvT2c3Y8=
-github.com/fluxcd/flux2 v0.13.2/go.mod h1:1FICqZ10PJeDDWTpnjcNbjxshMs5fZa+oU76DHGZu08=
-github.com/fluxcd/go-git-providers v0.0.3/go.mod h1:iaXf3nEq8MB/LzxfbNcCl48sAtIReUU7jqjJ7CEnfFQ=
+github.com/fluxcd/flux2 v0.13.3 h1:DAJTAChkctER5/+ps0KWUjubcS9oZKdkB4W4qJMAoJ8=
+github.com/fluxcd/flux2 v0.13.3/go.mod h1:tcgI8RgCVA2ISneQ+CyZz2InffZZNzczmQdIBHffmhk=
+github.com/fluxcd/go-git-providers v0.1.1/go.mod h1:nRgNpHZmZhrsyNSma1JcAhjUG9xrqMGJcIUr9K7M7vk=
 github.com/fluxcd/helm-controller/api v0.10.0/go.mod h1:IZ/d5VdxolemPILdN4xeVnHO7kXpUTND/9vJ/rnS/7U=
-github.com/fluxcd/image-automation-controller/api v0.9.0/go.mod h1:gpz1FCM/zK4cqvGsyV4OJovFEFLm2lFI7IvJG2BeLgg=
+github.com/fluxcd/image-automation-controller/api v0.9.1/go.mod h1:gpz1FCM/zK4cqvGsyV4OJovFEFLm2lFI7IvJG2BeLgg=
 github.com/fluxcd/image-reflector-controller/api v0.9.1/go.mod h1:gFoTJFs977JhE1H6RQSlGwYJGw12aIFDi5ljAn3rtUc=
 github.com/fluxcd/kustomize-controller/api v0.12.0 h1:FWPxxo2S3y5v9rqYK45p7RCNk1Jky6tNpXqV1oivdL4=
 github.com/fluxcd/kustomize-controller/api v0.12.0/go.mod h1:dyRZGTc7ozlf00OhTkB19lbrKv/IjUB8FfBwcV2dO2w=
@@ -814,7 +814,6 @@ github.com/vmihailenco/msgpack v4.0.4+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6Ac
 github.com/vmihailenco/msgpack/v4 v4.3.12/go.mod h1:gborTTJjAo/GWTqqRjrLCn9pgNN+NXzzngzBKDPIqw4=
 github.com/vmihailenco/tagparser v0.1.1/go.mod h1:OeAg3pn3UbLjkWt+rN9oFYB6u/cQgqMEUPoW2WPyhdI=
 github.com/vmware/govmomi v0.20.3/go.mod h1:URlwyTFZX72RmxtxuaFL2Uj3fD1JTvZdx59bHWk6aFU=
-github.com/xanzy/go-gitlab v0.33.0/go.mod h1:sPLojNBn68fMUWSxIJtdVVIP8uSBYqesTfDUseX11Ug=
 github.com/xanzy/go-gitlab v0.43.0/go.mod h1:sPLojNBn68fMUWSxIJtdVVIP8uSBYqesTfDUseX11Ug=
 github.com/xanzy/ssh-agent v0.2.1 h1:TCbipTQL2JiiCprBWx9frJ2eJlCYT00NmctrHxVAr70=
 github.com/xanzy/ssh-agent v0.2.1/go.mod h1:mLlQY/MoOhWBj+gOGMQkOeiEvkx+8pJSI+0Bx9h2kr4=
