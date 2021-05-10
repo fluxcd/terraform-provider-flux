@@ -206,10 +206,10 @@ github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d/go.mod h1:ZZM
 github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
-github.com/fluxcd/flux2 v0.13.3 h1:DAJTAChkctER5/+ps0KWUjubcS9oZKdkB4W4qJMAoJ8=
-github.com/fluxcd/flux2 v0.13.3/go.mod h1:tcgI8RgCVA2ISneQ+CyZz2InffZZNzczmQdIBHffmhk=
+github.com/fluxcd/flux2 v0.13.4 h1:m+hOO3gGUXsa+qvsVDukjhUlmDDVP/UE7BCbqgv97CE=
+github.com/fluxcd/flux2 v0.13.4/go.mod h1:PrcAI/RM1AEmtcKx2AgyQvMqxy0wMvCMUlZSwJyP26k=
 github.com/fluxcd/go-git-providers v0.1.1/go.mod h1:nRgNpHZmZhrsyNSma1JcAhjUG9xrqMGJcIUr9K7M7vk=
-github.com/fluxcd/helm-controller/api v0.10.0/go.mod h1:IZ/d5VdxolemPILdN4xeVnHO7kXpUTND/9vJ/rnS/7U=
+github.com/fluxcd/helm-controller/api v0.10.1/go.mod h1:IZ/d5VdxolemPILdN4xeVnHO7kXpUTND/9vJ/rnS/7U=
 github.com/fluxcd/image-automation-controller/api v0.9.1/go.mod h1:gpz1FCM/zK4cqvGsyV4OJovFEFLm2lFI7IvJG2BeLgg=
 github.com/fluxcd/image-reflector-controller/api v0.9.1/go.mod h1:gFoTJFs977JhE1H6RQSlGwYJGw12aIFDi5ljAn3rtUc=
 github.com/fluxcd/kustomize-controller/api v0.12.0 h1:FWPxxo2S3y5v9rqYK45p7RCNk1Jky6tNpXqV1oivdL4=
@@ -226,8 +226,8 @@ github.com/fluxcd/pkg/untar v0.0.5 h1:UGI3Ch1UIEIaqQvMicmImL1s9npQa64DJ/ozqHKB7g
 github.com/fluxcd/pkg/untar v0.0.5/go.mod h1:O6V9+rtl8c1mHBafgqFlJN6zkF1HS5SSYn7RpQJ/nfw=
 github.com/fluxcd/pkg/version v0.0.1/go.mod h1:WAF4FEEA9xyhngF8TDxg3UPu5fA1qhEYV8Pmi2Il01Q=
 github.com/fluxcd/source-controller/api v0.12.0/go.mod h1:+EPyhxC7Y+hUnq7EwAkkLtfbwCxJxF5yfmiyzDk43KY=
-github.com/fluxcd/source-controller/api v0.12.1 h1:ubO3gwGaxnXwayJeDHpdsh96NXwOLpFcbLjZo/pqWCg=
-github.com/fluxcd/source-controller/api v0.12.1/go.mod h1:+EPyhxC7Y+hUnq7EwAkkLtfbwCxJxF5yfmiyzDk43KY=
+github.com/fluxcd/source-controller/api v0.12.2 h1:8n9+poUv/6bAEgteTxKV591aKzqRIv391VS8uD1imzo=
+github.com/fluxcd/source-controller/api v0.12.2/go.mod h1:+EPyhxC7Y+hUnq7EwAkkLtfbwCxJxF5yfmiyzDk43KY=
 github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568/go.mod h1:xEzjJPgXI435gkrCt3MPfRiAkVrwSbHsst4LCFVfpJc=
 github.com/form3tech-oss/jwt-go v3.2.2+incompatible/go.mod h1:pbq4aXjuKjdthFRnoDwaVPLA+WlJuPGy+QneDUgJi2k=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
