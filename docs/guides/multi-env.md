@@ -9,7 +9,7 @@ description: |-
 
 Usually when deploying multiple environments the same Terraform HCL is used, using different backends to store the state.
 This introduces an issue with the simple examples as they create the git repository for you. The first environment would
-deploy properly but the second would fail as it attempts to create an identical repository. Generally you would want
+deploy properly, but the second would fail as it attempts to create an identical repository. Generally you would want
 to share the same repository for the Flux deployments in the different environments. The solution to the problem is
 to manually create the repository and then use a datasource instead of a resource.
 
