@@ -1,8 +1,8 @@
 ---
 subcategory: ""
-page_title: "Bootstrap a cluster with GitHub"
+page_title: "Bootstrap a GKE cluster with GitHub"
 description: |-
-    An example of how to bootstrap a flux on GKE and sync it with a GitHub repository.
+    An example of how to bootstrap Flux on GKE and sync it with a GitHub repository.
 ---
 
 # Bootstrap a flux on GKE with GitHub
