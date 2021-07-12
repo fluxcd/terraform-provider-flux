@@ -14,7 +14,7 @@ When deploying Flux with the CLI the reccomended solution is to [modify the kust
 This is also the reccomended way when deploying with Terraform, but it requires some extra considerations as changes made manually to
 the repository after deployment would be overridden the next time the Terraform is applied.
 
-Given that the Github exampel has been followed the solution is simple as all that is required is to override the kustomization content output from the datasource.
+Given that the Github example has been followed the solution is simple as all that is required is to override the kustomization content output from the datasource.
 The following kustomization file can be used instead. Note the strategic merge which adds a priority class to the source controller. It is important that the
 resources list contains the `gotk-components.yaml` and `gotk-sync.yaml` files as otherwise the Flux manifests will not be included in the Kustomization.
 {{ tffile "examples/kustomize-flux/kustomization-override.yaml" }}
