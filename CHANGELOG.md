@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.3.0
+
+**Release date:** 2021-08-26
+
+This prerelease includes flux2 [v0.17.0](https://github.com/fluxcd/flux2/releases/tag/v0.17.0).
+
 ## 0.2.2
 
 **Release date:** 2021-08-06
