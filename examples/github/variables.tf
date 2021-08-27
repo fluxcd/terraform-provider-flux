@@ -17,7 +17,7 @@ variable "repository_name" {
 variable "repository_visibility" {
   type        = string
   default     = "private"
-  description = "How visiable is the github repo"
+  description = "How visible is the github repo"
 }
 
 variable "branch" {
