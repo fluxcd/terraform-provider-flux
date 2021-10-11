@@ -38,12 +38,15 @@ data "flux_sync" "main" {
 ### Optional
 
 - **branch** (String) Default branch to sync from. Defaults to `main`.
+- **commit** (String) The Git commit SHA to checkout, if specified Tag filters will be ignored.
 - **git_implementation** (String) The git implementation to use, can be `go-git` or `libgit2`. Defaults to ``.
 - **id** (String) The ID of this resource.
 - **interval** (Number) Sync interval in minutes. Defaults to `1`.
 - **name** (String) The kubernetes resources name Defaults to `flux-system`.
 - **namespace** (String) The namespace scope for this operation. Defaults to `flux-system`.
 - **secret** (String) The name of the secret that is referenced by GitRepository as SecretRef. Defaults to `flux-system`.
+- **semver** (String) The Git tag semver expression, takes precedence over `tag`.
+- **tag** (String) The Git tag to checkout, takes precedence over `branch`.
 
 ### Read-Only
 

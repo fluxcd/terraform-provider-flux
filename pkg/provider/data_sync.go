@@ -64,6 +64,21 @@ func DataSync() *schema.Resource {
 				Optional:    true,
 				Default:     syncDefaults.Branch,
 			},
+			"tag": {
+				Description: "The Git tag to checkout, takes precedence over `branch`.",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
+			"semver": {
+				Description: "The Git tag semver expression, takes precedence over `tag`.",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
+			"commit": {
+				Description: "The Git commit SHA to checkout, if specified Tag filters will be ignored.",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
 			"secret": {
 				Description: "The name of the secret that is referenced by GitRepository as SecretRef.",
 				Type:        schema.TypeString,
@@ -122,6 +137,19 @@ func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 	opt.TargetPath = d.Get("target_path").(string)
 	opt.GitImplementation = d.Get("git_implementation").(string)
 	opt.Secret = d.Get("secret").(string)
+
+	if v, ok := d.GetOk("tag"); ok {
+		opt.Tag = v.(string)
+	}
+
+	if v, ok := d.GetOk("semver"); ok {
+		opt.SemVer = v.(string)
+	}
+
+	if v, ok := d.GetOk("commit"); ok {
+		opt.Commit = v.(string)
+	}
+
 	manifest, err := sync.Generate(opt)
 	if err != nil {
 		return diag.FromErr(err)
