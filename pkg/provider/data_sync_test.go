@@ -118,7 +118,7 @@ spec:
     name: flux-system
   url: ssh://git@example.com
 ---
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
   name: flux-system
@@ -130,7 +130,6 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  validation: client
 `
 	testAccDataSyncIntervalExpectedContent = `---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
@@ -146,7 +145,7 @@ spec:
     name: flux-system
   url: ssh://git@example.com
 ---
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
   name: flux-system
@@ -158,7 +157,6 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  validation: client
 `
 )
 
