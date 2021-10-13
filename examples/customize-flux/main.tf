@@ -15,3 +15,10 @@ resource "github_repository_file" "kustomize" {
   content    = file("${path.module}/kustomization-override.yaml")
   branch     = var.branch
 }
+
+resource "github_repository_file" "psp_patch" {
+  repository = github_repository.main.name
+  file       = "${dirname(data.flux_sync.main.kustomize_path)}/psp-patch.yaml"
+  content    = file("${path.module}/psp-patch.yaml")
+  branch     = var.branch
+}
