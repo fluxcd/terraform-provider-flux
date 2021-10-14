@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.4.0
+
+**Release date:** 2021-10-14
+
+This prerelease includes flux2 [v0.18.3](https://github.com/fluxcd/flux2/releases/tag/v0.18.3).
+
+**Breaking changes**
+With the introduction of Kustomization v1beta2 there is a breaking change that requires a manual state update.
+
+All that is required is to remove the `kubectl_manifest` resource for the Kustomization manifest. This will cause the kubectl provider to overwrite the existing manifest.
+
+```shell
+terraform state rm 'kubectl_manifest.sync["kustomize.toolkit.fluxcd.io/v1beta1/kustomization/flux-system/flux-system"]'
+```
+
+Future versions of the provider will solve this long term.
+
 ## 0.3.1
 
 **Release date:** 2021-09-13
