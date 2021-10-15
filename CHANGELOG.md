@@ -2,6 +2,51 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.0
+
+**Release date:** 2021-11-01
+
+This prerelease includes flux2 [v0.20.1](https://github.com/fluxcd/flux2/releases/tag/v0.20.1).
+
+## 0.6.0
+
+**Release date:** 2021-10-28
+
+This prerelease includes flux2 [v0.20.0](https://github.com/fluxcd/flux2/releases/tag/v0.20.0).
+
+## 0.5.1
+
+**Release date:** 2021-10-22
+
+This prerelease includes flux2 [v0.19.1](https://github.com/fluxcd/flux2/releases/tag/v0.19.1).
+
+## 0.5.0
+
+**Release date:** 2021-10-19
+
+This prerelease includes flux2 [v0.19.0](https://github.com/fluxcd/flux2/releases/tag/v0.19.0).
+
+## 0.4.0
+
+**Release date:** 2021-10-15
+
+This prerelease includes flux2 [v0.18.3](https://github.com/fluxcd/flux2/releases/tag/v0.18.3).
+
+Flux v0.18 comes with breaking changes, new features, performance improvements and many bug fixes.
+
+Please see the [Upgrade to Flux v0.18 and the v1beta2 API](https://github.com/fluxcd/flux2/discussions/1916) discussion for more details.
+
+**Breaking changes**
+With the introduction of Kustomization v1beta2 there is a breaking change that requires a manual state update.
+
+All that is required is to remove the `kubectl_manifest` resource for the Kustomization manifest. This will cause the kubectl provider to overwrite the existing manifest.
+
+```shell
+terraform state rm 'kubectl_manifest.sync["kustomize.toolkit.fluxcd.io/v1beta1/kustomization/flux-system/flux-system"]'
+```
+
+Future versions of the provider will solve this long term.
+
 ## 0.3.1
 
 **Release date:** 2021-09-13
