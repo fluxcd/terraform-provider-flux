@@ -1,0 +1,28 @@
+---
+subcategory: ""
+page_title: "Customize Flux"
+description: |-
+  Customizing Flux past the exposed parameters.
+---
+
+# Customize Flux
+
+The Flux datasources expose a set of parameters that can configure the controller deployment. These parameters are identical to the ones
+exposed by the `flux bootstrap` CLI command. There may be situations where the exposed parameters are not enough and additional configuration
+has to be done. This could be changing the resource requests or limits for a controller, adding annotations or labels, or modifying container settings.
+When deploying Flux with the CLI the recommended solution is to [modify the Kustomization file](https://fluxcd.io/docs/installation/#customize-flux-manifests).
+This is also the recommended way when deploying with Terraform, but it requires some extra considerations as changes made manually to
+the repository after deployment would be overridden the next time the Terraform is applied.
+
+This guide assumes that you have setup Flux with Terraform already. Follow the [GitHub guide](./github) for a quick example to get a Kubernetes cluster with Flux installed in it.
+Customizing Flux with Terraform requires you to create your own Kustomization file instead of using the one given by the provider.
+
+The following path file will set PSP rules for all of the Flux deployments.
+{{ tffile "examples/customize-flux/psp-patch.yaml" }}
+
+The path file can then be used in the Kustomization file. It is important that the resources list contains the `gotk-components.yaml` and `gotk-sync.yaml` files as otherwise the Flux
+manifests will not be included.
+{{ tffile "examples/customize-flux/kustomization-override.yaml" }}
+
+Change the Terraform so that it will commit the local Kustomization file instead of the one given by the provider. Make sure that the patch file is also committed to the same repository.
+{{ tffile "examples/customize-flux/main.tf" }}
