@@ -102,6 +102,14 @@ func DataSync() *schema.Resource {
 				Optional:    true,
 				Default:     syncDefaults.GitImplementation,
 			},
+			"patch_names": {
+				Description: "The names of patches to apply to the initial Kustomization. Used to generate the `patch_file_paths` output value.",
+				Type:        schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+			},
 			"path": {
 				Description: "Expected path of content in git repository.",
 				Type:        schema.TypeString,
@@ -121,6 +129,14 @@ func DataSync() *schema.Resource {
 				Description: "Kustomize yaml document.",
 				Type:        schema.TypeString,
 				Computed:    true,
+			},
+			"patch_file_paths": {
+				Description: "Map of expected paths of kustomize patches in git repository, keyed by the `patch_names` input variable.",
+				Type:        schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Computed: true,
 			},
 		},
 	}
@@ -158,16 +174,20 @@ func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 	basePath := path.Dir(manifest.Path)
 	kustomizePath := path.Join(basePath, "kustomization.yaml")
 	paths := []string{opt.ManifestFile, install.MakeDefaultOptions().ManifestFile}
-	kustomizeContent, err := generateKustomizationYaml(paths)
+	patchNames := toStringList(d.Get("patch_names"))
+	patchBases := getPatchBases(patchNames)
+	kustomizeContent, err := generateKustomizationYaml(paths, patchBases)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	patchFilePathsMap := genPatchFilePaths(basePath, patchNames)
 
 	d.SetId(fmt.Sprintf("%x", sha256.Sum256([]byte(manifest.Path+manifest.Content))))
 	d.Set("path", manifest.Path)
 	d.Set("content", manifest.Content)
 	d.Set("kustomize_path", kustomizePath)
 	d.Set("kustomize_content", kustomizeContent)
+	d.Set("patch_file_paths", patchFilePathsMap)
 
 	return nil
 }
