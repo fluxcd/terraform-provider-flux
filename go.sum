@@ -240,8 +240,8 @@ github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwo
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/felixge/httpsnoop v1.0.1/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
-github.com/fluxcd/flux2 v0.20.1 h1:GCpdPnikG9L5BoNm71MNHI/evZdE+U8GnX/4vKlbIRE=
-github.com/fluxcd/flux2 v0.20.1/go.mod h1:id1uIRnf/kZBPsM94qeksgay5NS0x9SrAvpTMbkJzcs=
+github.com/fluxcd/flux2 v0.21.0 h1:H7PMumvILtjuuovT6JfUBJaT6Mfxpp9rNEPVkaCHnhg=
+github.com/fluxcd/flux2 v0.21.0/go.mod h1:id1uIRnf/kZBPsM94qeksgay5NS0x9SrAvpTMbkJzcs=
 github.com/fluxcd/go-git-providers v0.1.1/go.mod h1:nRgNpHZmZhrsyNSma1JcAhjUG9xrqMGJcIUr9K7M7vk=
 github.com/fluxcd/helm-controller/api v0.12.1/go.mod h1:zWmzV0s2SU4rEIGLPTt+dsaMs40OsNQgSgOATgJmxB0=
 github.com/fluxcd/image-automation-controller/api v0.16.0/go.mod h1:tEQCFKGgxii7zfXti2MxixwFbxhEXnVJqLGM2x9zlGw=
