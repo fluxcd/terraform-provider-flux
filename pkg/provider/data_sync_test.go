@@ -79,6 +79,27 @@ func TestAccDataSync_basic(t *testing.T) {
 				Check:  resource.TestCheckResourceAttr(resourceName, "branch", "develop"),
 			},
 			{
+				Config: testAccDataSyncWithArg("tag", "1.0.0"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "tag", "1.0.0"),
+					resource.TestCheckResourceAttr(resourceName, "content", testAccDataSyncContentWithGitRefArg(`tag`, `1.0.0`)),
+				),
+			},
+			{
+				Config: testAccDataSyncWithArg("semver", ">1.0.0"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "semver", ">1.0.0"),
+					resource.TestCheckResourceAttr(resourceName, "content", testAccDataSyncContentWithGitRefArg(`semver`, `'>1.0.0'`)),
+				),
+			},
+			{
+				Config: testAccDataSyncWithArg("commit", "ed8459bd047d0cfff48612c64cc994b1b5dfea23"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "commit", "ed8459bd047d0cfff48612c64cc994b1b5dfea23"),
+					resource.TestCheckResourceAttr(resourceName, "content", testAccDataSyncContentWithGitRefArg(`commit`, `ed8459bd047d0cfff48612c64cc994b1b5dfea23`)),
+				),
+			},
+			{
 				Config: testAccDataSyncWithArg("interval", "5"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "interval", "5"),
@@ -168,4 +189,35 @@ func testAccDataSyncWithArg(attr string, value string) string {
 			%s = %q
 		}
 	`, attr, value)
+}
+
+func testAccDataSyncContentWithGitRefArg(attr, value string) string {
+	return fmt.Sprintf(`---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: main
+    %s: %s
+  secretRef:
+    name: flux-system
+  url: ssh://git@example.com
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./staging-cluster
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+`, attr, value)
 }
