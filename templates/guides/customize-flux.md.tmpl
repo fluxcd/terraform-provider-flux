@@ -10,6 +10,7 @@ description: |-
 The Flux datasources expose a set of parameters that can configure the controller deployment. These parameters are identical to the ones
 exposed by the `flux bootstrap` CLI command. There may be situations where the exposed parameters are not enough and additional configuration
 has to be done. This could be changing the resource requests or limits for a controller, adding annotations or labels, or modifying container settings.
+
 When deploying Flux with the CLI the recommended solution is to [modify the Kustomization file](https://fluxcd.io/docs/installation/#customize-flux-manifests).
 This is also the recommended way when deploying with Terraform, but it requires some extra considerations as changes made manually to
 the repository after deployment would be overridden the next time the Terraform is applied.
