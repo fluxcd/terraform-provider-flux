@@ -51,14 +51,38 @@ make tools
 ```
 
 Run the unit tests and acceptance tests.
+
 ```bash
 make testacc
 ```
 
 Generate the docs if you have made changes to any of the schemas or guides.
-```
+
+```sh
 make docs
 ```
+
+## Documentation
+
+The documentation is generated from the `*.md.tmpl` files in `templates/` with
+[tfplugindocs](https://github.com/hashicorp/terraform-plugin-docs).
+
+To generate the documentation, run:
+
+```sh
+make docs
+```
+
+Documentation is written in Markdown format and supports
+[frontmatter](https://www.terraform.io/docs/registry/providers/docs.html#yaml-frontmatter),
+which should be used to ensure [navigation hierarchy](https://www.terraform.io/docs/registry/providers/docs.html#navigation-hierarchy).
+[(Markdown) format](https://www.terraform.io/docs/registry/providers/docs.html#format)
+recommendations should be followed.
+
+New pages can be added by adding a new `.md.tmpl` file to the
+`templates/` (sub-)directory. Subcategories have an [impact on
+directory structure](https://www.terraform.io/docs/registry/providers/docs.html#guides-subcategories),
+other path related assumptions are [documented here](https://github.com/hashicorp/terraform-plugin-docs#conventional-paths).
 
 ## Acceptance policy
 
