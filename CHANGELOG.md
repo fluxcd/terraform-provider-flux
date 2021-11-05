@@ -2,7 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
-## 0.6.0
+## 0.7.0
+
+**Release date:** 2021-11-05
+
+This prerelease includes flux2 [v0.21.1](https://github.com/fluxcd/flux2/releases/tag/v0.21.1),
+and adds support for defining Tag, SemVer and Commit references in `data.flux_sync`.
+
+## 0.6.1
 
 **Release date:** 2021-11-01
 
