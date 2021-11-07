@@ -59,19 +59,18 @@ terraform {
   required_version = ">= 0.13"
 
   required_providers {
+    google = {
+      version = ">= 4.0.0"
+    }
     github = {
       source = "integrations/github"
       version = "4.5.2"
     }
+    flux = {
+      source  = "fluxcd/flux"
+      version = ">= 0.0.13"
+    }
   }
-}
-
-variable "target_path" {
-  type = string
-}
-
-variable "clone_url" {
-  type = string
 }
 
 data "google_service_account" "flux_sops" {
