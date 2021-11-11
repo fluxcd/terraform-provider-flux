@@ -103,7 +103,7 @@ func DataSync() *schema.Resource {
 				Default:     syncDefaults.GitImplementation,
 			},
 			"patch_names": {
-				Description: "The names of patches to apply to the initial Kustomization. Used to generate the `patch_file_paths` output value.",
+				Description: "The names of patches to apply to the Kustomization. Used to generate the `patch_file_paths` output value.",
 				Type:        schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

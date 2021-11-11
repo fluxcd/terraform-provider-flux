@@ -44,7 +44,7 @@ data "flux_sync" "main" {
 - **interval** (Number) Sync interval in minutes. Defaults to `1`.
 - **name** (String) The kubernetes resources name Defaults to `flux-system`.
 - **namespace** (String) The namespace scope for this operation. Defaults to `flux-system`.
-- **patch_names** (Set of String) The names of patches to apply to the initial Kustomization. Used to generate the `patch_file_paths` output value.
+- **patch_names** (Set of String) The names of patches to apply to the Kustomization. Used to generate the `patch_file_paths` output value.
 - **secret** (String) The name of the secret that is referenced by GitRepository as SecretRef. Defaults to `flux-system`.
 - **semver** (String) The Git tag semver expression, takes precedence over `tag`.
 - **tag** (String) The Git tag to checkout, takes precedence over `branch`.
