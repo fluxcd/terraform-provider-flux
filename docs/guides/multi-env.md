@@ -19,7 +19,7 @@ terraform {
 
   required_providers {
     github = {
-      source = "integrations/github"
+      source  = "integrations/github"
       version = "4.5.2"
     }
     tls = {
@@ -35,8 +35,8 @@ data "github_repository" "main" {
 }
 
 resource "tls_private_key" "main" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P256"
 }
 
 resource "github_repository_deploy_key" "main" {
