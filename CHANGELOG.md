@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.8.0
+
+**Release date:** 2021-11-24
+
+This prerelease includes flux2 [v0.24.0](https://github.com/fluxcd/flux2/releases/tag/v0.24.0),
+and allows for [enabling bootstrap customization of Flux components](https://github.com/fluxcd/terraform-provider-flux/pull/217)
+through Terraform config.
+
 ## 0.7.3
 
 **Release date:** 2021-11-12
