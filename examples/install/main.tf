@@ -12,7 +12,7 @@ terraform {
     }
     flux = {
       source  = "fluxcd/flux"
-      version = ">= 0.0.13"
+      version = "0.0.0-dev"
     }
   }
 }
@@ -27,7 +27,7 @@ provider "kubernetes" {
 
 # Flux
 data "flux_install" "main" {
-  target_path = var.target_path
+  target_path      = var.target_path
   components_extra = var.components_extra
 }
 
