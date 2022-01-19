@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.9.0
+
+**Release date:** 2022-01-19
+
+This prerelease includes flux2 [v0.25.3](https://github.com/fluxcd/flux2/releases/tag/v0.25.3).
+
+In addition, the provider is now built with Go 1.17.
+
 ## 0.8.1
 
 **Release date:** 2021-12-10
