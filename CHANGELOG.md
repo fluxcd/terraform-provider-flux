@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.10.0
+
+**Release date:** 2022-02-01
+
+This prerelease includes flux2 [v0.26.0](https://github.com/fluxcd/flux2/releases/tag/v0.26.0).
+
+Note that Flux v0.26 comes with breaking changes, most notable,
+the minimum supported version of Kubernetes is now **v1.20.6**.
+While Flux may still work on Kubernetes 1.19, we don’t recommend running EOL versions in production
+as we don't run any conformance tests on Kubernetes versions that have reached end-of-life.
+
 ## 0.9.0
 
 **Release date:** 2022-01-19
