@@ -55,6 +55,7 @@ func TestAccDataInstall_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "registry", "ghcr.io/fluxcd"),
 					resource.TestCheckResourceAttr(resourceName, "target_path", "staging-cluster"),
 					resource.TestCheckResourceAttr(resourceName, "watch_all_namespaces", "true"),
+					resource.TestCheckResourceAttr(resourceName, "baseurl", "https://github.com/fluxcd/flux2/releases"),
 				),
 			},
 			// Ensure attribute value changes are propagated correctly into the state
@@ -96,6 +97,10 @@ func TestAccDataInstall_basic(t *testing.T) {
 			{
 				Config:      testAccDataInstallWithArg("version", "foo"),
 				ExpectError: regexp.MustCompile("\"version\" must either be latest or have the prefix 'v', got: foo"),
+			},
+			{
+				Config:      testAccDataInstallWithArg("baseurl", "http://www.example.org"),
+				ExpectError: regexp.MustCompile("Error: failed to download manifests.tar.gz"),
 			},
 			{
 				Config: testAccDataInstallWithArg("version", "v0.5.3"),

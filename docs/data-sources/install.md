@@ -31,6 +31,7 @@ data "flux_install" "main" {
 
 ### Optional
 
+- `baseurl` (String) Base URL to get the install manifests from. When specifying this, `version` should also be set to the corresponding version to download from that URL, or the latest version associated with upstream flux will be requested. Defaults to `https://github.com/fluxcd/flux2/releases`.
 - `cluster_domain` (String) The internal cluster domain. Defaults to `cluster.local`.
 - `components` (Set of String) Toolkit components to include in the install manifests.
 - `components_extra` (Set of String) List of extra components to include in the install manifests.
