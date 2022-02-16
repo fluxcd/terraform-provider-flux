@@ -3,7 +3,7 @@ module github.com/fluxcd/terraform-provider-flux
 go 1.17
 
 require (
-	github.com/fluxcd/flux2 v0.26.3
+	github.com/fluxcd/flux2 v0.27.0
 	github.com/hashicorp/terraform-plugin-docs v0.5.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.1
 	github.com/stretchr/testify v1.7.0
@@ -27,8 +27,8 @@ require (
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
-	github.com/fatih/color v1.7.0 // indirect
-	github.com/fluxcd/kustomize-controller/api v0.20.2 // indirect
+	github.com/fatih/color v1.13.0 // indirect
+	github.com/fluxcd/kustomize-controller/api v0.21.0 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.0.3 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v0.3.1 // indirect
 	github.com/fluxcd/pkg/apis/meta v0.10.2 // indirect
@@ -77,7 +77,7 @@ require (
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/klauspost/compress v1.11.2 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/mattn/go-colorable v0.1.11 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/cli v1.1.2 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
