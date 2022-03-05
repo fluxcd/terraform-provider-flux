@@ -7,7 +7,7 @@ description: |-
 
 # Bootstrap a cluster with GitHub
 
-In order to follow the guide you'll need a GitHub account and a [personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)
+In order to follow the guide you'll need a GitHub account and a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 that can create repositories (check all permissions under repo).
 
 Create the staging cluster using Kubernetes kind or set the kubectl context to an existing cluster:
