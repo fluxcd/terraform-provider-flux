@@ -32,29 +32,29 @@ data "flux_sync" "main" {
 
 ### Required
 
-- **target_path** (String) Relative path to the Git repository root where the sync manifests are committed.
-- **url** (String) Git repository clone url.
+- `target_path` (String) Relative path to the Git repository root where the sync manifests are committed.
+- `url` (String) Git repository clone url.
 
 ### Optional
 
-- **branch** (String) Default branch to sync from. Defaults to `main`.
-- **commit** (String) The Git commit SHA to checkout, if specified Tag filters will be ignored.
-- **git_implementation** (String) The git implementation to use, can be `go-git` or `libgit2`. Defaults to ``.
-- **id** (String) The ID of this resource.
-- **interval** (Number) Sync interval in minutes. Defaults to `1`.
-- **name** (String) The kubernetes resources name Defaults to `flux-system`.
-- **namespace** (String) The namespace scope for this operation. Defaults to `flux-system`.
-- **patch_names** (Set of String) The names of patches to apply to the Kustomization. Used to generate the `patch_file_paths` output value.
-- **secret** (String) The name of the secret that is referenced by GitRepository as SecretRef. Defaults to `flux-system`.
-- **semver** (String) The Git tag semver expression, takes precedence over `tag`.
-- **tag** (String) The Git tag to checkout, takes precedence over `branch`.
+- `branch` (String) Default branch to sync from. Defaults to `main`.
+- `commit` (String) The Git commit SHA to checkout, if specified Tag filters will be ignored.
+- `git_implementation` (String) The git implementation to use, can be `go-git` or `libgit2`. Defaults to ``.
+- `id` (String) The ID of this resource.
+- `interval` (Number) Sync interval in minutes. Defaults to `1`.
+- `name` (String) The kubernetes resources name Defaults to `flux-system`.
+- `namespace` (String) The namespace scope for this operation. Defaults to `flux-system`.
+- `patch_names` (Set of String) The names of patches to apply to the Kustomization. Used to generate the `patch_file_paths` output value.
+- `secret` (String) The name of the secret that is referenced by GitRepository as SecretRef. Defaults to `flux-system`.
+- `semver` (String) The Git tag semver expression, takes precedence over `tag`.
+- `tag` (String) The Git tag to checkout, takes precedence over `branch`.
 
 ### Read-Only
 
-- **content** (String) Manifests in multi-doc yaml format.
-- **kustomize_content** (String) Kustomize yaml document.
-- **kustomize_path** (String) Expected path of kustomize content in git repository.
-- **patch_file_paths** (Map of String) Map of expected paths of kustomize patches in git repository, keyed by the `patch_names` input variable.
-- **path** (String) Expected path of content in git repository.
+- `content` (String) Manifests in multi-doc yaml format.
+- `kustomize_content` (String) Kustomize yaml document.
+- `kustomize_path` (String) Expected path of kustomize content in git repository.
+- `patch_file_paths` (Map of String) Map of expected paths of kustomize patches in git repository, keyed by the `patch_names` input variable.
+- `path` (String) Expected path of content in git repository.
 
 

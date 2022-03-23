@@ -27,26 +27,26 @@ data "flux_install" "main" {
 
 ### Required
 
-- **target_path** (String) Relative path to the Git repository root where Flux manifests are committed.
+- `target_path` (String) Relative path to the Git repository root where Flux manifests are committed.
 
 ### Optional
 
-- **cluster_domain** (String) The internal cluster domain. Defaults to `cluster.local`.
-- **components** (Set of String) Toolkit components to include in the install manifests.
-- **components_extra** (Set of String) List of extra components to include in the install manifests.
-- **id** (String) The ID of this resource.
-- **image_pull_secrets** (String) Kubernetes secret name used for pulling the toolkit images from a private registry. Defaults to ``.
-- **log_level** (String) Log level for toolkit components. Defaults to `info`.
-- **namespace** (String) The namespace scope for install manifests. Defaults to `flux-system`.
-- **network_policy** (Boolean) Deny ingress access to the toolkit controllers from other namespaces using network policies. Defaults to `true`.
-- **registry** (String) Container registry where the toolkit images are published. Defaults to `ghcr.io/fluxcd`.
-- **toleration_keys** (Set of String) List of toleration keys used to schedule the components pods onto nodes with matching taints.
-- **version** (String) Flux version. Defaults to `v0.27.4`.
-- **watch_all_namespaces** (Boolean) If true watch for custom resources in all namespaces. Defaults to `true`.
+- `cluster_domain` (String) The internal cluster domain. Defaults to `cluster.local`.
+- `components` (Set of String) Toolkit components to include in the install manifests.
+- `components_extra` (Set of String) List of extra components to include in the install manifests.
+- `id` (String) The ID of this resource.
+- `image_pull_secrets` (String) Kubernetes secret name used for pulling the toolkit images from a private registry. Defaults to ``.
+- `log_level` (String) Log level for toolkit components. Defaults to `info`.
+- `namespace` (String) The namespace scope for install manifests. Defaults to `flux-system`.
+- `network_policy` (Boolean) Deny ingress access to the toolkit controllers from other namespaces using network policies. Defaults to `true`.
+- `registry` (String) Container registry where the toolkit images are published. Defaults to `ghcr.io/fluxcd`.
+- `toleration_keys` (Set of String) List of toleration keys used to schedule the components pods onto nodes with matching taints.
+- `version` (String) Flux version. Defaults to `v0.27.4`.
+- `watch_all_namespaces` (Boolean) If true watch for custom resources in all namespaces. Defaults to `true`.
 
 ### Read-Only
 
-- **content** (String) Manifests in multi-doc yaml format.
-- **path** (String) Expected path of content in git repository.
+- `content` (String) Manifests in multi-doc yaml format.
+- `path` (String) Expected path of content in git repository.
 
 
