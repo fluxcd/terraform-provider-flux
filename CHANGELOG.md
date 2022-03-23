@@ -2,6 +2,31 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.12.0
+
+**Release date:** 2022-03-23
+
+This prerelease includes flux2 [v0.28.2](https://github.com/fluxcd/flux2/releases/tag/v0.28.2).
+
+Flux v0.28 comes with breaking changes, new features, and bug fixes.
+Please see the [Upgrade Flux to the Source v1beta2 API](https://github.com/fluxcd/flux2/discussions/2567)
+discussion for more details.
+
+### Breaking changes
+
+With the introduction of Source v1beta2, there is a breaking change that
+requires a manual state update.
+
+All that is required is to remove the `kubectl_manifest` resource for the
+GitRepository manifest. This will cause the kubectl provider to overwrite the
+existing manifest.
+
+```shell
+terraform state rm 'kubectl_manifest.sync["source.toolkit.fluxcd.io/v1beta1/gitrepository/flux-system/flux-system"]'
+```
+
+Future versions of the provider will solve this long term.
+
 ## 0.11.3
 
 **Release date:** 2022-03-15
