@@ -134,6 +134,12 @@ func DataInstall() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
+			"baseurl": {
+				Description: "Base URL to get the install manifests from. When specifying this, `version` should also be set to the corresponding version to download from that URL, or the latest version associated with upstream flux will be requested.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     installDefaults.BaseURL,
+			},
 		},
 	}
 }
@@ -166,6 +172,7 @@ func dataInstallRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	opt.NetworkPolicy = d.Get("network_policy").(bool)
 	opt.LogLevel = d.Get("log_level").(string)
 	opt.TargetPath = d.Get("target_path").(string)
+	opt.BaseURL = d.Get("baseurl").(string)
 	opt.TolerationKeys = tolerationKeys
 	manifest, err := install.Generate(opt, "")
 	if err != nil {
