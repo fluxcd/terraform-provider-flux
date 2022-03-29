@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.12.1
+
+**Release date:** 2022-03-28
+
+This prerelease includes flux2 [v0.28.4](https://github.com/fluxcd/flux2/releases/tag/v0.28.4).
+
+In addition, it also makes the base URL to get the flux install manifests from
+configurable in flux_install data source.
+
+Improvements:
+* Allow specifying the baseurl for flux_install data sources
+  [#251](https://github.com/fluxcd/terraform-provider-flux/pull/251)
+
 ## 0.12.0
 
 **Release date:** 2022-03-23
