@@ -3,7 +3,7 @@ module github.com/fluxcd/terraform-provider-flux
 go 1.17
 
 require (
-	github.com/fluxcd/flux2 v0.28.4
+	github.com/fluxcd/flux2 v0.28.5
 	github.com/hashicorp/terraform-plugin-docs v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.12.0
 	github.com/stretchr/testify v1.7.1
@@ -23,12 +23,12 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fluxcd/kustomize-controller/api v0.22.2 // indirect
+	github.com/fluxcd/kustomize-controller/api v0.22.3 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.0.3 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v0.3.2 // indirect
 	github.com/fluxcd/pkg/apis/meta v0.12.1 // indirect
 	github.com/fluxcd/pkg/untar v0.1.0 // indirect
-	github.com/fluxcd/source-controller/api v0.22.4 // indirect
+	github.com/fluxcd/source-controller/api v0.22.5 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
@@ -87,8 +87,8 @@ require (
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
-	golang.org/x/net v0.0.0-20220121210141-e204ce36a2ba // indirect
-	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
+	golang.org/x/net v0.0.0-20220325170049-de3da57026de // indirect
+	golang.org/x/sys v0.0.0-20220325203850-36772127a21f // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
