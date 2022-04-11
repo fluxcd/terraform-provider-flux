@@ -56,3 +56,5 @@ resource "kubectl_manifest" "sync" {
   ignore_fields = ["metadata.annotations", "spec"]
 }
 ```
+
+This will make sure the changes to the `yaml_incluster` property are ignored and only changes to the parsed yaml will be detected.
