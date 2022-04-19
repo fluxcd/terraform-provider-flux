@@ -18,11 +18,6 @@ variable "repository_name" {
   type        = string
 }
 
-variable "organization" {
-  description = "organization"
-  type        = string
-}
-
 variable "branch" {
   description = "branch"
   type        = string
