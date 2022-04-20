@@ -34,11 +34,6 @@ variable "repository_name" {
   type        = string
 }
 
-variable "organization" {
-  description = "organization"
-  type        = string
-}
-
 variable "branch" {
   description = "branch"
   type        = string
@@ -124,7 +119,7 @@ data "flux_install" "main" {
 
 data "flux_sync" "main" {
   target_path = var.target_path
-  url         = "ssh://git@github.com/${var.organization}/${var.repository_name}.git"
+  url         = "ssh://git@github.com/${var.github_owner}/${var.repository_name}.git"
   branch      = var.branch
 }
 
@@ -224,12 +219,11 @@ resource "kubernetes_secret" "main" {
 provider "github" {
   token        = var.github_token
   owner        = var.github_owner
-  organization = var.organization
 }
 
 # To make sure the repository exists and the correct permissions are set.
 data "github_repository" "main" {
-  full_name = "${var.organization}/${var.repository_name}"
+  full_name = "${var.github_owner}/${var.repository_name}"
 }
 
 resource "github_repository_file" "install" {
