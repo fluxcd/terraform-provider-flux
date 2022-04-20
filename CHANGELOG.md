@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.13.0
+
+**Release date:** 2022-04-20
+
+This prerelease includes flux2 [v0.29.0](https://github.com/fluxcd/flux2/releases/tag/v0.29.0).
+
+In addition, the examples have been updated to reflect the deprecation of the
+`organization` field of the GitHub provider, in favour of `owner`.
+
 ## 0.12.2
 
 **Release date:** 2022-03-30
