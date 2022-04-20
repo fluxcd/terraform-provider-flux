@@ -42,7 +42,7 @@ data "flux_install" "main" {
 - `network_policy` (Boolean) Deny ingress access to the toolkit controllers from other namespaces using network policies. Defaults to `true`.
 - `registry` (String) Container registry where the toolkit images are published. Defaults to `ghcr.io/fluxcd`.
 - `toleration_keys` (Set of String) List of toleration keys used to schedule the components pods onto nodes with matching taints.
-- `version` (String) Flux version. Defaults to `v0.28.5`.
+- `version` (String) Flux version. Defaults to `v0.29.0`.
 - `watch_all_namespaces` (Boolean) If true watch for custom resources in all namespaces. Defaults to `true`.
 
 ### Read-Only
