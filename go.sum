@@ -165,10 +165,10 @@ github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5Kwzbycv
 github.com/fatih/color v1.13.0 h1:8LOYc1KYPPmyKMuN8QV2DNRWNbLo6LZ0iLs8+mlH53w=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
 github.com/felixge/httpsnoop v1.0.1/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
-github.com/fluxcd/flux2 v0.29.1 h1:QXBXY4QorlvMfqHDrTFjH4FQrFVGKBN2sS/w9EQW4zE=
-github.com/fluxcd/flux2 v0.29.1/go.mod h1:ShRO6817NCabGYp5tlAw5Zua/XJ9zvcSml2uTPIy+PM=
-github.com/fluxcd/kustomize-controller/api v0.24.1 h1:Yh+IlEUjoNAGJO+FyDpZn9NKuc/jElYGJghkfe0YjPs=
-github.com/fluxcd/kustomize-controller/api v0.24.1/go.mod h1:fzzyD5x2SRs/9XfZEVkQ89IDKykG0ugjMMrI7h5hvR8=
+github.com/fluxcd/flux2 v0.29.2 h1:aYskfK3OaCZZCgMedrDNs+RPBXwsTrCNo1doZnF4OE8=
+github.com/fluxcd/flux2 v0.29.2/go.mod h1:j49m/D546joI3peMnNQPyxhpq8XecDjbJZxCz5zb7bs=
+github.com/fluxcd/kustomize-controller/api v0.24.2 h1:ZHS4KkR4t76KagrD9wKgW1Fgw5nK6PseBLLArbKFyTk=
+github.com/fluxcd/kustomize-controller/api v0.24.2/go.mod h1:fzzyD5x2SRs/9XfZEVkQ89IDKykG0ugjMMrI7h5hvR8=
 github.com/fluxcd/pkg/apis/acl v0.0.3 h1:Lw0ZHdpnO4G7Zy9KjrzwwBmDZQuy4qEjaU/RvA6k1lc=
 github.com/fluxcd/pkg/apis/acl v0.0.3/go.mod h1:XPts6lRJ9C9fIF9xVWofmQwftvhY25n1ps7W9xw0XLU=
 github.com/fluxcd/pkg/apis/kustomize v0.3.3 h1:bPN29SdVzWl0yhgivuf/83IAe2R6vUuDVcB3LzyVU8E=
