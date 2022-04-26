@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.13.4
+
+**Release date:** 2022-04-26
+
+This prerelease includes flux2 [v0.29.4](https://github.com/fluxcd/flux2/releases/tag/v0.29.4).
+
 ## 0.13.3
 
 **Release date:** 2022-04-22
