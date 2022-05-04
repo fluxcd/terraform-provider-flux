@@ -3,7 +3,7 @@ module github.com/fluxcd/terraform-provider-flux
 go 1.17
 
 require (
-	github.com/fluxcd/flux2 v0.30.0
+	github.com/fluxcd/flux2 v0.30.1
 	github.com/hashicorp/terraform-plugin-docs v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.14.0
 	github.com/stretchr/testify v1.7.1
