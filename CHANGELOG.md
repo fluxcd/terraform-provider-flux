@@ -2,6 +2,57 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.14.1
+
+**Release date:** 2022-05-04
+
+This prerelease includes flux2 [v0.30.2](https://github.com/fluxcd/flux2/releases/tag/v0.30.2).
+
+## 0.14.0
+
+**Release date:** 2022-05-04
+
+This prerelease includes flux2 [v0.30.1](https://github.com/fluxcd/flux2/releases/tag/v0.30.1).
+
+## 0.13.5
+
+**Release date:** 2022-04-28
+
+This prerelease includes flux2 [v0.29.5](https://github.com/fluxcd/flux2/releases/tag/v0.29.5).
+
+## 0.13.4
+
+**Release date:** 2022-04-26
+
+This prerelease includes flux2 [v0.29.4](https://github.com/fluxcd/flux2/releases/tag/v0.29.4).
+
+## 0.13.3
+
+**Release date:** 2022-04-22
+
+This prerelease includes flux2 [v0.29.3](https://github.com/fluxcd/flux2/releases/tag/v0.29.3).
+
+## 0.13.2
+
+**Release date:** 2022-04-21
+
+This prerelease includes flux2 [v0.29.2](https://github.com/fluxcd/flux2/releases/tag/v0.29.2).
+
+## 0.13.1
+
+**Release date:** 2022-04-20
+
+This prerelease includes flux2 [v0.29.1](https://github.com/fluxcd/flux2/releases/tag/v0.29.1).
+
+## 0.13.0
+
+**Release date:** 2022-04-20
+
+This prerelease includes flux2 [v0.29.0](https://github.com/fluxcd/flux2/releases/tag/v0.29.0).
+
+In addition, the examples have been updated to reflect the deprecation of the
+`organization` field of the GitHub provider, in favour of `owner`.
+
 ## 0.12.2
 
 **Release date:** 2022-03-30
