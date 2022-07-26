@@ -3,7 +3,7 @@ module github.com/fluxcd/terraform-provider-flux
 go 1.17
 
 require (
-	github.com/fluxcd/flux2 v0.31.3
+	github.com/fluxcd/flux2 v0.31.4
 	github.com/hashicorp/terraform-plugin-docs v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.14.0
 	github.com/stretchr/testify v1.7.1
@@ -27,7 +27,6 @@ require (
 	github.com/fluxcd/pkg/apis/acl v0.0.3 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v0.4.2 // indirect
 	github.com/fluxcd/pkg/apis/meta v0.14.2 // indirect
-	github.com/fluxcd/pkg/kustomize v0.5.2 // indirect
 	github.com/fluxcd/pkg/untar v0.1.0 // indirect
 	github.com/fluxcd/source-controller/api v0.25.9 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
