@@ -11,7 +11,7 @@ The Flux datasources expose a set of parameters that can configure the controlle
 exposed by the `flux bootstrap` CLI command. There may be situations where these parameters are not enough and additional configuration
 has to be done. This could be changing the resource requests or limits for a controller, adding annotations or labels, or modifying container settings.
 
-When deploying Flux with the CLI the recommended solution is to [modify the Kustomization file](https://fluxcd.io/docs/installation/#customize-flux-manifests).
+When deploying Flux with the CLI the recommended solution is to [modify the Kustomization file](https://fluxcd.io/flux/installation/#customize-flux-manifests).
 When using terraform to bootstrap flux, the `flux_sync` data source provides a `patch_names` argument and corresponding `patch_file_paths` output value that allow users to provide patches to the `kustomize.yaml` in the same manner.
 
 This guide assumes that you have setup Flux with Terraform already. Follow the [GitHub guide](./github) for a quick example to get a Kubernetes cluster with Flux installed in it.
