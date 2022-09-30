@@ -3,7 +3,7 @@ module github.com/fluxcd/terraform-provider-flux
 go 1.18
 
 require (
-	github.com/fluxcd/flux2 v0.34.0
+	github.com/fluxcd/flux2 v0.35.0
 	github.com/hashicorp/terraform-plugin-docs v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.14.0
 	github.com/stretchr/testify v1.7.1
@@ -21,13 +21,13 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fluxcd/kustomize-controller/api v0.28.0 // indirect
+	github.com/fluxcd/kustomize-controller/api v0.29.0 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.1.0 // indirect
-	github.com/fluxcd/pkg/apis/kustomize v0.5.0 // indirect
-	github.com/fluxcd/pkg/apis/meta v0.15.0 // indirect
+	github.com/fluxcd/pkg/apis/kustomize v0.6.0 // indirect
+	github.com/fluxcd/pkg/apis/meta v0.16.0 // indirect
 	github.com/fluxcd/pkg/kustomize v0.7.0 // indirect
 	github.com/fluxcd/pkg/untar v0.2.0 // indirect
-	github.com/fluxcd/source-controller/api v0.29.0 // indirect
+	github.com/fluxcd/source-controller/api v0.30.0 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
@@ -97,12 +97,12 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.25.0 // indirect
-	k8s.io/apimachinery v0.25.0 // indirect
+	k8s.io/apiextensions-apiserver v0.25.2 // indirect
+	k8s.io/apimachinery v0.25.2 // indirect
 	k8s.io/klog/v2 v2.70.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20220803162953-67bda5d908f1 // indirect
 	k8s.io/utils v0.0.0-20220728103510-ee6ede2d64ed // indirect
-	sigs.k8s.io/controller-runtime v0.12.3 // indirect
+	sigs.k8s.io/controller-runtime v0.13.0 // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/kustomize/api v0.12.1 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.13.9 // indirect
