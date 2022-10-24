@@ -35,7 +35,6 @@ data "flux_install" "main" {
 - `cluster_domain` (String) The internal cluster domain. Defaults to `cluster.local`.
 - `components` (Set of String) Toolkit components to include in the install manifests.
 - `components_extra` (Set of String) List of extra components to include in the install manifests.
-- `id` (String) The ID of this resource.
 - `image_pull_secrets` (String) Kubernetes secret name used for pulling the toolkit images from a private registry. Defaults to ``.
 - `log_level` (String) Log level for toolkit components. Defaults to `info`.
 - `namespace` (String) The namespace scope for install manifests. Defaults to `flux-system`.
@@ -48,6 +47,7 @@ data "flux_install" "main" {
 ### Read-Only
 
 - `content` (String) Manifests in multi-doc yaml format.
+- `id` (String) The ID of this resource.
 - `path` (String) Expected path of content in git repository.
 
 
