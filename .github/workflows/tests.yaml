@@ -1,0 +1,66 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19.x
+      - name: Install tools
+        run: make tools
+      - name: Generate docs
+        run: make docs
+      - name: Check if working tree is dirty
+        run: |
+          if [[ $(git diff --stat) != '' ]]; then
+            git diff
+            echo 'run make docs and commit changes'
+            exit 1
+          fi
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19.x
+      - name: Run tests
+        run: make testacc
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19.x
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v2
+      - name: Lint Terraform
+        run: make lint
+      - name: Setup Kubernetes
+        uses: engineerd/setup-kind@v0.5.0
+        with:
+          version: v0.17.0
+      - name: Apply Terraform
+        env:
+          GOOS: linux
+          GOARCH: amd64
+        run: |
+          make install
+          cd examples/install
+          terraform init
+          terraform apply -auto-approve -var "components_extra=[\"image-reflector-controller\", \"image-automation-controller\"]"

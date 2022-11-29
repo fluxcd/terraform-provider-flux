@@ -84,7 +84,7 @@ data sources `flux_install` and `flux_sync`. The cluster has been successfully a
 manifests are applied to it.
 ```terraform
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 1.1.5"
 
   required_providers {
     github = {
@@ -126,6 +126,7 @@ data "flux_sync" "main" {
 # https://registry.terraform.io/modules/terraform-google-modules/kubernetes-engine/google/latest/submodules/auth
 module "gke_auth" {
   source               = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+  version              = ">= 24.0.0"
   project_id           = var.project_id
   cluster_name         = var.cluster_name
   location             = var.cluster_region

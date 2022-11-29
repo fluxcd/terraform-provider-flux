@@ -30,7 +30,6 @@ var testAccProvider *schema.Provider
 
 func init() {
 	testAccProvider = Provider()
-
 	testAccProviderFactories = map[string]func() (*schema.Provider, error){
 		"flux": func() (*schema.Provider, error) { return testAccProvider, nil },
 	}

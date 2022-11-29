@@ -2,7 +2,7 @@
 SHELL := /bin/bash
 
 TEST_COUNT?=1
-ACCTEST_PARALLELISM?=4
+ACCTEST_PARALLELISM?=5
 ACCTEST_TIMEOUT?=10m
 
 all: test testacc build
@@ -20,7 +20,7 @@ test: tidy fmt vet
 	go test ./... -coverprofile cover.out
 
 testacc: tidy fmt vet
-	TF_ACC=1 go test ./pkg/provider -v -count $(TEST_COUNT) -parallel $(ACCTEST_PARALLELISM) -timeout $(ACCTEST_TIMEOUT)
+	TF_ACC=1 go test ./... -v -count $(TEST_COUNT) -parallel $(ACCTEST_PARALLELISM) -timeout $(ACCTEST_TIMEOUT)
 
 build:
 	CGO_ENABLED=0 go build -o ./bin/flux main.go

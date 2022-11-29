@@ -1,0 +1,14 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+~> **NOTE:** This resources is still under development and may receive breaking attribute changes. Use with care in a production environment.
+
+{{ .SchemaMarkdown | trimspace }}
