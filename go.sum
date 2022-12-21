@@ -70,8 +70,8 @@ github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5Kwzbycv
 github.com/fatih/color v1.13.0 h1:8LOYc1KYPPmyKMuN8QV2DNRWNbLo6LZ0iLs8+mlH53w=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
 github.com/flowstack/go-jsonschema v0.1.1/go.mod h1:yL7fNggx1o8rm9RlgXv7hTBWxdBM0rVwpMwimd3F3N0=
-github.com/fluxcd/flux2 v0.38.0 h1:5D5xiCTtKcmcw8HKDvod5HU5WiM1zzqB6lh6zKRwKdQ=
-github.com/fluxcd/flux2 v0.38.0/go.mod h1:9TlJ0jN0yyRew4SRT47NEFqhttx5cBE3ZgU2AzfOtp0=
+github.com/fluxcd/flux2 v0.38.1 h1:/+/17KyVIo09fCr5uzbHGQDdq8HcLO7EPktnnG9rbfI=
+github.com/fluxcd/flux2 v0.38.1/go.mod h1:Ft79iw6WtoSZfekQJYfOlaL0h7sJQYaJPOaQzy4igno=
 github.com/fluxcd/kustomize-controller/api v0.32.0 h1:5QGLV5xRI8S3tUFJNV+vVzy/pdl0d6Ua0AccWwGRKfs=
 github.com/fluxcd/kustomize-controller/api v0.32.0/go.mod h1:t2pqIe1SMzdZIAG/aietrg3XpRXmpcubf0uxDJOryEA=
 github.com/fluxcd/pkg/apis/acl v0.1.0 h1:EoAl377hDQYL3WqanWCdifauXqXbMyFuK82NnX6pH4Q=
