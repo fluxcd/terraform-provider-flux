@@ -26,7 +26,7 @@ import (
 func TestGenereateKustomizationYamlWithNoPatches(t *testing.T) {
 	result, err := GenerateKustomizationYaml([]string{"foo", "bar"}, []string{})
 
-	expected := `
+	expected := `---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -41,7 +41,7 @@ resources:
 func TestGenereateKustomizationYamlWithPatches(t *testing.T) {
 	result, err := GenerateKustomizationYaml([]string{"foo", "bar"}, []string{"baz", "buzz"})
 
-	expected := `
+	expected := `---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
