@@ -15,10 +15,14 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.18.x
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Update component versions
         id: update
         run: |
-          RELEASE_VERSION=$(curl -s https://api.github.com/repos/fluxcd/flux2/releases | jq -r 'sort_by(.published_at) | .[-1] | .tag_name')
+          RELEASE_VERSION=$(flux version --client | awk '{print $2}')
           CURRENT_VERSION=$(go list -m all | grep github.com/fluxcd/flux2 | awk '{print $2}')
           if [[ "${RELEASE_VERSION}" != "${CURRENT_VERSION}" ]]; then
             go mod edit -require github.com/fluxcd/flux2@${RELEASE_VERSION}
@@ -28,8 +32,8 @@ jobs:
 
           PR_TITLE="Update Flux to ${RELEASE_VERSION}"
           PR_BODY="- github.com/fluxcd/flux2 to ${RELEASE_VERSION}%0A  https://github.com/fluxcd/flux2/releases/${RELEASE_VERSION}%0A"
-          echo "::set-output name=pr_body::$PR_BODY"
-          echo "::set-output name=pr_title::$PR_TITLE"
+          echo "pr_body=$PR_BODY" >> $GITHUB_OUTPUT
+          echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v3
