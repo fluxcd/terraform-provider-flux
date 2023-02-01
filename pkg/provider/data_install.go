@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/fluxcd/flux2/pkg/manifestgen/install"
+	"github.com/fluxcd/terraform-provider-flux/internal/utils"
 )
 
 var (
@@ -47,7 +48,7 @@ func DataInstall() *schema.Resource {
 				Description: "Flux version.",
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "v0.38.3",
+				Default:     utils.DefaultFluxVersion,
 				ValidateFunc: func(val interface{}, key string) ([]string, []error) {
 					errs := []error{}
 					v := val.(string)

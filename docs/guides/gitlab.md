@@ -65,7 +65,7 @@ data sources `flux_install` and `flux_sync`. The cluster has been successfully p
 after the same manifests are applied to it.
 ```terraform
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 1.1.5"
 
   required_providers {
     gitlab = {
