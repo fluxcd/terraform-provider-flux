@@ -16,6 +16,7 @@ import (
 
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -111,6 +112,8 @@ type bootstrapGitResourceData struct {
 	KustomizationOverride types.String `tfsdk:"kustomization_override"`
 
 	RepositoryFiles types.Map `tfsdk:"repository_files"`
+
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -395,6 +398,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: "Git repository files created and managed by the provider.",
 				Computed:    true,
 			},
+			"timeouts": timeouts.AttributesAll(ctx),
 		},
 	}
 }
@@ -497,6 +501,14 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
+	createTimeout, diags := data.Timeouts.Create(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, createTimeout)
+	defer cancel()
+
 	gitClient, err := getGitClient(ctx, data)
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
@@ -575,7 +587,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	manifestsBase := ""
-	err = bootstrap.Run(ctx, b, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, 10*time.Minute)
+	err = bootstrap.Run(ctx, b, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, createTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError("Bootstrap run error", err.Error())
 		return
@@ -613,6 +625,14 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	readTimeout, diags := data.Timeouts.Create(ctx, 10*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, readTimeout)
+	defer cancel()
 
 	gitClient, err := getGitClient(ctx, data)
 	if err != nil {
@@ -655,6 +675,14 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	updateTimeout, diags := data.Timeouts.Create(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, updateTimeout)
+	defer cancel()
 
 	gitClient, err := getGitClient(ctx, data)
 	if err != nil {
@@ -741,6 +769,14 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	deleteTimeout, diags := data.Timeouts.Create(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
+	defer cancel()
 
 	gitClient, err := getGitClient(ctx, data)
 	if err != nil {
