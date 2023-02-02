@@ -2,6 +2,31 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.23.0
+
+**Release date:** 2023-02-02
+
+This prerelease includes flux2 [v0.39.0](https://github.com/fluxcd/flux2/releases/tag/v0.39.0).
+
+A new resource `flux_bootstrap_git` has been added as a replacement to the current two data source.
+
+Bootstrapping Flux with Terraform has been a feature that was available early on in Fluxcd V2 development. With time new features in Flux and more requirements from end users have made the experience complex and error-prone.
+A big reason is that the solution was built with a focus on using existing providers to manage the interaction with Git and Kubernetes. While it saved time early on it caused issues in the long run.
+Flux has specific requirements in the order resources are applied and removed to work properly, which became very difficult to express with Terraform. In the worst case, Terraform would not be able to run at all due to the dependency complexity.
+
+Over the last couple of months, a new provider resource has been developed to replace the old bootstrapping method. The resource implements all the functionality required to bootstrap Flux, removing the dependency on third-party Terraform providers.
+The goal has been to replicate the features offered by the Flux CLI as close as possible while solving long-standing issues current users experience with the provider.
+
+Currently customizing the Flux installation has issues as it only affects how Flux reconciles itself but now how the manifests are applied to Kubernetes. This results in issues for the end user as their cluster may block Pods lacking specific security settings.
+This issue is no longer present in the new solution as the provider manages both the process of committing the customized configuration to Git and applying it to Kubernetes.
+
+Another long-standing issue has been uninstalling Flux with Terraform. The old solution was for the most part luck based if the resources were removed in the right order and enough time was allowed for finalizers to be removed by the Flux controllers.
+This rarely occurred causing clusters to be stuck in locked states. The new solution will always remove resources in the correct order, making sure that all finalizers are removed before Kubernetes considers the resource to be fully removed from Terraform.
+
+The plan forward is to only work on developing the new Terraform resource, initially focusing on ironing out any early bugs. While the new resource is stable there may occur some breaking attribute changes to deal with unforeseen use cases. While having said that feedback
+is needed to make the Terraform experience with Flux better, so please start evaluating the new Terraform resource. A migration guide is available which walks through the step-by-step process for how to migrate between the old and new solution without breaking an existing Flux installation.
+When the attributes in the new resource are considered set, the old data sources will be deprecated, and eventually removed. Until then it is recommended to start looking at which features are missing in the new resource to cover specific use cases.
+
 ## 0.22.3
 
 **Release date:** 2023-01-10
