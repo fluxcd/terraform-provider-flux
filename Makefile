@@ -38,14 +38,4 @@ tools:
 
 .SILENT:
 lint:
-	set -e
-	echo lint: Start
-	EXAMPLES=$$(find examples -mindepth 1 -maxdepth 1 -type d)
-	DELETE=examples/data-sources
-	echo $${array[@]/$$DELETE}
-	EXAMPLES=( "$${EXAMPLES[@]/$$DELETE}" )
-	for EXAMPLE in $${EXAMPLES}; do
-		echo $$EXAMPLE
-		tflint -c examples/.tflint.hcl $${EXAMPLE}
-	done
-	echo lint: Success
+	tflint --recursive --disable-rule=terraform_required_providers --disable-rule terraform_required_version --disable-rule=terraform_unused_declarations

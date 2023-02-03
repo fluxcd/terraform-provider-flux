@@ -2,8 +2,19 @@
 layout: ""
 page_title: "Provider: Flux"
 description: |-
-  The Flux provider provides data sources to bootstrap a Kubernetes cluster with Flux.
+  The Flux provider can be used to install and configure Flux in a Kubernetes cluster.
 ---
 
 # Flux Provider
-The Flux provider provides data sources to bootstrap a Kubernetes cluster with Flux.
+
+The Flux provider can be used to install and configure [Flux](https://github.com/fluxcd/flux2/) in a Kubernetes cluster.
+
+The provider needs to be configured with Kubernetes credentials to be used.
+
+## Example Usage
+
+Get Kubernetes credentials from a kubeconfig file. The current context set in the kubeconfig file will be used by default.
+
+{{ tffile .ExampleFile }}
+
+{{ .SchemaMarkdown | trimspace }}
