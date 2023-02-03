@@ -865,7 +865,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		resp.Diagnostics.AddError(fmt.Sprintf("Could not get Deployment %s/%s", kustomizeDeployment.Namespace, kustomizeDeployment.Name), err.Error())
 		return
 	}
-	managerContainer, err := getContainer(kustomizeDeployment.Spec.Template.Spec.Containers, "manager")
+	managerContainer, err := utils.GetContainer(kustomizeDeployment.Spec.Template.Spec.Containers, "manager")
 	if err != nil {
 		resp.Diagnostics.AddError("Could not get manager container", err.Error())
 		return
@@ -900,7 +900,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	}
 
 	// Get if watching all namespace
-	value, err := getArgValue(managerContainer.Args, "--watch-all-namespaces")
+	value, err := utils.GetArgValue(managerContainer, "--watch-all-namespaces")
 	if err != nil {
 		resp.Diagnostics.AddError("Could not get arg", err.Error())
 		return
@@ -913,7 +913,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	data.WatchAllNamespaces = types.BoolValue(watchAllNamespaces)
 
 	// Get log level
-	value, err = getArgValue(managerContainer.Args, "--log-level")
+	value, err = utils.GetArgValue(managerContainer, "--log-level")
 	if err != nil {
 		resp.Diagnostics.AddError("Could not get arg", err.Error())
 		return
@@ -921,7 +921,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	data.LogLevel = types.StringValue(value)
 
 	// Get cluster domain
-	value, err = getArgValue(managerContainer.Args, "--events-addr")
+	value, err = utils.GetArgValue(managerContainer, "--events-addr")
 	if err != nil {
 		resp.Diagnostics.AddError("Could not get arg", err.Error())
 		return
@@ -1286,24 +1286,4 @@ func getExpectedRepositoryFiles(data bootstrapGitResourceData) (map[string]strin
 	repositoryFiles[syncManifests.Path] = syncManifests.Content
 	repositoryFiles[filepath.Join(data.Path.ValueString(), data.Namespace.ValueString(), konfig.DefaultKustomizationFileName())] = getKustomizationFile(data)
 	return repositoryFiles, nil
-}
-
-func getContainer(containers []corev1.Container, name string) (corev1.Container, error) {
-	for _, c := range containers {
-		return c, nil
-	}
-	return corev1.Container{}, fmt.Errorf("could not find container: %s", name)
-}
-
-func getArgValue(args []string, name string) (string, error) {
-	for _, arg := range args {
-		if strings.HasPrefix(arg, name) {
-			_, after, ok := strings.Cut(arg, "=")
-			if !ok {
-				return "", fmt.Errorf("could not split arg: %s", arg)
-			}
-			return after, nil
-		}
-	}
-	return "", fmt.Errorf("arg with name not found: %s", name)
 }
