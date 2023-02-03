@@ -9,6 +9,37 @@ description: |-
 
 {{ .Description | trimspace }}
 
-~> **NOTE:** This resources is still under development and may receive breaking attribute changes. Use with care in a production environment.
+~> **NOTE:** This resource is still under development and may receive breaking attribute changes. Use with care in a production environment.
+
+## Example Usage
+
+Get Kubernetes credentials from a kubeconfig file. The current context set in the kubeconfig file will be used by default.
+
+{{ tffile .ExampleFile }}
 
 {{ .SchemaMarkdown | trimspace }}
+
+### Customizing Flux
+
+The Flux controller deployments, container command arguments, node affinity, etc can be customized using [Kustomize strategic merge patches and JSON patches](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/patchMultipleObjects.md).
+The Kustomize file is configured through the `kustomize_override` argument. Below are some examples of use cases when customizing Flux is useful, refer to the [customization examples documentation](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/patchMultipleObjects.md) for more examples.
+
+{{ tffile "examples/resources/flux_bootstrap_git/customize.tf" }}
+
+#### Safe to evict
+
+Allow the cluster autoscaler to evict the Flux controller pods.
+
+{{ codefile "yaml" "examples/resources/flux_bootstrap_git/kustomization-evict.yaml" }}
+
+#### Node affinity and tolerations
+
+Pin the Flux controllers to specific nodes.
+
+{{ codefile "yaml" "examples/resources/flux_bootstrap_git/kustomization-node.yaml" }}
+
+## Import
+
+Existing Flux installations can be imported by passing the namespace where Flux is installed.
+
+{{ codefile "sh" .ImportFile }}
