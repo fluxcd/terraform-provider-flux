@@ -18,6 +18,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -141,4 +142,39 @@ func (r *RESTClientGetter) ToRESTMapper() (meta.RESTMapper, error) {
 
 func (r *RESTClientGetter) ToRawKubeConfigLoader() clientcmd.ClientConfig {
 	return r.clientconfig
+}
+
+func GetContainer(containers []corev1.Container, name string) (corev1.Container, error) {
+	if name == "" {
+		return corev1.Container{}, fmt.Errorf("container name cannot be empty")
+	}
+	for _, c := range containers {
+		if c.Name == name {
+			return c, nil
+		}
+	}
+	return corev1.Container{}, fmt.Errorf("could not find container: %s", name)
+}
+
+func GetArgValue(container corev1.Container, name string) (string, error) {
+	if name == "" {
+		return "", fmt.Errorf("arg name cannot be empty")
+	}
+	for i, arg := range container.Args {
+		if !strings.HasPrefix(arg, name) {
+			continue
+		}
+		_, after, ok := strings.Cut(arg, "=")
+		if ok {
+			if after == "" {
+				return "", fmt.Errorf("unexpected empty argument value")
+			}
+			return after, nil
+		}
+		if i == len(container.Args)-1 {
+			break
+		}
+		return container.Args[i+1], nil
+	}
+	return "", fmt.Errorf("arg with name not found: %s", name)
 }
