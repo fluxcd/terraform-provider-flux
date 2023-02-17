@@ -31,8 +31,16 @@ jobs:
           git diff
 
           PR_TITLE="Update Flux to ${RELEASE_VERSION}"
-          PR_BODY="- github.com/fluxcd/flux2 to ${RELEASE_VERSION} https://github.com/fluxcd/flux2/releases/${RELEASE_VERSION}"
-          echo "pr_body=$PR_BODY" >> $GITHUB_OUTPUT
+          PR_BODY=$(mktemp)
+          echo "- github.com/fluxcd/flux2 to ${RELEASE_VERSION}" >> $PR_BODY
+          echo "  https://github.com/fluxcd/flux2/releases/${RELEASE_VERSION}" >> $PR_BODY
+
+          # NB: this may look strange but it is the way it should be done to
+          # maintain our precious newlines
+          # Ref: https://github.com/github/docs/issues/21529
+          echo 'pr_body<<EOF' >> $GITHUB_OUTPUT
+          cat $PR_BODY >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
           echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
       - name: Create Pull Request
         id: cpr
