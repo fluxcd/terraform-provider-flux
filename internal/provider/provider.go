@@ -202,7 +202,7 @@ func initializeConfiguration(ctx context.Context, data providerData) (clientcmd.
 		configPaths = []string{data.ConfigPath.ValueString()}
 	} else if len(data.ConfigPaths.Elements()) > 0 {
 		var pp []string
-		diag := data.ConfigPaths.ElementsAs(ctx, pp, false)
+		diag := data.ConfigPaths.ElementsAs(ctx, &pp, false)
 		if diag.HasError() {
 			return nil, fmt.Errorf("%s", diag)
 		}
