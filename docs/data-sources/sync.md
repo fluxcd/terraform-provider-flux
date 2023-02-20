@@ -39,7 +39,6 @@ data "flux_sync" "main" {
 
 - `branch` (String) Default branch to sync from. Defaults to `main`.
 - `commit` (String) The Git commit SHA to checkout, if specified Tag filters will be ignored.
-- `git_implementation` (String) The git implementation to use, can be `go-git` or `libgit2`. Defaults to ``.
 - `interval` (Number) Sync interval in minutes. Defaults to `1`.
 - `name` (String) The kubernetes resources name Defaults to `flux-system`.
 - `namespace` (String) The namespace scope for this operation. Defaults to `flux-system`.
