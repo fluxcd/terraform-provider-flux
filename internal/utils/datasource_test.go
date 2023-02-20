@@ -14,32 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package provider
+package utils
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStringList(t *testing.T) {
-	origList := []interface{}{"foo", "bar"}
-	set := schema.NewSet(schema.HashString, origList)
-	list := toStringList(set)
-
-	assert.ElementsMatch(t, origList, list)
-}
-
-func TestStringListNil(t *testing.T) {
-	list := toStringList(nil)
-
-	assert.Equal(t, list, []string{})
-}
-
 func TestGenereateKustomizationYamlWithNoPatches(t *testing.T) {
-	result, err := generateKustomizationYaml([]string{"foo", "bar"}, []string{})
+	result, err := GenerateKustomizationYaml([]string{"foo", "bar"}, []string{})
 
 	expected := `
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -54,7 +39,7 @@ resources:
 }
 
 func TestGenereateKustomizationYamlWithPatches(t *testing.T) {
-	result, err := generateKustomizationYaml([]string{"foo", "bar"}, []string{"baz", "buzz"})
+	result, err := GenerateKustomizationYaml([]string{"foo", "bar"}, []string{"baz", "buzz"})
 
 	expected := `
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -102,7 +87,7 @@ func TestGetPatchBases(t *testing.T) {
 	input := []string{"foo", "bar"}
 
 	expected := []string{"patch-foo.yaml", "patch-bar.yaml"}
-	actual := getPatchBases(input)
+	actual := GetPatchBases(input)
 
 	assert.Equal(t, expected, actual)
 }
@@ -112,7 +97,7 @@ func TestGenPatchFilePaths(t *testing.T) {
 	patchNames := []string{"bar"}
 
 	expected := map[string]string{"bar": "/foo/patch-bar.yaml"}
-	actual := genPatchFilePaths(basePath, patchNames)
+	actual := GenPatchFilePaths(basePath, patchNames)
 
 	assert.Equal(t, expected, actual)
 }

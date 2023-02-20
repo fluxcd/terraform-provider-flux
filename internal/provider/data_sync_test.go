@@ -21,14 +21,17 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSync_basic(t *testing.T) {
+func TestAccDataSync_Basic(t *testing.T) {
 	resourceName := "data.flux_sync.main"
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
+		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
+			"flux": providerserver.NewProtocol6WithError(New("dev")()),
+		},
 		Steps: []resource.TestStep{
 			{
 				// Without required target_path set
@@ -43,7 +46,7 @@ func TestAccDataSync_basic(t *testing.T) {
 			{
 				// Incorrect url syntax
 				Config:      testAccDataSyncInCorrectURL,
-				ExpectError: regexp.MustCompile(`Error: expected "url" to have a url with schema of: "http,https,ssh", got ftp://git@example.com`),
+				ExpectError: regexp.MustCompile(`Invalid URL scheme`),
 			},
 			{
 				// Check default values

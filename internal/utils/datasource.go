@@ -14,37 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package provider
+package utils
 
 import (
 	"bytes"
 	"fmt"
 	"path"
 	"text/template"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
-func toStringList(ll interface{}) []string {
-	if ll == nil {
-		return []string{}
-	}
-
-	set := ll.(*schema.Set)
-	result := []string{}
-	for _, l := range set.List() {
-		result = append(result, l.(string))
-	}
-
-	return result
-}
 
 type KustomizationValues struct {
 	Paths   []string
 	Patches []string
 }
 
-func generateKustomizationYaml(paths []string, patches []string) (string, error) {
+func GenerateKustomizationYaml(paths []string, patches []string) (string, error) {
 	var t *template.Template
 	var err error
 
@@ -101,7 +85,7 @@ func Map(vs []string, f func(string) string) []string {
 	return vsm
 }
 
-func getPatchBases(patchNames []string) []string {
+func GetPatchBases(patchNames []string) []string {
 	f := func(s string) string {
 		return fmt.Sprintf("patch-%s.yaml", s)
 	}
@@ -109,12 +93,12 @@ func getPatchBases(patchNames []string) []string {
 	return Map(patchNames, f)
 }
 
-func genPatchFilePaths(basePath string, patchNames []string) map[string]string {
+func GenPatchFilePaths(basePath string, patchNames []string) map[string]string {
 	f := func(filename string) string {
 		return path.Join(basePath, filename)
 	}
 
-	patchBases := getPatchBases(patchNames)
+	patchBases := GetPatchBases(patchNames)
 	filePaths := Map(patchBases, f)
 
 	patchMap := make(map[string]string)
