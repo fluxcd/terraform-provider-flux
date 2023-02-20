@@ -217,6 +217,25 @@ func TestAccBootstrapGit_Upgrade(t *testing.T) {
 	})
 }
 
+func TestAccBootstrapGit_Components(t *testing.T) {
+	env := setupEnvironment(t)
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
+			"flux": providerserver.NewProtocol6WithError(New("dev")()),
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: bootstrapGitComponents(env),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccBootstrapGit_Customization(t *testing.T) {
 	kustomizationOverride := `apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -379,6 +398,33 @@ func bootstrapGitCustomization(env environment, kustomizationOverride string) st
       EOT
     }
 	`, env.kubeCfgPath, env.httpClone, env.username, env.password, kustomizationOverride)
+}
+
+func bootstrapGitComponents(env environment) string {
+	return fmt.Sprintf(`
+    provider "flux" {
+      config_path = "%s"
+    }
+
+    resource "flux_bootstrap_git" "this" {
+      url = "%s"
+      http = {
+        username = "%s"
+        password = "%s"
+        allow_insecure_http = true
+      }
+	  components           = [
+        "helm-controller",
+        "kustomize-controller",
+        "notification-controller",
+        "source-controller",
+      ]
+      components_extra     = [
+        "image-automation-controller",
+        "image-reflector-controller",
+      ]
+    }
+	`, env.kubeCfgPath, env.httpClone, env.username, env.password)
 }
 
 type environment struct {

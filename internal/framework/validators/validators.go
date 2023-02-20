@@ -79,7 +79,7 @@ func (v mustContainValidator) ValidateSet(ctx context.Context, req validator.Set
 	}
 
 	setStr := []string{}
-	diag := req.ConfigValue.ElementsAs(ctx, setStr, false)
+	diag := req.ConfigValue.ElementsAs(ctx, &setStr, false)
 	resp.Diagnostics.Append(diag...)
 	if resp.Diagnostics.HasError() {
 		return
