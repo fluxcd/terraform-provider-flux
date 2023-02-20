@@ -13,21 +13,21 @@ replace gopkg.in/yaml.v3 => gopkg.in/yaml.v3 v3.0.1
 
 require (
 	code.gitea.io/sdk/gitea v0.15.1
-	github.com/ProtonMail/go-crypto v0.0.0-20230127202215-f7f10de891d5
+	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8
 	github.com/docker/docker v20.10.20+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/fluxcd/flux2 v0.39.0
-	github.com/fluxcd/helm-controller/api v0.29.0
-	github.com/fluxcd/image-automation-controller/api v0.29.0
-	github.com/fluxcd/image-reflector-controller/api v0.24.0
-	github.com/fluxcd/kustomize-controller/api v0.33.0
-	github.com/fluxcd/notification-controller/api v0.31.0
-	github.com/fluxcd/pkg/git v0.8.0
-	github.com/fluxcd/pkg/git/gogit v0.5.0
-	github.com/fluxcd/pkg/runtime v0.27.0
-	github.com/fluxcd/pkg/ssa v0.23.0
-	github.com/fluxcd/pkg/ssh v0.7.0
-	github.com/fluxcd/source-controller/api v0.34.0
+	github.com/fluxcd/flux2 v0.40.0
+	github.com/fluxcd/helm-controller/api v0.30.0
+	github.com/fluxcd/image-automation-controller/api v0.30.0
+	github.com/fluxcd/image-reflector-controller/api v0.25.0
+	github.com/fluxcd/kustomize-controller/api v0.34.0
+	github.com/fluxcd/notification-controller/api v0.32.0
+	github.com/fluxcd/pkg/git v0.10.0
+	github.com/fluxcd/pkg/git/gogit v0.7.1
+	github.com/fluxcd/pkg/runtime v0.29.0
+	github.com/fluxcd/pkg/ssa v0.23.1
+	github.com/fluxcd/pkg/ssh v0.7.1
+	github.com/fluxcd/source-controller/api v0.35.1
 	github.com/google/go-containerregistry v0.13.0
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.1.1
@@ -44,7 +44,7 @@ require (
 	k8s.io/cli-runtime v0.26.1
 	k8s.io/client-go v0.26.1
 	sigs.k8s.io/cli-utils v0.34.0
-	sigs.k8s.io/controller-runtime v0.14.2
+	sigs.k8s.io/controller-runtime v0.14.4
 	sigs.k8s.io/kind v0.17.0
 	sigs.k8s.io/kustomize/api v0.12.1
 	sigs.k8s.io/yaml v1.3.0
@@ -68,7 +68,7 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chai2010/gettext-go v1.0.2 // indirect
-	github.com/cloudflare/circl v1.3.1 // indirect
+	github.com/cloudflare/circl v1.3.2 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
@@ -79,22 +79,22 @@ require (
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fluxcd/go-git-providers v0.13.0 // indirect
+	github.com/fluxcd/go-git-providers v0.14.0 // indirect
 	github.com/fluxcd/go-git/v5 v5.0.0-20221219190809-2e5c9d01cfc4 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.1.0 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v0.8.0 // indirect
 	github.com/fluxcd/pkg/apis/meta v0.19.0 // indirect
-	github.com/fluxcd/pkg/kustomize v0.13.0 // indirect
+	github.com/fluxcd/pkg/kustomize v0.13.1 // indirect
 	github.com/fluxcd/pkg/untar v0.2.0 // indirect
-	github.com/fluxcd/pkg/version v0.2.0 // indirect
+	github.com/fluxcd/pkg/version v0.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
-	github.com/go-git/go-billy/v5 v5.3.1 // indirect
+	github.com/go-git/go-billy/v5 v5.4.1 // indirect
 	github.com/go-git/go-git/v5 v5.5.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
-	github.com/go-openapi/jsonpointer v0.19.5 // indirect
-	github.com/go-openapi/jsonreference v0.20.0 // indirect
+	github.com/go-openapi/jsonpointer v0.19.6 // indirect
+	github.com/go-openapi/jsonreference v0.20.1 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -102,7 +102,7 @@ require (
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/go-github/v48 v48.2.0 // indirect
+	github.com/google/go-github/v49 v49.1.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/safetext v0.0.0-20220905092116-b49f7bc46da2 // indirect
@@ -166,7 +166,7 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/russross/blackfriday v1.6.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/sergi/go-diff v1.2.0 // indirect
+	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/skeema/knownhosts v1.1.0 // indirect
@@ -176,7 +176,7 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v4 v4.3.12 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
-	github.com/xanzy/go-gitlab v0.77.0 // indirect
+	github.com/xanzy/go-gitlab v0.78.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xlab/treeprint v1.1.0 // indirect
 	github.com/zclconf/go-cty v1.12.1 // indirect
@@ -201,7 +201,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/component-base v0.26.1 // indirect
 	k8s.io/klog/v2 v2.90.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20221207184640-f3cff1453715 // indirect
+	k8s.io/kube-openapi v0.0.0-20230109183929-3758b55a6596 // indirect
 	k8s.io/kubectl v0.26.1 // indirect
 	k8s.io/utils v0.0.0-20221128185143-99ec85e7a448 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
