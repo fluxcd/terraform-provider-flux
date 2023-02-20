@@ -44,7 +44,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,14 +52,12 @@ import (
 
 	"github.com/fluxcd/flux2/pkg/bootstrap"
 	"github.com/fluxcd/flux2/pkg/log"
-	"github.com/fluxcd/flux2/pkg/manifestgen"
 	"github.com/fluxcd/flux2/pkg/manifestgen/install"
 	"github.com/fluxcd/flux2/pkg/manifestgen/sourcesecret"
 	"github.com/fluxcd/flux2/pkg/manifestgen/sync"
 	"github.com/fluxcd/flux2/pkg/uninstall"
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1beta2"
 	"github.com/fluxcd/pkg/git"
-	"github.com/fluxcd/pkg/git/gogit"
 	"github.com/fluxcd/pkg/git/repository"
 	runclient "github.com/fluxcd/pkg/runtime/client"
 	sourcev1 "github.com/fluxcd/source-controller/api/v1beta2"
@@ -80,24 +77,10 @@ const (
 	rfc1123DomainError = "a lowercase RFC 1123 subdomain must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character"
 )
 
-type Ssh struct {
-	Username   types.String `tfsdk:"username"`
-	Password   types.String `tfsdk:"password"`
-	PrivateKey types.String `tfsdk:"private_key"`
-}
-
-type Http struct {
-	Username             types.String `tfsdk:"username"`
-	Password             types.String `tfsdk:"password"`
-	InsecureHttpAllowed  types.Bool   `tfsdk:"allow_insecure_http"`
-	CertificateAuthority types.String `tfsdk:"certificate_authority"`
-}
-
 type bootstrapGitResourceData struct {
 	ID types.String `tfsdk:"id"`
 
 	Version            types.String         `tfsdk:"version"`
-	Url                customtypes.URL      `tfsdk:"url"`
 	Branch             types.String         `tfsdk:"branch"`
 	Path               types.String         `tfsdk:"path"`
 	ClusterDomain      types.String         `tfsdk:"cluster_domain"`
@@ -121,9 +104,6 @@ type bootstrapGitResourceData struct {
 	GpgKeyID              types.String `tfsdk:"gpg_key_id"`
 	CommitMessageAppendix types.String `tfsdk:"commit_message_appendix"`
 
-	Ssh  *Ssh  `tfsdk:"ssh"`
-	Http *Http `tfsdk:"http"`
-
 	KustomizationOverride types.String `tfsdk:"kustomization_override"`
 
 	RepositoryFiles types.Map `tfsdk:"repository_files"`
@@ -134,7 +114,6 @@ var _ resource.Resource = &bootstrapGitResource{}
 var _ resource.ResourceWithConfigure = &bootstrapGitResource{}
 var _ resource.ResourceWithImportState = &bootstrapGitResource{}
 var _ resource.ResourceWithModifyPlan = &bootstrapGitResource{}
-var _ resource.ResourceWithValidateConfig = &bootstrapGitResource{}
 
 type bootstrapGitResource struct {
 	prd *providerResourceData
@@ -172,7 +151,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Computed: true,
 			},
 			"version": schema.StringAttribute{
-				Description: "Flux version.",
+				Description: fmt.Sprintf("Flux version. Defaults to `%s`.", utils.DefaultFluxVersion),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
@@ -183,7 +162,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"cluster_domain": schema.StringAttribute{
-				Description: "The internal cluster domain.",
+				Description: fmt.Sprintf("The internal cluster domain. Defaults to `%s`", defaultOpts.ClusterDomain),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
@@ -192,7 +171,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 			},
 			"components": schema.SetAttribute{
 				ElementType: types.StringType,
-				Description: "Toolkit components to include in the install manifests.",
+				Description: fmt.Sprintf("Toolkit components to include in the install manifests. Defaults to `%s`", defaultOpts.Components),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.Set{
@@ -222,7 +201,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"log_level": schema.StringAttribute{
-				Description: "Log level for toolkit components.",
+				Description: fmt.Sprintf("Log level for toolkit components. Defaults to `%s`.", defaultOpts.LogLevel),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
@@ -233,7 +212,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"namespace": schema.StringAttribute{
-				Description: "The namespace scope for install manifests.",
+				Description: fmt.Sprintf("The namespace scope for install manifests. Defaults to `%s`.", defaultOpts.Namespace),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
@@ -246,7 +225,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"network_policy": schema.BoolAttribute{
-				Description: "Deny ingress access to the toolkit controllers from other namespaces using network policies.",
+				Description: fmt.Sprintf("Deny ingress access to the toolkit controllers from other namespaces using network policies. Defaults to `%v`.", defaultOpts.NetworkPolicy),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.Bool{
@@ -255,7 +234,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 			},
 			"registry": schema.StringAttribute{
 				CustomType:  customtypes.URLType{},
-				Description: "Container registry where the toolkit images are published.",
+				Description: fmt.Sprintf("Container registry where the toolkit images are published. Defaults to `%s`.", defaultOpts.Registry),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
@@ -274,27 +253,16 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"watch_all_namespaces": schema.BoolAttribute{
-				Description: "If true watch for custom resources in all namespaces.",
+				Description: fmt.Sprintf("If true watch for custom resources in all namespaces. Defaults to `%v`.", defaultOpts.WatchAllNamespaces),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.Bool{
 					planmodifiers.DefaultBoolValue(defaultOpts.WatchAllNamespaces),
 				},
 			},
-			"url": schema.StringAttribute{
-				CustomType:  customtypes.URLType{},
-				Description: "Url of git repository to bootstrap from.",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.String{
-					validators.URLScheme("http", "https", "ssh"),
-				},
-			},
 			"interval": schema.StringAttribute{
 				CustomType:  customtypes.DurationType{},
-				Description: "Interval at which to reconcile from bootstrap repository.",
+				Description: fmt.Sprintf("Interval at which to reconcile from bootstrap repository. Defaults to `%s`.", time.Minute.String()),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
@@ -306,7 +274,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Optional:    true,
 			},
 			"branch": schema.StringAttribute{
-				Description: "Branch in repository to reconcile from.",
+				Description: fmt.Sprintf("Branch in repository to reconcile from. Defaults to `%s`.", defaultBranch),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
@@ -319,7 +287,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Optional:    true,
 			},
 			"secret_name": schema.StringAttribute{
-				Description: "Name of the secret the sync credentials can be found in or stored to.",
+				Description: fmt.Sprintf("Name of the secret the sync credentials can be found in or stored to. Defaults to `%s`.", defaultOpts.Namespace),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
@@ -332,7 +300,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"author_name": schema.StringAttribute{
-				Description: "Author name for Git commits.",
+				Description: fmt.Sprintf("Author name for Git commits. Defaults to `%s`.", defaultAuthor),
 				Optional:    true,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
@@ -365,87 +333,12 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Optional:    true,
 				Validators:  []validator.String{validators.KustomizationOverride()},
 			},
-			"ssh": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"username": schema.StringAttribute{
-						Description: "Username for Git SSH server.",
-						Optional:    true,
-					},
-					"password": schema.StringAttribute{
-						Description: "Password for private key.",
-						Optional:    true,
-						Sensitive:   true,
-					},
-					"private_key": schema.StringAttribute{
-						Description: "Private key used for authenticating to the Git SSH server.",
-						Optional:    true,
-						Sensitive:   true,
-					},
-				},
-				Optional: true,
-			},
-			"http": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"username": schema.StringAttribute{
-						Description: "Username for basic authentication.",
-						Optional:    true,
-					},
-					"password": schema.StringAttribute{
-						Description: "Password for basic authentication.",
-						Optional:    true,
-						Sensitive:   true,
-					},
-					"allow_insecure_http": schema.BoolAttribute{
-						Description: "Allows http Git url connections.",
-						Optional:    true,
-					},
-					"certificate_authority": schema.StringAttribute{
-						Description: "Certificate authority to validate self-signed certificates.",
-						Optional:    true,
-					},
-				},
-				Optional: true,
-			},
 			"repository_files": schema.MapAttribute{
 				ElementType: types.StringType,
 				Description: "Git repository files created and managed by the provider.",
 				Computed:    true,
 			},
 		},
-	}
-}
-
-func (r *bootstrapGitResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var data bootstrapGitResourceData
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if data.Url.ValueURL() != nil {
-		if data.Url.ValueURL().Scheme == "ssh" && data.Http != nil {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("http"),
-				"Unexpected Attribute Configuration",
-				"Did not expect http to be configured when url scheme is ssh",
-			)
-		}
-
-		if (data.Url.ValueURL().Scheme == "http" || data.Url.ValueURL().Scheme == "https") && data.Ssh != nil {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("ssh"),
-				"Unexpected Attribute Configuration",
-				"Did not expect ssh to be configured when url scheme is http(s)",
-			)
-		}
-
-		if data.Url.ValueURL().Scheme == "http" && !data.Http.InsecureHttpAllowed.ValueBool() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("allow_insecure_http"),
-				"Scheme Validation Error",
-				"Expected allow_insecure_http to be true when url scheme is http.",
-			)
-		}
 	}
 }
 
@@ -462,22 +355,8 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 		return
 	}
 
-	// Modify repository url
-	if data.Http != nil {
-		repositoryURL := data.Url.ValueURL()
-		repositoryURL.User = nil
-		data.Url = customtypes.URLValue(repositoryURL)
-	}
-	if data.Ssh != nil {
-		if data.Url.ValueURL().User == nil || data.Ssh.Username.ValueString() != "git" {
-			repositoryURL := data.Url.ValueURL()
-			repositoryURL.User = url.User(data.Ssh.Username.ValueString())
-			data.Url = customtypes.URLValue(repositoryURL)
-		}
-	}
-
 	// Write expected repository files
-	repositoryFiles, err := getExpectedRepositoryFiles(data)
+	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.repositoryUrl)
 	if err != nil {
 		resp.Diagnostics.AddError("Getting expected repository files", err.Error())
 		return
@@ -513,7 +392,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	gitClient, err := getGitClient(ctx, data)
+	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -521,29 +400,29 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	defer os.RemoveAll(gitClient.Path())
 
 	installOpts := getInstallOptions(data)
-	syncOpts := getSyncOptions(data)
+	syncOpts := getSyncOptions(data, r.prd.repositoryUrl)
 	secretOpts := sourcesecret.Options{
 		Name:         data.SecretName.ValueString(),
 		Namespace:    data.Namespace.ValueString(),
 		TargetPath:   data.Path.ValueString(),
 		ManifestFile: sourcesecret.MakeDefaultOptions().ManifestFile,
 	}
-	if data.Http != nil {
-		secretOpts.Username = data.Http.Username.ValueString()
-		secretOpts.Password = data.Http.Password.ValueString()
-		secretOpts.CAFile = []byte(data.Http.CertificateAuthority.ValueString())
+	if r.prd.http != nil {
+		secretOpts.Username = r.prd.http.Username.ValueString()
+		secretOpts.Password = r.prd.http.Password.ValueString()
+		secretOpts.CAFile = []byte(r.prd.http.CertificateAuthority.ValueString())
 	}
-	if data.Ssh != nil {
-		if data.Ssh.PrivateKey.ValueString() != "" {
-			keypair, err := sourcesecret.LoadKeyPair([]byte(data.Ssh.PrivateKey.ValueString()), data.Ssh.Password.ValueString())
+	if r.prd.ssh != nil {
+		if r.prd.ssh.PrivateKey.ValueString() != "" {
+			keypair, err := sourcesecret.LoadKeyPair([]byte(r.prd.ssh.PrivateKey.ValueString()), r.prd.ssh.Password.ValueString())
 			if err != nil {
 				resp.Diagnostics.AddError("Failed to load SSH Key Pair", err.Error())
 				return
 			}
 			secretOpts.Keypair = keypair
-			secretOpts.Password = data.Ssh.Password.ValueString()
+			secretOpts.Password = r.prd.ssh.Password.ValueString()
 		}
-		secretOpts.SSHHostname = data.Url.ValueURL().Host
+		secretOpts.SSHHostname = r.prd.repositoryUrl.Host
 	}
 
 	var entityList openpgp.EntityList
@@ -555,7 +434,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 		}
 	}
 	bootstrapOpts := []bootstrap.GitOption{
-		bootstrap.WithRepositoryURL(data.Url.ValueURL().String()),
+		bootstrap.WithRepositoryURL(r.prd.repositoryUrl.String()),
 		bootstrap.WithBranch(data.Branch.ValueString()),
 		bootstrap.WithSignature(data.AuthorName.ValueString(), data.AuthorEmail.ValueString()),
 		bootstrap.WithCommitMessageAppendix(data.CommitMessageAppendix.ValueString()),
@@ -622,6 +501,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 }
 
 // TODO: Consider if more value reading should be done here to detect drift. Similar to how import works.
+// TODO: Resources in the cluster should be verified to exist. If not resource id should be set to nil. This is to detect changing clusters.
 func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data bootstrapGitResourceData
 	diags := req.State.Get(ctx, &data)
@@ -630,7 +510,7 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	gitClient, err := getGitClient(ctx, data)
+	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -672,7 +552,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	gitClient, err := getGitClient(ctx, data)
+	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -758,7 +638,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	gitClient, err := getGitClient(ctx, data)
+	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -800,11 +680,13 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 			return
 		}
 	}
+	// TODO: If no files are removed we should not commit anything.
 	commit, signer, err := getCommit(data, "Uninstall Flux")
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create commit", err.Error())
 		return
 	}
+	// TODO: If all files are removed from the repository delete will fail. This needs a test and to be fixed.
 	_, err = gitClient.Commit(commit, signer)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to commit removed file(s)", err.Error())
@@ -948,12 +830,6 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		resp.Diagnostics.AddError(fmt.Sprintf("Could not get GitRepository %s/%s", gitRepository.Namespace, gitRepository.Name), err.Error())
 		return
 	}
-	repositoryUrl, err := url.Parse(gitRepository.Spec.URL)
-	if err != nil {
-		resp.Diagnostics.AddError("Unable to parse repository url", err.Error())
-		return
-	}
-	data.Url = customtypes.URLValue(repositoryUrl)
 	data.Branch = types.StringValue(gitRepository.Spec.Reference.Branch)
 	data.SecretName = types.StringValue(gitRepository.Spec.SecretRef.Name)
 	data.Interval = customtypes.DurationValue(gitRepository.Spec.Interval.Duration)
@@ -974,41 +850,6 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	path := strings.TrimPrefix(kustomization.Spec.Path, "./")
 	if path != "" {
 		data.Path = types.StringValue(path)
-	}
-
-	// Get git credentials
-	repositorySecret := corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      data.SecretName.ValueString(),
-			Namespace: data.Namespace.ValueString(),
-		},
-	}
-	if err := r.prd.kubeClient.Get(ctx, client.ObjectKeyFromObject(&repositorySecret), &repositorySecret); err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Could not get Secret %s/%s", repositorySecret.Namespace, repositorySecret.Name), err.Error())
-		return
-	}
-	switch data.Url.ValueURL().Scheme {
-	case "http":
-		data.Http = &Http{
-			Username:            types.StringValue(string(repositorySecret.Data[sourcesecret.UsernameSecretKey])),
-			Password:            types.StringValue(string(repositorySecret.Data[sourcesecret.PasswordSecretKey])),
-			InsecureHttpAllowed: types.BoolValue(true),
-		}
-	case "https":
-		data.Http = &Http{
-			Username:             types.StringValue(string(repositorySecret.Data[sourcesecret.UsernameSecretKey])),
-			Password:             types.StringValue(string(repositorySecret.Data[sourcesecret.PasswordSecretKey])),
-			CertificateAuthority: types.StringValue(string(repositorySecret.Data[sourcesecret.CAFileSecretKey])),
-		}
-	case "ssh":
-		username := "git"
-		if data.Url.ValueURL().User.Username() != "" {
-			username = data.Url.ValueURL().User.Username()
-		}
-		data.Ssh = &Ssh{
-			Username:   types.StringValue(username),
-			PrivateKey: types.StringValue(string(repositorySecret.Data[sourcesecret.PrivateKeySecretKey])),
-		}
 	}
 
 	// Check which components are present and which are not
@@ -1066,7 +907,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	}
 
 	// Set expected repository files
-	repositoryFiles, err := getExpectedRepositoryFiles(data)
+	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.repositoryUrl)
 	if err != nil {
 		resp.Diagnostics.AddError("Getting expected repository files", err.Error())
 		return
@@ -1092,65 +933,6 @@ resources:
 - gotk-components.yaml
 - gotk-sync.yaml
 `
-}
-
-func getGitClient(ctx context.Context, data bootstrapGitResourceData) (*gogit.Client, error) {
-	authOpts, err := getAuthOpts(data.Url.ValueURL(), data.Http, data.Ssh)
-	if err != nil {
-		return nil, err
-	}
-	tmpDir, err := manifestgen.MkdirTempAbs("", "flux-bootstrap-")
-	if err != nil {
-		return nil, fmt.Errorf("could not create temporary working directory for git repository: %w", err)
-	}
-	clientOpts := []gogit.ClientOption{gogit.WithDiskStorage()}
-	if data.Http != nil && data.Http.InsecureHttpAllowed.ValueBool() {
-		clientOpts = append(clientOpts, gogit.WithInsecureCredentialsOverHTTP())
-	}
-	client, err := gogit.NewClient(tmpDir, authOpts, clientOpts...)
-	if err != nil {
-		return nil, fmt.Errorf("could not create git client: %w", err)
-	}
-	_, err = client.Clone(ctx, data.Url.ValueURL().String(), repository.CloneOptions{CheckoutStrategy: repository.CheckoutStrategy{Branch: data.Branch.ValueString()}})
-	if err != nil {
-		return nil, fmt.Errorf("could not clone git repository: %w", err)
-	}
-	return client, nil
-}
-
-func getAuthOpts(u *url.URL, h *Http, s *Ssh) (*git.AuthOptions, error) {
-	switch u.Scheme {
-	case "http":
-		return &git.AuthOptions{
-			Transport: git.HTTP,
-			Username:  h.Username.ValueString(),
-			Password:  h.Password.ValueString(),
-		}, nil
-	case "https":
-		return &git.AuthOptions{
-			Transport: git.HTTPS,
-			Username:  h.Username.ValueString(),
-			Password:  h.Password.ValueString(),
-			CAFile:    []byte(h.CertificateAuthority.ValueString()),
-		}, nil
-	case "ssh":
-		if s.PrivateKey.ValueString() != "" {
-			kh, err := sourcesecret.ScanHostKey(u.Host)
-			if err != nil {
-				return nil, err
-			}
-			return &git.AuthOptions{
-				Transport:  git.SSH,
-				Username:   s.Username.ValueString(),
-				Password:   s.Password.ValueString(),
-				Identity:   []byte(s.PrivateKey.ValueString()),
-				KnownHosts: kh,
-			}, nil
-		}
-		return nil, fmt.Errorf("ssh scheme cannot be used without private key")
-	default:
-		return nil, fmt.Errorf("scheme %q is not supported", u.Scheme)
-	}
 }
 
 func getCommit(data bootstrapGitResourceData, message string) (git.Commit, repository.CommitOption, error) {
@@ -1255,12 +1037,12 @@ func getInstallOptions(data bootstrapGitResourceData) install.Options {
 	return installOptions
 }
 
-func getSyncOptions(data bootstrapGitResourceData) sync.Options {
+func getSyncOptions(data bootstrapGitResourceData, url *url.URL) sync.Options {
 	syncOpts := sync.Options{
 		Interval:          data.Interval.ValueDuration(),
 		Name:              data.Namespace.ValueString(),
 		Namespace:         data.Namespace.ValueString(),
-		URL:               data.Url.ValueURL().String(),
+		URL:               url.String(),
 		Branch:            data.Branch.ValueString(),
 		Secret:            data.SecretName.ValueString(),
 		TargetPath:        data.Path.ValueString(),
@@ -1270,7 +1052,7 @@ func getSyncOptions(data bootstrapGitResourceData) sync.Options {
 	return syncOpts
 }
 
-func getExpectedRepositoryFiles(data bootstrapGitResourceData) (map[string]string, error) {
+func getExpectedRepositoryFiles(data bootstrapGitResourceData, url *url.URL) (map[string]string, error) {
 	repositoryFiles := map[string]string{}
 	installOpts := getInstallOptions(data)
 	installManifests, err := install.Generate(installOpts, "")
@@ -1278,7 +1060,7 @@ func getExpectedRepositoryFiles(data bootstrapGitResourceData) (map[string]strin
 		return nil, fmt.Errorf("Could not generate install manifests: %w", err)
 	}
 	repositoryFiles[installManifests.Path] = installManifests.Content
-	syncOpts := getSyncOptions(data)
+	syncOpts := getSyncOptions(data, url)
 	syncManifests, err := sync.Generate(syncOpts)
 	if err != nil {
 		return nil, fmt.Errorf("Could not generate sync manifests: %w", err)

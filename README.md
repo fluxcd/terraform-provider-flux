@@ -10,15 +10,19 @@ verified that it can synchronize from the configured Git repository.
 
 ```hcl
 provider "flux" {
-  config_path = "~/.kube/config"
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+  git = {
+    url  = var.repository_ssh_url
+    ssh = {
+      username    = "git"
+      private_key = var.private_key_pem
+    }
+  }
 }
 
 resource "flux_bootstrap_git" "this" {
-  url  = var.repository_ssh_url
   path = "clusters/my-cluster"
-  ssh = {
-    username    = "git"
-    private_key = var.private_key_pem
-  }
 }
 ```
