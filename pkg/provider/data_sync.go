@@ -96,12 +96,6 @@ func DataSync() *schema.Resource {
 				Optional:    true,
 				Default:     fmt.Sprintf("%d", int64(syncDefaults.Interval.Minutes())),
 			},
-			"git_implementation": {
-				Description: "The git implementation to use, can be `go-git` or `libgit2`.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     syncDefaults.GitImplementation,
-			},
 			"patch_names": {
 				Description: "The names of patches to apply to the Kustomization. Used to generate the `patch_file_paths` output value.",
 				Type:        schema.TypeSet,
@@ -151,7 +145,6 @@ func dataSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 	opt.Namespace = d.Get("namespace").(string)
 	opt.Branch = d.Get("branch").(string)
 	opt.TargetPath = d.Get("target_path").(string)
-	opt.GitImplementation = d.Get("git_implementation").(string)
 	opt.Secret = d.Get("secret").(string)
 
 	if v, ok := d.GetOk("tag"); ok {
