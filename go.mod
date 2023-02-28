@@ -16,12 +16,12 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8
 	github.com/docker/docker v20.10.20+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/fluxcd/flux2 v0.40.1
+	github.com/fluxcd/flux2 v0.40.2
 	github.com/fluxcd/helm-controller/api v0.30.0
 	github.com/fluxcd/image-automation-controller/api v0.30.0
 	github.com/fluxcd/image-reflector-controller/api v0.25.0
 	github.com/fluxcd/kustomize-controller/api v0.34.0
-	github.com/fluxcd/notification-controller/api v0.32.0
+	github.com/fluxcd/notification-controller/api v0.32.1
 	github.com/fluxcd/pkg/git v0.10.0
 	github.com/fluxcd/pkg/git/gogit v0.7.1
 	github.com/fluxcd/pkg/runtime v0.29.0
