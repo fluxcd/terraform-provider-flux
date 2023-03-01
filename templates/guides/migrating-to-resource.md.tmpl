@@ -255,7 +255,16 @@ provider "github" {
 }
 
 provider "flux" {
-  config_path = "~/.kube/config"
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+  git = {
+    url  = "ssh://git@github.com/${github_repository.this.full_name}.git"
+    ssh = {
+      username    = "git"
+      private_key = tls_private_key.this.private_key_pem
+    }
+  }
 }
 
 resource "tls_private_key" "this" {
@@ -284,12 +293,7 @@ resource "github_repository_deploy_key" "this" {
 resource "flux_bootstrap_git" "this" {
   depends_on = [github_repository_deploy_key.this]
 
-  url  = "ssh://git@github.com/${github_repository.this.full_name}.git"
   path = "staging-cluster"
-  ssh = {
-    username    = "git"
-    private_key = tls_private_key.this.private_key_pem
-  }
 }
 ```
 

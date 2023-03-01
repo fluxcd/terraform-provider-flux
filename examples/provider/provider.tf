@@ -1,3 +1,8 @@
 provider "flux" {
-  config_path = "~/.kube/config"
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+  git = {
+    url = "https://example.com"
+  }
 }
