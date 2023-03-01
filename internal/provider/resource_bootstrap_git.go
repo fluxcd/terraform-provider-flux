@@ -247,7 +247,6 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Optional:    true,
 				Validators: []validator.Set{
 					setvalidator.ValueStringsAre(
-						stringvalidator.RegexMatches(regexp.MustCompile(rfc1123LabelRegex), rfc1123LabelError),
 						stringvalidator.LengthAtMost(63),
 					),
 				},
