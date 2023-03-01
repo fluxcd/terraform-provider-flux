@@ -40,7 +40,7 @@ data "flux_sync" "main" {
 - `branch` (String) Default branch to sync from. Defaults to `main`.
 - `commit` (String) The Git commit SHA to checkout, if specified Tag filters will be ignored.
 - `interval` (Number) Sync interval in minutes. Defaults to `1`.
-- `name` (String) The kubernetes resources name Defaults to `flux-system`.
+- `name` (String) The kubernetes resources name. Defaults to `flux-system`.
 - `namespace` (String) The namespace scope for this operation. Defaults to `flux-system`.
 - `patch_names` (Set of String) The names of patches to apply to the Kustomization. Used to generate the `patch_file_paths` output value.
 - `secret` (String) The name of the secret that is referenced by GitRepository as SecretRef. Defaults to `flux-system`.
