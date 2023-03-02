@@ -585,10 +585,9 @@ func setupEnvironment(t *testing.T) environment {
 	_, _, err = giteaClient.AdminCreateUser(createUserOpt)
 	require.NoError(t, err)
 	createRepoOpt := gitea.CreateRepoOption{
-		Name:          randSuffix,
-		AutoInit:      true,
-		DefaultBranch: defaultBranch,
-		Private:       true,
+		Name:     randSuffix,
+		AutoInit: false,
+		Private:  true,
 	}
 	repo, _, err := giteaClient.AdminCreateRepo(username, createRepoOpt)
 	require.NoError(t, err)
