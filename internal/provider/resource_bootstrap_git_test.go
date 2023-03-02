@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -112,6 +113,27 @@ resources:
 			{
 				Config:      bootstrapGitCustomization(env, kustomizationOverride),
 				ExpectError: regexp.MustCompile("Kustomization resource must contain: gotk-sync.yaml"),
+			},
+		},
+	})
+}
+
+func TestAccBootstrapGit_TolerationKeys(t *testing.T) {
+	env := environment{
+		httpClone: "https://gitub.com",
+	}
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
+			"flux": providerserver.NewProtocol6WithError(New("dev")()),
+		},
+		Steps: []resource.TestStep{
+			{
+				Config:      bootstrapGitTolerationKeys(env, []string{"-invalid"}),
+				ExpectError: regexp.MustCompile("a toleration key must begin with"),
+			},
+			{
+				Config:      bootstrapGitTolerationKeys(env, []string{"Inval?id"}),
+				ExpectError: regexp.MustCompile("a toleration key must begin with"),
 			},
 		},
 	})
@@ -337,6 +359,28 @@ patches:
 //   `
 // }
 
+func bootstrapGitTolerationKeys(env environment, tolerationKeys []string) string {
+	return fmt.Sprintf(`
+    provider "flux" {
+	  kubernetes = {
+        config_path = "%s"
+	  }
+	  git = {
+        url = "%s"
+        http = {
+          username = "%s"
+          password = "%s"
+          allow_insecure_http = true
+        }
+	  }
+    }
+
+    resource "flux_bootstrap_git" "this" {
+		toleration_keys = [%s]		
+	}
+	`, env.kubeCfgPath, env.httpClone, env.username, env.password, `"`+strings.Join(tolerationKeys, `", "`)+`"`)
+}
+
 func bootstrapGitHTTP(env environment) string {
 	return fmt.Sprintf(`
     provider "flux" {
@@ -353,7 +397,9 @@ func bootstrapGitHTTP(env environment) string {
 	  }
     }
 
-    resource "flux_bootstrap_git" "this" {}
+    resource "flux_bootstrap_git" "this" {
+		toleration_keys = ["FooBar", "test"]		
+	}
 	`, env.kubeCfgPath, env.httpClone, env.username, env.password)
 }
 
@@ -374,7 +420,9 @@ EOF
 	  }
     }
 
-    resource "flux_bootstrap_git" "this" {}
+    resource "flux_bootstrap_git" "this" {
+		toleration_keys = ["FooBar", "test"]		
+	}
 	`, env.kubeCfgPath, env.sshClone, env.privateKey)
 }
 

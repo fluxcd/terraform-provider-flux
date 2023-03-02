@@ -75,6 +75,8 @@ const (
 	rfc1123LabelError  = "a lowercase RFC 1123 label must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character"
 	rfc1123DomainRegex = `^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
 	rfc1123DomainError = "a lowercase RFC 1123 subdomain must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character"
+	tolerationKeyRegex = `^[A-Za-z0-9]([A-Za-z0-9._-]*)$`
+	tolerationKeyError = "a toleration key must begin with a letter or number, and may contain letters, numbers, hyphens, dots, and underscores."
 )
 
 type bootstrapGitResourceData struct {
@@ -247,8 +249,8 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Optional:    true,
 				Validators: []validator.Set{
 					setvalidator.ValueStringsAre(
-						stringvalidator.RegexMatches(regexp.MustCompile(rfc1123LabelRegex), rfc1123LabelError),
-						stringvalidator.LengthAtMost(63),
+						stringvalidator.RegexMatches(regexp.MustCompile(tolerationKeyRegex), tolerationKeyError),
+						stringvalidator.LengthAtMost(253),
 					),
 				},
 			},
@@ -774,6 +776,18 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		return
 	}
 	data.Registry = customtypes.URLValue(u)
+
+	// Get the toleration keys
+	tolerationKeys := []string{}
+	for _, toleration := range kustomizeDeployment.Spec.Template.Spec.Tolerations {
+		tolerationKeys = append(tolerationKeys, toleration.Key)
+	}
+	tolerationKeysSet, diags := types.SetValueFrom(ctx, types.StringType, tolerationKeys)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	data.TolerationKeys = tolerationKeysSet
 
 	// Get image pull secrets
 	data.ImagePullSecret = types.StringNull()
