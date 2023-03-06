@@ -251,6 +251,13 @@ func TestAccBootstrapGit_Components(t *testing.T) {
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
+			{
+				Config:            bootstrapGitComponents(env),
+				ResourceName:      "flux_bootstrap_git.this",
+				ImportState:       true,
+				ImportStateId:     "flux-system",
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

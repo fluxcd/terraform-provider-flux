@@ -908,7 +908,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 			resp.Diagnostics.AddError(fmt.Sprintf("Could not get Deployment %s/%s", dep.Namespace, dep.Name), err.Error())
 			return
 		}
-		componentsExtra = append(components, types.StringValue(c))
+		componentsExtra = append(componentsExtra, types.StringValue(c))
 	}
 	componentsExtraSet, diags := types.SetValue(types.StringType, componentsExtra)
 	resp.Diagnostics.Append(diags...)
