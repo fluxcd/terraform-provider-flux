@@ -394,7 +394,8 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
+	hasKustomizationOverride := data.KustomizationOverride.ValueString() != ""
+	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString(), hasKustomizationOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -451,7 +452,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	// Write own kustomization file
-	if data.KustomizationOverride.ValueString() != "" {
+	if hasKustomizationOverride {
 		// Need to write empty gotk-components and gotk-sync because other wise Kustomize will not work.
 		basePath := filepath.Join(gitClient.Path(), data.Path.ValueString(), data.Namespace.ValueString())
 		files := map[string]io.Reader{
@@ -512,7 +513,7 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
+	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString(), true)
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -554,7 +555,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
+	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString(), true)
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -640,7 +641,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
+	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString(), true)
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return

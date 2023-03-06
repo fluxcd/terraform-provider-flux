@@ -63,7 +63,7 @@ func (prd *providerResourceData) HasClients() bool {
 	return prd.rcg != nil && prd.manager != nil && prd.kubeClient != nil
 }
 
-func (prd *providerResourceData) GetGitClient(ctx context.Context, branch string) (*gogit.Client, error) {
+func (prd *providerResourceData) GetGitClient(ctx context.Context, branch string, clone bool) (*gogit.Client, error) {
 	tmpDir, err := manifestgen.MkdirTempAbs("", "flux-bootstrap-")
 	if err != nil {
 		return nil, fmt.Errorf("could not create temporary working directory for git repository: %w", err)
@@ -76,10 +76,11 @@ func (prd *providerResourceData) GetGitClient(ctx context.Context, branch string
 	if err != nil {
 		return nil, fmt.Errorf("could not create git client: %w", err)
 	}
-	// TODO: Need to conditionally clone here. If repository is empty this will fail.
-	_, err = client.Clone(ctx, prd.repositoryUrl.String(), repository.CloneOptions{CheckoutStrategy: repository.CheckoutStrategy{Branch: branch}})
-	if err != nil {
-		return nil, fmt.Errorf("could not clone git repository: %w", err)
+	if clone {
+		_, err = client.Clone(ctx, prd.repositoryUrl.String(), repository.CloneOptions{CheckoutStrategy: repository.CheckoutStrategy{Branch: branch}})
+		if err != nil {
+			return nil, fmt.Errorf("could not clone git repository: %w", err)
+		}
 	}
 	return client, nil
 }
