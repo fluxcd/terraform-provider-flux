@@ -17,18 +17,10 @@ limitations under the License.
 package provider
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/url"
 
-	"github.com/fluxcd/flux2/pkg/manifestgen"
-	"github.com/fluxcd/flux2/pkg/manifestgen/sourcesecret"
-	"github.com/fluxcd/pkg/git"
-	"github.com/fluxcd/pkg/git/gogit"
-	"github.com/fluxcd/pkg/git/repository"
-	runclient "github.com/fluxcd/pkg/runtime/client"
-	"github.com/fluxcd/pkg/ssa"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -36,53 +28,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/go-homedir"
-	apimachineryschema "k8s.io/apimachinery/pkg/runtime/schema"
-	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	customtypes "github.com/fluxcd/terraform-provider-flux/internal/framework/types"
 	"github.com/fluxcd/terraform-provider-flux/internal/framework/validators"
-	"github.com/fluxcd/terraform-provider-flux/internal/utils"
 )
 
-type providerResourceData struct {
-	repositoryUrl       *url.URL
-	authOpts            *git.AuthOptions
-	insecureHttpAllowed bool
-	ssh                 *Ssh
-	http                *Http
-	rcg                 *utils.RESTClientGetter
-	manager             *ssa.ResourceManager
-	kubeClient          client.WithWatch
-}
-
-func (prd *providerResourceData) HasClients() bool {
-	return prd.rcg != nil && prd.manager != nil && prd.kubeClient != nil
-}
-
-func (prd *providerResourceData) GetGitClient(ctx context.Context, branch string) (*gogit.Client, error) {
-	tmpDir, err := manifestgen.MkdirTempAbs("", "flux-bootstrap-")
-	if err != nil {
-		return nil, fmt.Errorf("could not create temporary working directory for git repository: %w", err)
-	}
-	clientOpts := []gogit.ClientOption{gogit.WithDiskStorage()}
-	if prd.insecureHttpAllowed {
-		clientOpts = append(clientOpts, gogit.WithInsecureCredentialsOverHTTP())
-	}
-	client, err := gogit.NewClient(tmpDir, prd.authOpts, clientOpts...)
-	if err != nil {
-		return nil, fmt.Errorf("could not create git client: %w", err)
-	}
-	// TODO: Need to conditionally clone here. If repository is empty this will fail.
-	_, err = client.Clone(ctx, prd.repositoryUrl.String(), repository.CloneOptions{CheckoutStrategy: repository.CheckoutStrategy{Branch: branch}})
-	if err != nil {
-		return nil, fmt.Errorf("could not clone git repository: %w", err)
-	}
-	return client, nil
-}
+const (
+	defaultBranch = "main"
+	defaultAuthor = "Flux"
+)
 
 type Ssh struct {
 	Username   types.String `tfsdk:"username"`
@@ -98,9 +52,16 @@ type Http struct {
 }
 
 type Git struct {
-	Url  customtypes.URL `tfsdk:"url"`
-	Ssh  *Ssh            `tfsdk:"ssh"`
-	Http *Http           `tfsdk:"http"`
+	Url                   customtypes.URL `tfsdk:"url"`
+	Branch                types.String    `tfsdk:"branch"`
+	AuthorName            types.String    `tfsdk:"author_name"`
+	AuthorEmail           types.String    `tfsdk:"author_email"`
+	GpgKeyRing            types.String    `tfsdk:"gpg_key_ring"`
+	GpgPassphrase         types.String    `tfsdk:"gpg_passphrase"`
+	GpgKeyID              types.String    `tfsdk:"gpg_key_id"`
+	CommitMessageAppendix types.String    `tfsdk:"commit_message_appendix"`
+	Ssh                   *Ssh            `tfsdk:"ssh"`
+	Http                  *Http           `tfsdk:"http"`
 }
 
 type Kubernetes struct {
@@ -221,6 +182,35 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 							validators.URLScheme("http", "https", "ssh"),
 						},
 					},
+					"branch": schema.StringAttribute{
+						Description: fmt.Sprintf("Branch in repository to reconcile from. Defaults to `%s`.", defaultBranch),
+						Optional:    true,
+					},
+					"author_name": schema.StringAttribute{
+						Description: fmt.Sprintf("Author name for Git commits. Defaults to `%s`.", defaultAuthor),
+						Optional:    true,
+					},
+					"author_email": schema.StringAttribute{
+						Description: "Author email for Git commits.",
+						Optional:    true,
+					},
+					"gpg_key_ring": schema.StringAttribute{
+						Description: "GPG key ring for signing commits.",
+						Optional:    true,
+					},
+					"gpg_passphrase": schema.StringAttribute{
+						Description: "Passphrase for decrypting GPG private key.",
+						Optional:    true,
+						Sensitive:   true,
+					},
+					"gpg_key_id": schema.StringAttribute{
+						Description: "Key id for selecting a particular key.",
+						Optional:    true,
+					},
+					"commit_message_appendix": schema.StringAttribute{
+						Description: "String to add to the commit messages.",
+						Optional:    true,
+					},
 					"ssh": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
 							"username": schema.StringAttribute{
@@ -311,63 +301,46 @@ func (p *fluxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
-	prd := &providerResourceData{}
+	// Either Git and Kubernetes configuration is set or none of them are set.
+	// An error is returned if either or is set.
+	if data.Git == nil && data.Kubernetes == nil {
+		return
+	}
+	if data.Git == nil && data.Kubernetes != nil {
+		resp.Diagnostics.AddError("Git configuration is empty when Kubernetes is not", "Either none or both Git and Kubernetes blocks need to be set")
+		return
+	}
+	if data.Git != nil && data.Kubernetes == nil {
+		resp.Diagnostics.AddError("Kubernetes configuration is empty when Git is not", "Either none or both Git and Kubernetes blocks need to be set")
+		return
+	}
 
-	// Only create Git client if configuration is set.
-	if data.Git != nil {
-		repositoryURL := data.Git.Url.ValueURL()
-		if data.Git.Http != nil {
-			repositoryURL.User = nil
+	// Set default values
+	if data.Git.Branch.IsNull() {
+		data.Git.Branch = types.StringValue(defaultBranch)
+	}
+	if data.Git.AuthorName.IsNull() {
+		data.Git.AuthorName = types.StringValue(defaultAuthor)
+	}
+
+	// Modify repository url
+	repositoryURL := data.Git.Url.ValueURL()
+	if data.Git.Http != nil {
+		repositoryURL.User = nil
+		data.Git.Url = customtypes.URLValue(repositoryURL)
+	}
+	if data.Git.Ssh != nil {
+		if data.Git.Url.ValueURL().User == nil || data.Git.Ssh.Username.ValueString() != "git" {
+			repositoryURL.User = url.User(data.Git.Ssh.Username.ValueString())
 			data.Git.Url = customtypes.URLValue(repositoryURL)
 		}
-		if data.Git.Ssh != nil {
-			if data.Git.Url.ValueURL().User == nil || data.Git.Ssh.Username.ValueString() != "git" {
-				repositoryURL.User = url.User(data.Git.Ssh.Username.ValueString())
-				data.Git.Url = customtypes.URLValue(repositoryURL)
-			}
-		}
-		insecureHttpAllowed := false
-		if data.Git.Http != nil && data.Git.Http.InsecureHttpAllowed.ValueBool() {
-			insecureHttpAllowed = true
-		}
-		authOpts, err := getAuthOpts(repositoryURL, data.Git.Http, data.Git.Ssh)
-		if err != nil {
-			resp.Diagnostics.AddError("Unable to get authentication options", err.Error())
-			return
-		}
-
-		prd.repositoryUrl = repositoryURL
-		prd.authOpts = authOpts
-		prd.insecureHttpAllowed = insecureHttpAllowed
-		prd.http = data.Git.Http
-		prd.ssh = data.Git.Ssh
 	}
 
-	// Only create Kubernetes client if configuration is set.
-	// If the configuration is set it is expected that it is correct and the cluster is reachable.
-	if data.Kubernetes != nil {
-		clientCfg, err := initializeConfiguration(ctx, data.Kubernetes)
-		if err != nil {
-			resp.Diagnostics.AddError("Unable to initialize configuration", err.Error())
-			return
-		}
-		rcg := utils.NewRestClientGetter(clientCfg)
-		man, err := utils.ResourceManager(rcg, &runclient.Options{})
-		if err != nil {
-			resp.Diagnostics.AddError("Unable to create Kubernetes Resource Manager", err.Error())
-			return
-		}
-		kubeClient, err := utils.KubeClient(rcg, &runclient.Options{})
-		if err != nil {
-			resp.Diagnostics.AddError("Unable to create Kubernetes Client", err.Error())
-			return
-		}
-
-		prd.rcg = rcg
-		prd.manager = man
-		prd.kubeClient = kubeClient
+	prd, err := NewProviderResourceData(ctx, data)
+	if err != nil {
+		resp.Diagnostics.AddError("Could not create provider resource data", err.Error())
+		return
 	}
-
 	resp.ResourceData = prd
 }
 
@@ -382,137 +355,4 @@ func (p *fluxProvider) Resources(context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewBootstrapGitResource,
 	}
-}
-
-func getAuthOpts(u *url.URL, h *Http, s *Ssh) (*git.AuthOptions, error) {
-	switch u.Scheme {
-	case "http":
-		if h == nil {
-			return nil, fmt.Errorf("Git URL scheme is http but http configuration is empty")
-		}
-		return &git.AuthOptions{
-			Transport: git.HTTP,
-			Username:  h.Username.ValueString(),
-			Password:  h.Password.ValueString(),
-		}, nil
-	case "https":
-		if h == nil {
-			return nil, fmt.Errorf("Git URL scheme is https but http configuration is empty")
-		}
-		return &git.AuthOptions{
-			Transport: git.HTTPS,
-			Username:  h.Username.ValueString(),
-			Password:  h.Password.ValueString(),
-			CAFile:    []byte(h.CertificateAuthority.ValueString()),
-		}, nil
-	case "ssh":
-		if s == nil {
-			return nil, fmt.Errorf("Git URL scheme is ssh but ssh configuration is empty")
-		}
-		if s.PrivateKey.ValueString() != "" {
-			kh, err := sourcesecret.ScanHostKey(u.Host)
-			if err != nil {
-				return nil, err
-			}
-			return &git.AuthOptions{
-				Transport:  git.SSH,
-				Username:   s.Username.ValueString(),
-				Password:   s.Password.ValueString(),
-				Identity:   []byte(s.PrivateKey.ValueString()),
-				KnownHosts: kh,
-			}, nil
-		}
-		return nil, fmt.Errorf("ssh scheme cannot be used without private key")
-	default:
-		return nil, fmt.Errorf("scheme %q is not supported", u.Scheme)
-	}
-}
-
-func initializeConfiguration(ctx context.Context, kubernetes *Kubernetes) (clientcmd.ClientConfig, error) {
-	overrides := &clientcmd.ConfigOverrides{}
-	loader := &clientcmd.ClientConfigLoadingRules{}
-
-	configPaths := []string{}
-	if kubernetes.ConfigPath.ValueString() != "" {
-		configPaths = []string{kubernetes.ConfigPath.ValueString()}
-	} else if len(kubernetes.ConfigPaths.Elements()) > 0 {
-		var pp []string
-		diag := kubernetes.ConfigPaths.ElementsAs(ctx, &pp, false)
-		if diag.HasError() {
-			return nil, fmt.Errorf("%s", diag)
-		}
-		for _, p := range pp {
-			configPaths = append(configPaths, p)
-		}
-	}
-	if len(configPaths) > 0 {
-		expandedPaths := []string{}
-		for _, p := range configPaths {
-			path, err := homedir.Expand(p)
-			if err != nil {
-				return nil, err
-			}
-			expandedPaths = append(expandedPaths, path)
-		}
-
-		if len(expandedPaths) == 1 {
-			loader.ExplicitPath = expandedPaths[0]
-		} else {
-			loader.Precedence = expandedPaths
-		}
-
-		ctxSuffix := "; default context"
-		if kubernetes.ConfigContext.ValueString() != "" || kubernetes.ConfigContextAuthInfo.ValueString() != "" || kubernetes.ConfigContextCluster.ValueString() != "" {
-			ctxSuffix = "; overriden context"
-			if kubernetes.ConfigContext.ValueString() != "" {
-				overrides.CurrentContext = kubernetes.ConfigContext.ValueString()
-				ctxSuffix += fmt.Sprintf("; config ctx: %s", overrides.CurrentContext)
-			}
-			overrides.Context = clientcmdapi.Context{}
-			if kubernetes.ConfigContextAuthInfo.ValueString() != "" {
-				overrides.Context.AuthInfo = kubernetes.ConfigContextAuthInfo.ValueString()
-				ctxSuffix += fmt.Sprintf("; auth_info: %s", overrides.Context.AuthInfo)
-			}
-			if kubernetes.ConfigContextCluster.ValueString() != "" {
-				overrides.Context.Cluster = kubernetes.ConfigContextCluster.ValueString()
-				ctxSuffix += fmt.Sprintf("; cluster: %s", overrides.Context.Cluster)
-			}
-		}
-	}
-
-	// Overriding with static configuration
-	overrides.ClusterInfo.InsecureSkipTLSVerify = kubernetes.Insecure.ValueBool()
-	if kubernetes.ClusterCACertificate.ValueString() != "" {
-		overrides.ClusterInfo.CertificateAuthorityData = bytes.NewBufferString(kubernetes.ClusterCACertificate.ValueString()).Bytes()
-	}
-	if kubernetes.ClientCertificate.ValueString() != "" {
-		overrides.AuthInfo.ClientCertificateData = bytes.NewBufferString(kubernetes.ClientCertificate.ValueString()).Bytes()
-	}
-	if kubernetes.Host.ValueString() != "" {
-		hasCA := len(overrides.ClusterInfo.CertificateAuthorityData) != 0
-		hasCert := len(overrides.AuthInfo.ClientCertificateData) != 0
-		defaultTLS := hasCA || hasCert || overrides.ClusterInfo.InsecureSkipTLSVerify
-		host, _, err := restclient.DefaultServerURL(kubernetes.Host.ValueString(), "", apimachineryschema.GroupVersion{}, defaultTLS)
-		if err != nil {
-			return nil, fmt.Errorf("Failed to parse host: %s", err)
-		}
-
-		overrides.ClusterInfo.Server = host.String()
-	}
-	overrides.AuthInfo.Username = kubernetes.Username.ValueString()
-	overrides.AuthInfo.Password = kubernetes.Password.ValueString()
-	overrides.AuthInfo.Token = kubernetes.Token.ValueString()
-	if kubernetes.ClientKey.ValueString() != "" {
-		overrides.AuthInfo.ClientKeyData = bytes.NewBufferString(kubernetes.ClientKey.ValueString()).Bytes()
-	}
-	overrides.ClusterDefaults.ProxyURL = kubernetes.ProxyURL.ValueString()
-
-	cc := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
-
-	// Validate that the Kubernetes configuration is correct.
-	if _, err := cc.ClientConfig(); err != nil {
-		return nil, err
-	}
-
-	return cc, nil
 }

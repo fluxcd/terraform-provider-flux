@@ -43,6 +43,13 @@ Required:
 
 Optional:
 
+- `author_email` (String) Author email for Git commits.
+- `author_name` (String) Author name for Git commits. Defaults to `Flux`.
+- `branch` (String) Branch in repository to reconcile from. Defaults to `main`.
+- `commit_message_appendix` (String) String to add to the commit messages.
+- `gpg_key_id` (String) Key id for selecting a particular key.
+- `gpg_key_ring` (String) GPG key ring for signing commits.
+- `gpg_passphrase` (String, Sensitive) Passphrase for decrypting GPG private key.
 - `http` (Attributes) (see [below for nested schema](#nestedatt--git--http))
 - `ssh` (Attributes) (see [below for nested schema](#nestedatt--git--ssh))
 

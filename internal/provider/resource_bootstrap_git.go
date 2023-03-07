@@ -30,7 +30,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -59,7 +58,6 @@ import (
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1beta2"
 	"github.com/fluxcd/pkg/git"
 	"github.com/fluxcd/pkg/git/repository"
-	runclient "github.com/fluxcd/pkg/runtime/client"
 	sourcev1 "github.com/fluxcd/source-controller/api/v1beta2"
 
 	"github.com/fluxcd/terraform-provider-flux/internal/framework/planmodifiers"
@@ -69,8 +67,6 @@ import (
 )
 
 const (
-	defaultBranch      = "main"
-	defaultAuthor      = "Flux"
 	rfc1123LabelRegex  = `^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`
 	rfc1123LabelError  = "a lowercase RFC 1123 label must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character"
 	rfc1123DomainRegex = `^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
@@ -80,35 +76,24 @@ const (
 )
 
 type bootstrapGitResourceData struct {
-	ID types.String `tfsdk:"id"`
-
-	Version            types.String         `tfsdk:"version"`
-	Branch             types.String         `tfsdk:"branch"`
-	Path               types.String         `tfsdk:"path"`
-	ClusterDomain      types.String         `tfsdk:"cluster_domain"`
-	Components         types.Set            `tfsdk:"components"`
-	ComponentsExtra    types.Set            `tfsdk:"components_extra"`
-	ImagePullSecret    types.String         `tfsdk:"image_pull_secret"`
-	LogLevel           types.String         `tfsdk:"log_level"`
-	Namespace          types.String         `tfsdk:"namespace"`
-	NetworkPolicy      types.Bool           `tfsdk:"network_policy"`
-	Registry           customtypes.URL      `tfsdk:"registry"`
-	TolerationKeys     types.Set            `tfsdk:"toleration_keys"`
-	WatchAllNamespaces types.Bool           `tfsdk:"watch_all_namespaces"`
-	Interval           customtypes.Duration `tfsdk:"interval"`
-	SecretName         types.String         `tfsdk:"secret_name"`
-	RecurseSubmodules  types.Bool           `tfsdk:"recurse_submodules"`
-
-	AuthorName            types.String `tfsdk:"author_name"`
-	AuthorEmail           types.String `tfsdk:"author_email"`
-	GpgKeyRing            types.String `tfsdk:"gpg_key_ring"`
-	GpgPassphrase         types.String `tfsdk:"gpg_passphrase"`
-	GpgKeyID              types.String `tfsdk:"gpg_key_id"`
-	CommitMessageAppendix types.String `tfsdk:"commit_message_appendix"`
-
-	KustomizationOverride types.String `tfsdk:"kustomization_override"`
-
-	RepositoryFiles types.Map `tfsdk:"repository_files"`
+	ID                    types.String         `tfsdk:"id"`
+	Version               types.String         `tfsdk:"version"`
+	Path                  types.String         `tfsdk:"path"`
+	ClusterDomain         types.String         `tfsdk:"cluster_domain"`
+	Components            types.Set            `tfsdk:"components"`
+	ComponentsExtra       types.Set            `tfsdk:"components_extra"`
+	ImagePullSecret       types.String         `tfsdk:"image_pull_secret"`
+	LogLevel              types.String         `tfsdk:"log_level"`
+	Namespace             types.String         `tfsdk:"namespace"`
+	NetworkPolicy         types.Bool           `tfsdk:"network_policy"`
+	Registry              customtypes.URL      `tfsdk:"registry"`
+	TolerationKeys        types.Set            `tfsdk:"toleration_keys"`
+	WatchAllNamespaces    types.Bool           `tfsdk:"watch_all_namespaces"`
+	Interval              customtypes.Duration `tfsdk:"interval"`
+	SecretName            types.String         `tfsdk:"secret_name"`
+	RecurseSubmodules     types.Bool           `tfsdk:"recurse_submodules"`
+	KustomizationOverride types.String         `tfsdk:"kustomization_override"`
+	RepositoryFiles       types.Map            `tfsdk:"repository_files"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -275,15 +260,6 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: "Path relative to the repository root, when specified the cluster sync will be scoped to this path.",
 				Optional:    true,
 			},
-			"branch": schema.StringAttribute{
-				Description: fmt.Sprintf("Branch in repository to reconcile from. Defaults to `%s`.", defaultBranch),
-				Optional:    true,
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-					planmodifiers.DefaultStringValue(defaultBranch),
-				},
-			},
 			"recurse_submodules": schema.BoolAttribute{
 				Description: "Configures the GitRepository source to initialize and include Git submodules in the artifact it produces.",
 				Optional:    true,
@@ -300,35 +276,6 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 					stringvalidator.RegexMatches(regexp.MustCompile(rfc1123DomainRegex), rfc1123DomainError),
 					stringvalidator.LengthAtMost(253),
 				},
-			},
-			"author_name": schema.StringAttribute{
-				Description: fmt.Sprintf("Author name for Git commits. Defaults to `%s`.", defaultAuthor),
-				Optional:    true,
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					planmodifiers.DefaultStringValue(defaultAuthor),
-				},
-			},
-			"author_email": schema.StringAttribute{
-				Description: "Author email for Git commits.",
-				Optional:    true,
-			},
-			"gpg_key_ring": schema.StringAttribute{
-				Description: "GPG key ring for signing commits.",
-				Optional:    true,
-			},
-			"gpg_passphrase": schema.StringAttribute{
-				Description: "Passphrase for decrypting GPG private key.",
-				Optional:    true,
-				Sensitive:   true,
-			},
-			"gpg_key_id": schema.StringAttribute{
-				Description: "Key id for selecting a particular key.",
-				Optional:    true,
-			},
-			"commit_message_appendix": schema.StringAttribute{
-				Description: "String to add to the commit messages.",
-				Optional:    true,
 			},
 			"kustomization_override": schema.StringAttribute{
 				Description: "Kustomization to override configuration set by default.",
@@ -358,7 +305,7 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 	}
 
 	// Write expected repository files
-	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.repositoryUrl)
+	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.repositoryUrl, r.prd.branch)
 	if err != nil {
 		resp.Diagnostics.AddError("Getting expected repository files", err.Error())
 		return
@@ -379,14 +326,6 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 
 // TODO: If kustomization file exists and not all resource files exist bootstrap will fail. This is because kustomize build is run.
 func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	if r.prd == nil || !r.prd.HasClients() {
-		resp.Diagnostics.AddError(
-			"Unconfigured Clients",
-			"Expected configured provider clients.",
-		)
-		return
-	}
-
 	var data bootstrapGitResourceData
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -394,7 +333,13 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
+	kubeClient, err := r.prd.GetKubernetesClient()
+	if err != nil {
+		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
+		return
+	}
+
+	gitClient, err := r.prd.GetGitClient(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -402,49 +347,19 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	defer os.RemoveAll(gitClient.Path())
 
 	installOpts := getInstallOptions(data)
-	syncOpts := getSyncOptions(data, r.prd.repositoryUrl)
-	secretOpts := sourcesecret.Options{
-		Name:         data.SecretName.ValueString(),
-		Namespace:    data.Namespace.ValueString(),
-		TargetPath:   data.Path.ValueString(),
-		ManifestFile: sourcesecret.MakeDefaultOptions().ManifestFile,
-	}
-	if r.prd.http != nil {
-		secretOpts.Username = r.prd.http.Username.ValueString()
-		secretOpts.Password = r.prd.http.Password.ValueString()
-		secretOpts.CAFile = []byte(r.prd.http.CertificateAuthority.ValueString())
-	}
-	if r.prd.ssh != nil {
-		if r.prd.ssh.PrivateKey.ValueString() != "" {
-			keypair, err := sourcesecret.LoadKeyPair([]byte(r.prd.ssh.PrivateKey.ValueString()), r.prd.ssh.Password.ValueString())
-			if err != nil {
-				resp.Diagnostics.AddError("Failed to load SSH Key Pair", err.Error())
-				return
-			}
-			secretOpts.Keypair = keypair
-			secretOpts.Password = r.prd.ssh.Password.ValueString()
-		}
-		secretOpts.SSHHostname = r.prd.repositoryUrl.Host
-	}
+	syncOpts := getSyncOptions(data, r.prd.repositoryUrl, r.prd.branch)
+	secretOpts := r.prd.secretOpts
+	secretOpts.Name = data.SecretName.ValueString()
+	secretOpts.Namespace = data.Namespace.ValueString()
+	secretOpts.TargetPath = data.Path.ValueString()
+	secretOpts.ManifestFile = sourcesecret.MakeDefaultOptions().ManifestFile
 
-	var entityList openpgp.EntityList
-	if data.GpgKeyRing.ValueString() != "" {
-		entityList, err = openpgp.ReadKeyRing(strings.NewReader(data.GpgKeyRing.ValueString()))
-		if err != nil {
-			resp.Diagnostics.AddError("Failed to read GPG key ring", err.Error())
-			return
-		}
+	bootstrapOpts, err := r.prd.GetBootstrapOptions()
+	if err != nil {
+		resp.Diagnostics.AddError("Could not get bootstrap options", err.Error())
+		return
 	}
-	bootstrapOpts := []bootstrap.GitOption{
-		bootstrap.WithRepositoryURL(r.prd.repositoryUrl.String()),
-		bootstrap.WithBranch(data.Branch.ValueString()),
-		bootstrap.WithSignature(data.AuthorName.ValueString(), data.AuthorEmail.ValueString()),
-		bootstrap.WithCommitMessageAppendix(data.CommitMessageAppendix.ValueString()),
-		bootstrap.WithKubeconfig(r.prd.rcg, &runclient.Options{}),
-		bootstrap.WithLogger(log.NopLogger{}),
-		bootstrap.WithGitCommitSigning(entityList, data.GpgPassphrase.ValueString(), data.GpgKeyID.ValueString()),
-	}
-	b, err := bootstrap.NewPlainGitProvider(gitClient, r.prd.kubeClient, bootstrapOpts...)
+	b, err := bootstrap.NewPlainGitProvider(gitClient, kubeClient, bootstrapOpts...)
 	if err != nil {
 		resp.Diagnostics.AddError("Could not create bootstrap provider", err.Error())
 		return
@@ -459,7 +374,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 			filepath.Join(basePath, "gotk-components.yaml"):                &strings.Reader{},
 			filepath.Join(basePath, "gotk-sync.yaml"):                      &strings.Reader{},
 		}
-		commit, signer, err := getCommit(data, "Add kustomize override")
+		commit, signer, err := r.prd.CreateCommit("Add kustomize override")
 		if err != nil {
 			resp.Diagnostics.AddError("Unable to create commit", err.Error())
 			return
@@ -512,7 +427,7 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
+	gitClient, err := r.prd.GetGitClient(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -554,7 +469,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
+	gitClient, err := r.prd.GetGitClient(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -601,7 +516,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 	for k, v := range repositoryFiles {
 		files[k] = strings.NewReader(v)
 	}
-	commit, signer, err := getCommit(data, "Update Flux")
+	commit, signer, err := r.prd.CreateCommit("Update Flux")
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create commit", err.Error())
 		return
@@ -625,14 +540,6 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 }
 
 func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	if r.prd == nil || !r.prd.HasClients() {
-		resp.Diagnostics.AddError(
-			"Unconfigured Clients",
-			"Expected configured provider clients.",
-		)
-		return
-	}
-
 	var data bootstrapGitResourceData
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -640,7 +547,13 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	gitClient, err := r.prd.GetGitClient(ctx, data.Branch.ValueString())
+	kubeClient, err := r.prd.GetKubernetesClient()
+	if err != nil {
+		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
+		return
+	}
+
+	gitClient, err := r.prd.GetGitClient(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
@@ -648,22 +561,22 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 	defer os.RemoveAll(gitClient.Path())
 
 	// TODO: Uninstall fails when flux-system namespace does not exist
-	err = uninstall.Components(ctx, log.NopLogger{}, r.prd.kubeClient, data.Namespace.ValueString(), false)
+	err = uninstall.Components(ctx, log.NopLogger{}, kubeClient, data.Namespace.ValueString(), false)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to remove Flux components", err.Error())
 		return
 	}
-	err = uninstall.Finalizers(ctx, log.NopLogger{}, r.prd.kubeClient, false)
+	err = uninstall.Finalizers(ctx, log.NopLogger{}, kubeClient, false)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to remove finalizers", err.Error())
 		return
 	}
-	err = uninstall.CustomResourceDefinitions(ctx, log.NopLogger{}, r.prd.kubeClient, false)
+	err = uninstall.CustomResourceDefinitions(ctx, log.NopLogger{}, kubeClient, false)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to remove CRDs", err.Error())
 		return
 	}
-	err = uninstall.Namespace(ctx, log.NopLogger{}, r.prd.kubeClient, data.Namespace.ValueString(), false)
+	err = uninstall.Namespace(ctx, log.NopLogger{}, kubeClient, data.Namespace.ValueString(), false)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to remove namespace", err.Error())
 		return
@@ -683,7 +596,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		}
 	}
 	// TODO: If no files are removed we should not commit anything.
-	commit, signer, err := getCommit(data, "Uninstall Flux")
+	commit, signer, err := r.prd.CreateCommit("Uninstall Flux")
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create commit", err.Error())
 		return
@@ -703,20 +616,15 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 
 // TODO: Validate Flux installation before proceeding with import
 func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if r.prd == nil || !r.prd.HasClients() {
-		resp.Diagnostics.AddError(
-			"Unconfigured Clients",
-			"Expected configured provider clients.",
-		)
+	kubeClient, err := r.prd.GetKubernetesClient()
+	if err != nil {
+		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
 		return
 	}
 
 	data := bootstrapGitResourceData{}
 	data.ID = types.StringValue(req.ID)
 	data.Namespace = data.ID
-
-	// It is impossible to determine the Author so we just set it to the default
-	data.AuthorName = types.StringValue(defaultAuthor)
 
 	// Set values that cant be null
 	data.TolerationKeys = types.SetNull(types.StringType)
@@ -728,7 +636,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 			Namespace: data.Namespace.ValueString(),
 		},
 	}
-	err := r.prd.kubeClient.Get(ctx, client.ObjectKeyFromObject(&networkPolicy), &networkPolicy)
+	err = kubeClient.Get(ctx, client.ObjectKeyFromObject(&networkPolicy), &networkPolicy)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		resp.Diagnostics.AddError(fmt.Sprintf("Could not get NetworkPolicy %s/%s", networkPolicy.Namespace, networkPolicy.Name), err.Error())
 		return
@@ -745,7 +653,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 			Namespace: data.Namespace.ValueString(),
 		},
 	}
-	if err := r.prd.kubeClient.Get(ctx, client.ObjectKeyFromObject(&kustomizeDeployment), &kustomizeDeployment); err != nil {
+	if err := kubeClient.Get(ctx, client.ObjectKeyFromObject(&kustomizeDeployment), &kustomizeDeployment); err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Could not get Deployment %s/%s", kustomizeDeployment.Namespace, kustomizeDeployment.Name), err.Error())
 		return
 	}
@@ -840,11 +748,10 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 			Namespace: data.Namespace.ValueString(),
 		},
 	}
-	if err := r.prd.kubeClient.Get(ctx, client.ObjectKeyFromObject(&gitRepository), &gitRepository); err != nil {
+	if err := kubeClient.Get(ctx, client.ObjectKeyFromObject(&gitRepository), &gitRepository); err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Could not get GitRepository %s/%s", gitRepository.Namespace, gitRepository.Name), err.Error())
 		return
 	}
-	data.Branch = types.StringValue(gitRepository.Spec.Reference.Branch)
 	data.SecretName = types.StringValue(gitRepository.Spec.SecretRef.Name)
 	data.Interval = customtypes.DurationValue(gitRepository.Spec.Interval.Duration)
 
@@ -855,7 +762,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 			Namespace: data.Namespace.ValueString(),
 		},
 	}
-	if err := r.prd.kubeClient.Get(ctx, client.ObjectKeyFromObject(&kustomization), &kustomization); err != nil {
+	if err := kubeClient.Get(ctx, client.ObjectKeyFromObject(&kustomization), &kustomization); err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Could not get Kustomization %s/%s", kustomization.Namespace, kustomization.Name), err.Error())
 		return
 	}
@@ -875,7 +782,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 				Namespace: data.Namespace.ValueString(),
 			},
 		}
-		err := r.prd.kubeClient.Get(ctx, client.ObjectKeyFromObject(&dep), &dep)
+		err := kubeClient.Get(ctx, client.ObjectKeyFromObject(&dep), &dep)
 		if err != nil && k8serrors.IsNotFound(err) {
 			continue
 		}
@@ -900,7 +807,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 				Namespace: data.Namespace.ValueString(),
 			},
 		}
-		err := r.prd.kubeClient.Get(ctx, client.ObjectKeyFromObject(&dep), &dep)
+		err := kubeClient.Get(ctx, client.ObjectKeyFromObject(&dep), &dep)
 		if err != nil && k8serrors.IsNotFound(err) {
 			continue
 		}
@@ -921,7 +828,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	}
 
 	// Set expected repository files
-	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.repositoryUrl)
+	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.repositoryUrl, r.prd.branch)
 	if err != nil {
 		resp.Diagnostics.AddError("Getting expected repository files", err.Error())
 		return
@@ -947,75 +854,6 @@ resources:
 - gotk-components.yaml
 - gotk-sync.yaml
 `
-}
-
-func getCommit(data bootstrapGitResourceData, message string) (git.Commit, repository.CommitOption, error) {
-	var entityList openpgp.EntityList
-	if data.GpgKeyRing.ValueString() != "" {
-		var err error
-		entityList, err = openpgp.ReadKeyRing(strings.NewReader(data.GpgKeyRing.ValueString()))
-		if err != nil {
-			return git.Commit{}, nil, fmt.Errorf("Failed to read GPG key ring: %w", err)
-		}
-	}
-	var signer *openpgp.Entity
-	if entityList != nil {
-		var err error
-		signer, err = getOpenPgpEntity(entityList, data.GpgPassphrase.ValueString(), data.GpgKeyID.ValueString())
-		if err != nil {
-			return git.Commit{}, nil, fmt.Errorf("failed to generate OpenPGP entity: %w", err)
-		}
-	}
-	if data.CommitMessageAppendix.ValueString() != "" {
-		message = message + "\n\n" + data.CommitMessageAppendix.ValueString()
-	}
-	commit := git.Commit{
-		Author: git.Signature{
-			Name:  data.AuthorName.ValueString(),
-			Email: data.AuthorEmail.ValueString(),
-		},
-		Message: message,
-	}
-	return commit, repository.WithSigner(signer), nil
-}
-
-func getOpenPgpEntity(keyRing openpgp.EntityList, passphrase, keyID string) (*openpgp.Entity, error) {
-	if len(keyRing) == 0 {
-		return nil, fmt.Errorf("empty GPG key ring")
-	}
-
-	var entity *openpgp.Entity
-	if keyID != "" {
-		if strings.HasPrefix(keyID, "0x") {
-			keyID = strings.TrimPrefix(keyID, "0x")
-		}
-		if len(keyID) != 16 {
-			return nil, fmt.Errorf("invalid GPG key id length; expected %d, got %d", 16, len(keyID))
-		}
-		keyID = strings.ToUpper(keyID)
-
-		for _, ent := range keyRing {
-			if ent.PrimaryKey.KeyIdString() == keyID {
-				entity = ent
-			}
-		}
-
-		if entity == nil {
-			return nil, fmt.Errorf("no GPG keyring matching key id '%s' found", keyID)
-		}
-		if entity.PrivateKey == nil {
-			return nil, fmt.Errorf("keyring does not contain private key for key id '%s'", keyID)
-		}
-	} else {
-		entity = keyRing[0]
-	}
-
-	err := entity.PrivateKey.Decrypt([]byte(passphrase))
-	if err != nil {
-		return nil, fmt.Errorf("unable to decrypt GPG private key: %w", err)
-	}
-
-	return entity, nil
 }
 
 func getInstallOptions(data bootstrapGitResourceData) install.Options {
@@ -1051,13 +889,13 @@ func getInstallOptions(data bootstrapGitResourceData) install.Options {
 	return installOptions
 }
 
-func getSyncOptions(data bootstrapGitResourceData, url *url.URL) sync.Options {
+func getSyncOptions(data bootstrapGitResourceData, url *url.URL, branch string) sync.Options {
 	syncOpts := sync.Options{
 		Interval:          data.Interval.ValueDuration(),
 		Name:              data.Namespace.ValueString(),
 		Namespace:         data.Namespace.ValueString(),
 		URL:               url.String(),
-		Branch:            data.Branch.ValueString(),
+		Branch:            branch,
 		Secret:            data.SecretName.ValueString(),
 		TargetPath:        data.Path.ValueString(),
 		ManifestFile:      sync.MakeDefaultOptions().ManifestFile,
@@ -1066,7 +904,7 @@ func getSyncOptions(data bootstrapGitResourceData, url *url.URL) sync.Options {
 	return syncOpts
 }
 
-func getExpectedRepositoryFiles(data bootstrapGitResourceData, url *url.URL) (map[string]string, error) {
+func getExpectedRepositoryFiles(data bootstrapGitResourceData, url *url.URL, branch string) (map[string]string, error) {
 	repositoryFiles := map[string]string{}
 	installOpts := getInstallOptions(data)
 	installManifests, err := install.Generate(installOpts, "")
@@ -1074,7 +912,7 @@ func getExpectedRepositoryFiles(data bootstrapGitResourceData, url *url.URL) (ma
 		return nil, fmt.Errorf("Could not generate install manifests: %w", err)
 	}
 	repositoryFiles[installManifests.Path] = installManifests.Content
-	syncOpts := getSyncOptions(data, url)
+	syncOpts := getSyncOptions(data, url, branch)
 	syncManifests, err := sync.Generate(syncOpts)
 	if err != nil {
 		return nil, fmt.Errorf("Could not generate sync manifests: %w", err)
