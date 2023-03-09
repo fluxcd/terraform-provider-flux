@@ -8,7 +8,7 @@ ACCTEST_TIMEOUT?=10m
 all: test testacc build
 
 tidy:
-	rm -f go.sum; go mod tidy -compat=1.18
+	rm -f go.sum; go mod tidy -compat=1.20
 
 fmt:
 	go fmt ./...
