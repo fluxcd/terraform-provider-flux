@@ -16,18 +16,18 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8
 	github.com/docker/docker v20.10.20+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/fluxcd/flux2 v0.40.2
-	github.com/fluxcd/helm-controller/api v0.30.0
-	github.com/fluxcd/image-automation-controller/api v0.30.0
-	github.com/fluxcd/image-reflector-controller/api v0.25.0
-	github.com/fluxcd/kustomize-controller/api v0.34.0
-	github.com/fluxcd/notification-controller/api v0.32.1
-	github.com/fluxcd/pkg/git v0.10.0
-	github.com/fluxcd/pkg/git/gogit v0.7.1
-	github.com/fluxcd/pkg/runtime v0.29.0
-	github.com/fluxcd/pkg/ssa v0.23.1
-	github.com/fluxcd/pkg/ssh v0.7.1
-	github.com/fluxcd/source-controller/api v0.35.2
+	github.com/fluxcd/flux2 v0.41.0
+	github.com/fluxcd/helm-controller/api v0.31.0
+	github.com/fluxcd/image-automation-controller/api v0.31.0
+	github.com/fluxcd/image-reflector-controller/api v0.26.0
+	github.com/fluxcd/kustomize-controller/api v0.35.0
+	github.com/fluxcd/notification-controller/api v0.33.0
+	github.com/fluxcd/pkg/git v0.11.0
+	github.com/fluxcd/pkg/git/gogit v0.8.1
+	github.com/fluxcd/pkg/runtime v0.31.0
+	github.com/fluxcd/pkg/ssa v0.24.1
+	github.com/fluxcd/pkg/ssh v0.7.3
+	github.com/fluxcd/source-controller/api v0.36.0
 	github.com/google/go-containerregistry v0.13.0
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.1.1
@@ -36,14 +36,14 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-testing v1.1.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/stretchr/testify v1.8.1
-	k8s.io/api v0.26.1
-	k8s.io/apiextensions-apiserver v0.26.1
-	k8s.io/apimachinery v0.26.1
-	k8s.io/cli-runtime v0.26.1
-	k8s.io/client-go v0.26.1
+	github.com/stretchr/testify v1.8.2
+	k8s.io/api v0.26.2
+	k8s.io/apiextensions-apiserver v0.26.2
+	k8s.io/apimachinery v0.26.2
+	k8s.io/cli-runtime v0.26.2
+	k8s.io/client-go v0.26.2
 	sigs.k8s.io/cli-utils v0.34.0
-	sigs.k8s.io/controller-runtime v0.14.4
+	sigs.k8s.io/controller-runtime v0.14.5
 	sigs.k8s.io/kind v0.17.0
 	sigs.k8s.io/kustomize/api v0.12.1
 	sigs.k8s.io/yaml v1.3.0
@@ -80,9 +80,9 @@ require (
 	github.com/fluxcd/go-git-providers v0.14.0 // indirect
 	github.com/fluxcd/go-git/v5 v5.0.0-20221219190809-2e5c9d01cfc4 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.1.0 // indirect
-	github.com/fluxcd/pkg/apis/kustomize v0.8.0 // indirect
-	github.com/fluxcd/pkg/apis/meta v0.19.0 // indirect
-	github.com/fluxcd/pkg/kustomize v0.13.1 // indirect
+	github.com/fluxcd/pkg/apis/kustomize v0.8.1 // indirect
+	github.com/fluxcd/pkg/apis/meta v0.19.1 // indirect
+	github.com/fluxcd/pkg/kustomize v0.13.2 // indirect
 	github.com/fluxcd/pkg/untar v0.2.0 // indirect
 	github.com/fluxcd/pkg/version v0.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -180,13 +180,13 @@ require (
 	github.com/xlab/treeprint v1.1.0 // indirect
 	github.com/zclconf/go-cty v1.12.1 // indirect
 	go.starlark.net v0.0.0-20221205180719-3fd0dac74452 // indirect
-	golang.org/x/crypto v0.6.0 // indirect
+	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.5.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/term v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
@@ -198,10 +198,10 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/component-base v0.26.1 // indirect
-	k8s.io/klog/v2 v2.90.0 // indirect
+	k8s.io/component-base v0.26.2 // indirect
+	k8s.io/klog/v2 v2.90.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230109183929-3758b55a6596 // indirect
-	k8s.io/kubectl v0.26.1 // indirect
+	k8s.io/kubectl v0.26.2 // indirect
 	k8s.io/utils v0.0.0-20221128185143-99ec85e7a448 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/kustomize/kyaml v0.13.10 // indirect
