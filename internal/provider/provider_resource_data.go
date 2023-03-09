@@ -242,6 +242,10 @@ func getAuthOpts(g *Git) (*git.AuthOptions, error) {
 		if g.Ssh == nil {
 			return nil, fmt.Errorf("Git URL scheme is ssh but ssh configuration is empty")
 		}
+		// Return early beacuse the private key is not yet known.
+		if g.Ssh.PrivateKey.IsUnknown() {
+			return nil, nil
+		}
 		if g.Ssh.PrivateKey.ValueString() != "" {
 			kh, err := sourcesecret.ScanHostKey(u.Host)
 			if err != nil {
