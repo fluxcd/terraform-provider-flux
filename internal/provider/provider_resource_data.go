@@ -341,11 +341,5 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 	overrides.ClusterDefaults.ProxyURL = kubernetes.ProxyURL.ValueString()
 
 	cc := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
-
-	// Validate that the Kubernetes configuration is correct.
-	if _, err := cc.ClientConfig(); err != nil {
-		return nil, err
-	}
-
 	return cc, nil
 }
