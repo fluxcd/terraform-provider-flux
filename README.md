@@ -1,12 +1,10 @@
-# Terraform provider flux
+# Terraform Provider Flux
 
 This is the Terraform provider for Flux v2. The provider allows you to install Flux on Kubernetes and configure it to reconcile the cluster state from a Git repository.
 
-## Get started
+## Get Started
 
-Flux can be bootstrapped using Terraform with a single Terraform resource. The provider needs to be configured with Kubernetes credentials in the same way that the Kubernetes and Helm Terraform providers are configured.
-The resource is configured with the repository URL and git credentials. When applied the necessary Kubernetes manifests will be committed to the Git repository and applied to the Kubernetes cluster. Flux will then be 
-verified that it can synchronize from the configured Git repository.
+Below is an example for how to bootstrap a Kubernetes cluster with flux. Refer to [registry.terraform.io](https://registry.terraform.io/providers/fluxcd/flux/latest) for detailed configuration documentation.
 
 ```hcl
 provider "flux" {

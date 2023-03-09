@@ -19,12 +19,7 @@ Get Kubernetes credentials from a kubeconfig file. The current context set in th
 
 ```terraform
 resource "flux_bootstrap_git" "this" {
-  url  = var.repository_ssh_url
   path = "clusters/my-cluster"
-  ssh = {
-    username    = "git"
-    private_key = var.private_key_pem
-  }
 }
 ```
 
@@ -33,16 +28,9 @@ resource "flux_bootstrap_git" "this" {
 
 ### Optional
 
-- `author_email` (String) Author email for Git commits.
-- `author_name` (String) Author name for Git commits. Defaults to `Flux`.
-- `branch` (String) Branch in repository to reconcile from. Defaults to `main`.
 - `cluster_domain` (String) The internal cluster domain. Defaults to `cluster.local`
-- `commit_message_appendix` (String) String to add to the commit messages.
 - `components` (Set of String) Toolkit components to include in the install manifests. Defaults to `[source-controller kustomize-controller helm-controller notification-controller]`
 - `components_extra` (Set of String) List of extra components to include in the install manifests.
-- `gpg_key_id` (String) Key id for selecting a particular key.
-- `gpg_key_ring` (String) GPG key ring for signing commits.
-- `gpg_passphrase` (String, Sensitive) Passphrase for decrypting GPG private key.
 - `image_pull_secret` (String) Kubernetes secret name used for pulling the toolkit images from a private registry.
 - `interval` (String) Interval at which to reconcile from bootstrap repository. Defaults to `1m0s`.
 - `kustomization_override` (String) Kustomization to override configuration set by default.
@@ -69,12 +57,7 @@ The Kustomize file is configured through the `kustomize_override` argument. Belo
 
 ```terraform
 resource "flux_bootstrap_git" "this" {
-  url  = var.repository_ssh_url
-  path = "clusters/my-cluster"
-  ssh = {
-    username    = "git"
-    private_key = var.private_key_pem
-  }
+  path                   = "clusters/my-cluster"
   kustomization_override = file("${path.module}/kustomization.yaml")
 }
 ```
