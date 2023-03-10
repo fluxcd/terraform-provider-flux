@@ -16,6 +16,10 @@ jobs:
         uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # v3.5.0
         with:
           go-version: 1.20.x
+          cache: true
+          cache-dependency-path: |
+            **/go.sum
+            **/go.mod
       - name: Install tools
         run: make tools
       - name: Generate docs
@@ -55,6 +59,8 @@ jobs:
         uses: helm/kind-action@d8ccf8fb623ce1bb360ae2f45f323d9d5c5e9f00 # v1.5.0
         with:
           version: v0.17.0
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@af153ea0cf4fd480c75accacc0c0dc7a2afdad0d # v0.41.0 
       - name: Apply Terraform
         env:
           GOOS: linux
@@ -64,3 +70,5 @@ jobs:
           cd examples/install
           terraform init
           terraform apply -auto-approve -var "components_extra=[\"image-reflector-controller\", \"image-automation-controller\"]"
+      - name: Health check Flux
+        run: flux check
