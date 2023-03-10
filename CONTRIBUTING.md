@@ -44,13 +44,14 @@ meeting](https://docs.google.com/document/d/1l_M0om0qUEN_NNiGgpqJ2tvsF2iioHkaARD
 
 ## Developing
 
-Install the required tools.
+Clone the terraform-provider-flux repository.
 
-```bash
-make tools
+```sh
+git clone https://github.com/fluxcd/terraform-provider-flux.git
+cd terraform-provider-flux
 ```
 
-Run the unit tests and acceptance tests.
+Run the unit and acceptance tests.
 
 ```bash
 make testacc
@@ -61,6 +62,15 @@ Generate the docs if you have made changes to any of the schemas or guides.
 ```sh
 make docs
 ```
+
+First build the provider, then generate a Terraform CLI config file to use a local build of the provider with Terraform.
+
+```sh
+make build
+make terraformrc
+export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
+```
+
 
 ## Documentation
 

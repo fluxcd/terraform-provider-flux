@@ -33,3 +33,6 @@ cover.out
 
 # ignore tf lock file
 .terraform.lock.hcl
+
+# ignore .terraformrc for dev overrides
+.terraformrc

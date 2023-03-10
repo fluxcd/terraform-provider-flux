@@ -23,11 +23,7 @@ testacc: tidy fmt vet
 	TF_ACC=1 go test ./... -v -count $(TEST_COUNT) -parallel $(ACCTEST_PARALLELISM) -timeout $(ACCTEST_TIMEOUT)
 
 build:
-	CGO_ENABLED=0 go build -o ./bin/flux main.go
-
-install: build
-	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/fluxcd/flux/0.0.0-dev/$${GOOS}_$${GOARCH}
-	cp ./bin/flux ~/.terraform.d/plugins/registry.terraform.io/fluxcd/flux/0.0.0-dev/$${GOOS}_$${GOARCH}/terraform-provider-flux
+	CGO_ENABLED=0 go build -o ./bin/terraform-provider-flux main.go
 
 .PHONY: docs
 docs: tools
@@ -39,3 +35,6 @@ tools:
 .SILENT:
 lint:
 	tflint --recursive --disable-rule=terraform_required_providers --disable-rule terraform_required_version --disable-rule=terraform_unused_declarations
+
+terraformrc:
+	cat .terraformrc.tmpl | envsubst > .terraformrc
