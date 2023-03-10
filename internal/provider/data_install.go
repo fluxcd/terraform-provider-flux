@@ -206,6 +206,8 @@ func (s *installDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 	components = append(components, componentsExtra...)
+	opt.Components = components
+	opt.ComponentsExtra = componentsExtra
 	tolerationKeys := []string{}
 	diags = data.TolerationKeys.ElementsAs(ctx, &tolerationKeys, false)
 	resp.Diagnostics.Append(diags...)
