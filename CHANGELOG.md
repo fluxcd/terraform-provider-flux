@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.25.1
+
+**Release date:** 2023-03-10
+
+This prerelease includes flux2 [v0.41.0](https://github.com/fluxcd/flux2/releases/tag/v0.41.0).
+
+Fixes to components extra configuration in `flux_install` datasource which caused it to not be included in the generated manifests.
+
 ## 0.25.0
 
 **Release date:** 2023-03-09
