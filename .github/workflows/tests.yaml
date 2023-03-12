@@ -74,3 +74,65 @@ jobs:
           terraform apply -auto-approve -var "components_extra=[\"image-reflector-controller\", \"image-automation-controller\"]"
       - name: Health check Flux
         run: flux check
+  e2e-github:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      - name: Setup Go
+        uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # v3.5.0
+        with:
+          go-version: 1.20.x
+          cache: true
+          cache-dependency-path: |
+            **/go.sum
+            **/go.mod
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@af153ea0cf4fd480c75accacc0c0dc7a2afdad0d # v0.41.0 
+      - name: Set outputs
+        id: vars
+        run: |
+          REPOSITORY_NAME=${{ github.event.repository.name }}
+          BRANCH_NAME=${GITHUB_REF##*/}
+          COMMIT_SHA=$(git rev-parse HEAD)
+          PSEUDO_RAND_SUFFIX=$(echo "${BRANCH_NAME}-${COMMIT_SHA}" | shasum | awk '{print $1}')
+          TEST_REPO_NAME="${REPOSITORY_NAME}-${PSEUDO_RAND_SUFFIX}"
+          echo "test_repo_name=$TEST_REPO_NAME" >> $GITHUB_OUTPUT
+      - name: Create repository
+        run: |
+          curl \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            --fail --silent \
+            https://api.github.com/orgs/fluxcd-testing/repos \
+            -d '{"name":"${{ steps.vars.outputs.test_repo_name }}", "auto_init": true}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: Apply Terraform
+        run: |
+          make build
+          make terraformrc
+          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
+          cd examples/github-ssh
+          terraform init
+          terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: Health check Flux
+        run: flux check
+      - name: Destroy Terraform
+        run: |
+          cd examples/github-ssh
+          terraform destroy -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+      - name: Delete repository
+        if: ${{ always() }}
+        run: |
+          curl \
+            -X DELETE \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            --fail --silent \
+            https://api.github.com/repos/fluxcd-testing/${{ steps.vars.outputs.test_repo_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
