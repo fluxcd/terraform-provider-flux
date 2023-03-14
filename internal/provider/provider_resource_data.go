@@ -44,76 +44,18 @@ import (
 
 type providerResourceData struct {
 	rcg *utils.RESTClientGetter
-
-	repositoryUrl         *url.URL
-	branch                string
-	authorName            string
-	authorEmail           string
-	commitMessageAppendix string
-	entityList            openpgp.EntityList
-	gpgPassphrase         string
-	gpgID                 string
-	secretOpts            sourcesecret.Options
-	authOpts              *git.AuthOptions
-	clientOpts            []gogit.ClientOption
+	git *Git
 }
 
 func NewProviderResourceData(ctx context.Context, data ProviderModel) (*providerResourceData, error) {
-	// Kubernetes configuration
 	clientCfg, err := getClientConfiguration(ctx, data.Kubernetes)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid Kubernetes configuration: %w", err)
 	}
 	rcg := utils.NewRestClientGetter(clientCfg)
-
-	// Git configuration
-	authOpts, err := getAuthOpts(data.Git)
-	if err != nil {
-		return nil, err
-	}
-	clientOpts := []gogit.ClientOption{gogit.WithDiskStorage()}
-	if data.Git.Http != nil && data.Git.Http.InsecureHttpAllowed.ValueBool() {
-		clientOpts = append(clientOpts, gogit.WithInsecureCredentialsOverHTTP())
-	}
-	var entityList openpgp.EntityList
-	if data.Git.GpgKeyRing.ValueString() != "" {
-		var err error
-		entityList, err = openpgp.ReadKeyRing(strings.NewReader(data.Git.GpgKeyRing.ValueString()))
-		if err != nil {
-			return nil, fmt.Errorf("Failed to read GPG key ring: %w", err)
-		}
-	}
-	secretOpts := sourcesecret.Options{}
-	if data.Git.Http != nil {
-		secretOpts.Username = data.Git.Http.Username.ValueString()
-		secretOpts.Password = data.Git.Http.Password.ValueString()
-		secretOpts.CAFile = []byte(data.Git.Http.CertificateAuthority.ValueString())
-	}
-	if data.Git.Ssh != nil {
-		if data.Git.Ssh.PrivateKey.ValueString() != "" {
-			keypair, err := sourcesecret.LoadKeyPair([]byte(data.Git.Ssh.PrivateKey.ValueString()), data.Git.Ssh.Password.ValueString())
-			if err != nil {
-				return nil, fmt.Errorf("Failed to load SSH Key Pair: %w", err)
-			}
-			secretOpts.Keypair = keypair
-			secretOpts.Password = data.Git.Ssh.Password.ValueString()
-		}
-		secretOpts.SSHHostname = data.Git.Url.ValueURL().Host
-	}
-
 	return &providerResourceData{
-		rcg:                   rcg,
-		repositoryUrl:         data.Git.Url.ValueURL(),
-		branch:                data.Git.Branch.ValueString(),
-		authorName:            data.Git.AuthorName.ValueString(),
-		authorEmail:           data.Git.AuthorEmail.ValueString(),
-		commitMessageAppendix: data.Git.CommitMessageAppendix.ValueString(),
-		entityList:            entityList,
-		gpgPassphrase:         data.Git.GpgPassphrase.ValueString(),
-		gpgID:                 data.Git.GpgKeyID.ValueString(),
-		secretOpts:            secretOpts,
-		authOpts:              authOpts,
-		clientOpts:            clientOpts,
+		rcg: rcg,
+		git: data.Git,
 	}, nil
 
 }
@@ -127,16 +69,26 @@ func (prd *providerResourceData) GetKubernetesClient() (client.WithWatch, error)
 }
 
 func (prd *providerResourceData) GetGitClient(ctx context.Context) (*gogit.Client, error) {
+	// Git configuration
+	authOpts, err := getAuthOpts(prd.git)
+	if err != nil {
+		return nil, err
+	}
+	clientOpts := []gogit.ClientOption{gogit.WithDiskStorage()}
+	if prd.git.Http != nil && prd.git.Http.InsecureHttpAllowed.ValueBool() {
+		clientOpts = append(clientOpts, gogit.WithInsecureCredentialsOverHTTP())
+	}
+
 	tmpDir, err := manifestgen.MkdirTempAbs("", "flux-bootstrap-")
 	if err != nil {
 		return nil, fmt.Errorf("could not create temporary working directory for git repository: %w", err)
 	}
-	client, err := gogit.NewClient(tmpDir, prd.authOpts, prd.clientOpts...)
+	client, err := gogit.NewClient(tmpDir, authOpts, clientOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("could not create git client: %w", err)
 	}
 	// TODO: Need to conditionally clone here. If repository is empty this will fail.
-	_, err = client.Clone(ctx, prd.repositoryUrl.String(), repository.CloneOptions{CheckoutStrategy: repository.CheckoutStrategy{Branch: prd.branch}})
+	_, err = client.Clone(ctx, prd.GetRepositoryURL().String(), repository.CloneOptions{CheckoutStrategy: repository.CheckoutStrategy{Branch: prd.git.Branch.ValueString()}})
 	if err != nil {
 		return nil, fmt.Errorf("could not clone git repository: %w", err)
 	}
@@ -144,37 +96,96 @@ func (prd *providerResourceData) GetGitClient(ctx context.Context) (*gogit.Clien
 }
 
 func (prd *providerResourceData) GetBootstrapOptions() ([]bootstrap.GitOption, error) {
+	entityList, err := prd.GetEntityList()
+	if err != nil {
+		return nil, err
+	}
 	return []bootstrap.GitOption{
-		bootstrap.WithRepositoryURL(prd.repositoryUrl.String()),
+		bootstrap.WithRepositoryURL(prd.GetRepositoryURL().String()),
 		bootstrap.WithKubeconfig(prd.rcg, &runclient.Options{}),
-		bootstrap.WithBranch(prd.branch),
-		bootstrap.WithSignature(prd.authorName, prd.authorEmail),
-		bootstrap.WithCommitMessageAppendix(prd.commitMessageAppendix),
-		bootstrap.WithGitCommitSigning(prd.entityList, prd.gpgPassphrase, prd.gpgID),
+		bootstrap.WithBranch(prd.git.Branch.ValueString()),
+		bootstrap.WithSignature(prd.git.AuthorName.ValueString(), prd.git.AuthorEmail.ValueString()),
+		bootstrap.WithCommitMessageAppendix(prd.git.CommitMessageAppendix.ValueString()),
+		bootstrap.WithGitCommitSigning(entityList, prd.git.GpgPassphrase.ValueString(), prd.git.GpgKeyID.ValueString()),
 		bootstrap.WithLogger(log.NopLogger{}),
 	}, nil
 }
 
+func (prd *providerResourceData) GetSecretOptions(secretName, namespace, targetPath string) (sourcesecret.Options, error) {
+	secretOpts := sourcesecret.Options{
+		Name:         secretName,
+		Namespace:    namespace,
+		TargetPath:   targetPath,
+		ManifestFile: sourcesecret.MakeDefaultOptions().ManifestFile,
+	}
+	if prd.git.Http != nil {
+		secretOpts.Username = prd.git.Http.Username.ValueString()
+		secretOpts.Password = prd.git.Http.Password.ValueString()
+		secretOpts.CAFile = []byte(prd.git.Http.CertificateAuthority.ValueString())
+	}
+	if prd.git.Ssh != nil {
+		if prd.git.Ssh.PrivateKey.ValueString() != "" {
+			keypair, err := sourcesecret.LoadKeyPair([]byte(prd.git.Ssh.PrivateKey.ValueString()), prd.git.Ssh.Password.ValueString())
+			if err != nil {
+				return sourcesecret.Options{}, fmt.Errorf("Failed to load SSH Key Pair: %w", err)
+			}
+			secretOpts.Keypair = keypair
+			secretOpts.Password = prd.git.Ssh.Password.ValueString()
+		}
+		secretOpts.SSHHostname = prd.git.Url.ValueURL().Host
+	}
+	return secretOpts, nil
+}
+
 func (prd *providerResourceData) CreateCommit(message string) (git.Commit, repository.CommitOption, error) {
+	entityList, err := prd.GetEntityList()
+	if err != nil {
+		return git.Commit{}, nil, err
+	}
 	var signer *openpgp.Entity
-	if prd.entityList != nil {
+	if entityList != nil {
 		var err error
-		signer, err = getOpenPgpEntity(prd.entityList, prd.gpgPassphrase, prd.gpgID)
+		signer, err = getOpenPgpEntity(entityList, prd.git.GpgPassphrase.ValueString(), prd.git.GpgKeyID.ValueString())
 		if err != nil {
 			return git.Commit{}, nil, fmt.Errorf("failed to generate OpenPGP entity: %w", err)
 		}
 	}
-	if prd.commitMessageAppendix != "" {
-		message = message + "\n\n" + prd.commitMessageAppendix
+	if prd.git.CommitMessageAppendix.ValueString() != "" {
+		message = message + "\n\n" + prd.git.CommitMessageAppendix.ValueString()
 	}
 	commit := git.Commit{
 		Author: git.Signature{
-			Name:  prd.authorName,
-			Email: prd.authorEmail,
+			Name:  prd.git.AuthorName.ValueString(),
+			Email: prd.git.AuthorEmail.ValueString(),
 		},
 		Message: message,
 	}
 	return commit, repository.WithSigner(signer), nil
+}
+
+func (prd *providerResourceData) GetRepositoryURL() *url.URL {
+	repositoryURL := prd.git.Url.ValueURL()
+	if prd.git.Http != nil {
+		repositoryURL.User = nil
+	}
+	if prd.git.Ssh != nil {
+		if prd.git.Url.ValueURL().User == nil || prd.git.Ssh.Username.ValueString() != "git" {
+			repositoryURL.User = url.User(prd.git.Ssh.Username.ValueString())
+		}
+	}
+	return repositoryURL
+}
+
+func (prd *providerResourceData) GetEntityList() (openpgp.EntityList, error) {
+	var entityList openpgp.EntityList
+	if prd.git.GpgKeyRing.ValueString() != "" {
+		var err error
+		entityList, err = openpgp.ReadKeyRing(strings.NewReader(prd.git.GpgKeyRing.ValueString()))
+		if err != nil {
+			return nil, fmt.Errorf("Failed to read GPG key ring: %w", err)
+		}
+	}
+	return entityList, nil
 }
 
 func getOpenPgpEntity(keyRing openpgp.EntityList, passphrase, keyID string) (*openpgp.Entity, error) {
@@ -241,10 +252,6 @@ func getAuthOpts(g *Git) (*git.AuthOptions, error) {
 	case "ssh":
 		if g.Ssh == nil {
 			return nil, fmt.Errorf("Git URL scheme is ssh but ssh configuration is empty")
-		}
-		// Return early beacuse the private key is not yet known.
-		if g.Ssh.PrivateKey.IsUnknown() {
-			return nil, nil
 		}
 		if g.Ssh.PrivateKey.ValueString() != "" {
 			kh, err := sourcesecret.ScanHostKey(u.Host)
