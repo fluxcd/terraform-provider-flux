@@ -9,7 +9,7 @@ description: |-
 
 Commits Flux components to a Git repository and configures a Kubernetes cluster to synchronize with the same Git repository.
 
-~> **NOTE:** This resource is still under development and may receive breaking attribute changes. Use with care in a production environment.
+-> **NOTE:** Checkout the [GitHub bootstrap guide](https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/github-bootstrap) for a walkthrough over how to use this resource with GitHub.
 
 ~> **NOTE:** A breaking change in the attributes have been made in this resource. Read the [guide](https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/breaking-provider-configuration) for information of the changes required.
 
