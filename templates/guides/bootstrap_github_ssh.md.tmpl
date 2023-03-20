@@ -1,0 +1,39 @@
+---
+subcategory: ""
+page_title: "Bootstrap with GitHub"
+description: |-
+	Install Flux and synchronize with GitHub.
+---
+
+# Bootstrap with GitHub
+
+This guide will walk through how to install Flux into a Kubernetes cluster and configure it to synchronize from a GitHub repository. Begin with creating a GitHub repository, in this guide it will be named `fleet-infra`, which will be used by Flux.
+Generate a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) (PAT) with `repo` permissions, make sure to copy the generated token.
+
+It is a good idea to use variables so that you do not accidentally store GitHub credentials in your Terraform configuration.
+
+{{ tffile "examples/github-ssh/variables.tf" }}
+
+Configure the required providers and their versions.
+
+{{ tffile "examples/github-ssh/main.tf" }}
+
+A Kind cluster is used as the target Kubernetes cluster where Flux is installed.
+
+{{ tffile "examples/github-ssh/kind.tf" }}
+
+The GitHub repository is created separatly so a datasource is used to get a reference to the repository. Creating GitHub repositories with Terraform is generally not a good idea as they could easily be removed. Additionally it is not possible to use the same repository for multiple environments if the repository is created with Terraform.
+	
+{{ tffile "examples/github-ssh/github.tf" }}
+
+The Flux provider needs to be configured both with Git and Kubernetes credentials. 
+
+{{ tffile "examples/github-ssh/flux.tf" }}
+
+Apply the Terraform, remember to include values for the varaibles.
+
+```hcl
+terraform apply -var "github_org=<username or org>" -var "github_token=<token>" -var "github_repository=fleet-infra"
+```
+
+When Terraform apply has completed a Kind cluster will exist with Flux installed and configured in it.
