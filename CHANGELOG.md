@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.25.2
+
+**Release date:** 2023-03-20
+
+This prerelease includes flux2 [v0.41.1](https://github.com/fluxcd/flux2/releases/tag/v0.41.1).
+
+Fixes errors caused by passing computed values to certain Git configuration attributes in the provider by delaying the reading of the attributes.
+
 ## 0.25.1
 
 **Release date:** 2023-03-10
