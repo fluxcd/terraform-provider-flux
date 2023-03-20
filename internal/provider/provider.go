@@ -19,7 +19,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -321,19 +320,6 @@ func (p *fluxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	}
 	if data.Git.AuthorName.IsNull() {
 		data.Git.AuthorName = types.StringValue(defaultAuthor)
-	}
-
-	// Modify repository url
-	repositoryURL := data.Git.Url.ValueURL()
-	if data.Git.Http != nil {
-		repositoryURL.User = nil
-		data.Git.Url = customtypes.URLValue(repositoryURL)
-	}
-	if data.Git.Ssh != nil {
-		if data.Git.Url.ValueURL().User == nil || data.Git.Ssh.Username.ValueString() != "git" {
-			repositoryURL.User = url.User(data.Git.Ssh.Username.ValueString())
-			data.Git.Url = customtypes.URLValue(repositoryURL)
-		}
 	}
 
 	prd, err := NewProviderResourceData(ctx, data)

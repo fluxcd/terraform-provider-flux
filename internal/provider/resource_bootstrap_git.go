@@ -52,7 +52,6 @@ import (
 	"github.com/fluxcd/flux2/pkg/bootstrap"
 	"github.com/fluxcd/flux2/pkg/log"
 	"github.com/fluxcd/flux2/pkg/manifestgen/install"
-	"github.com/fluxcd/flux2/pkg/manifestgen/sourcesecret"
 	"github.com/fluxcd/flux2/pkg/manifestgen/sync"
 	"github.com/fluxcd/flux2/pkg/uninstall"
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1beta2"
@@ -305,7 +304,7 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 	}
 
 	// Write expected repository files
-	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.repositoryUrl, r.prd.branch)
+	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Getting expected repository files", err.Error())
 		return
@@ -347,12 +346,12 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	defer os.RemoveAll(gitClient.Path())
 
 	installOpts := getInstallOptions(data)
-	syncOpts := getSyncOptions(data, r.prd.repositoryUrl, r.prd.branch)
-	secretOpts := r.prd.secretOpts
-	secretOpts.Name = data.SecretName.ValueString()
-	secretOpts.Namespace = data.Namespace.ValueString()
-	secretOpts.TargetPath = data.Path.ValueString()
-	secretOpts.ManifestFile = sourcesecret.MakeDefaultOptions().ManifestFile
+	syncOpts := getSyncOptions(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
+	secretOpts, err := r.prd.GetSecretOptions(data.SecretName.ValueString(), data.Namespace.ValueString(), data.Path.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Could not get secret options", err.Error())
+		return
+	}
 
 	bootstrapOpts, err := r.prd.GetBootstrapOptions()
 	if err != nil {
@@ -828,7 +827,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	}
 
 	// Set expected repository files
-	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.repositoryUrl, r.prd.branch)
+	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Getting expected repository files", err.Error())
 		return
