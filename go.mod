@@ -16,18 +16,18 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8
 	github.com/docker/docker v20.10.20+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/fluxcd/flux2 v0.41.1
-	github.com/fluxcd/helm-controller/api v0.31.1
+	github.com/fluxcd/flux2 v0.41.2
+	github.com/fluxcd/helm-controller/api v0.31.2
 	github.com/fluxcd/image-automation-controller/api v0.31.0
-	github.com/fluxcd/image-reflector-controller/api v0.26.0
-	github.com/fluxcd/kustomize-controller/api v0.35.0
+	github.com/fluxcd/image-reflector-controller/api v0.26.1
+	github.com/fluxcd/kustomize-controller/api v0.35.1
 	github.com/fluxcd/notification-controller/api v0.33.0
 	github.com/fluxcd/pkg/git v0.11.0
 	github.com/fluxcd/pkg/git/gogit v0.8.1
 	github.com/fluxcd/pkg/runtime v0.31.0
 	github.com/fluxcd/pkg/ssa v0.24.1
 	github.com/fluxcd/pkg/ssh v0.7.3
-	github.com/fluxcd/source-controller/api v0.36.0
+	github.com/fluxcd/source-controller/api v0.36.1
 	github.com/google/go-containerregistry v0.13.0
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.1.1
