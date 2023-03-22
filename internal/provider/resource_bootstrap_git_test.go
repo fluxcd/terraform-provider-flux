@@ -167,6 +167,30 @@ func TestAccBootstrapGit_SSH(t *testing.T) {
 	})
 }
 
+func TestAccBootstrapGit_SSH_WithControllerGit(t *testing.T) {
+	env := setupEnvironment(t)
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: bootstrapGitSSHWithControllerGit(env),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+				),
+			},
+			{
+				Config:            bootstrapGitSSHWithControllerGit(env),
+				ResourceName:      "flux_bootstrap_git.this",
+				ImportState:       true,
+				ImportStateId:     "flux-system",
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccBootstrapGit_Drift(t *testing.T) {
 	env := setupEnvironment(t)
 	resource.ParallelTest(t, resource.TestCase{
@@ -390,6 +414,38 @@ EOF
 	`, env.kubeCfgPath, env.sshClone, env.privateKey)
 }
 
+func bootstrapGitSSHWithControllerGit(env environment) string {
+	return fmt.Sprintf(`
+    provider "flux" {
+	  kubernetes = {
+        config_path = "%s"
+	  }
+	  git = {
+        url = "%s"
+        ssh = {
+          username = "git"
+          private_key = <<EOF
+%s
+EOF
+        }
+	  }
+	  controller_git = {
+        url = "%s"
+        ssh = {
+          username = "git"
+          private_key = <<EOF
+%s
+EOF
+        }
+	  }
+    }
+
+    resource "flux_bootstrap_git" "this" {
+		toleration_keys = ["FooBar", "test"]		
+	}
+	`, env.kubeCfgPath, env.sshClone, env.privateKey, env.sshClone, env.privateKeyRo)
+}
+
 func bootstrapGitCustomPath(env environment, path string) string {
 	return fmt.Sprintf(`
     provider "flux" {
@@ -490,12 +546,13 @@ func bootstrapGitComponents(env environment) string {
 }
 
 type environment struct {
-	kubeCfgPath string
-	httpClone   string
-	sshClone    string
-	username    string
-	password    string
-	privateKey  string
+	kubeCfgPath  string
+	httpClone    string
+	sshClone     string
+	username     string
+	password     string
+	privateKey   string
+	privateKeyRo string
 }
 
 func setupEnvironment(t *testing.T) environment {
@@ -609,13 +666,23 @@ func setupEnvironment(t *testing.T) environment {
 	}
 	giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOpt)
 
+	keyPairRo, err := ssh.GenerateKeyPair(ssh.ECDSA_P256)
+	require.NoError(t, err)
+	createPublicKeyOptRo := gitea.CreateKeyOption{
+		Title:    "KeyRo",
+		Key:      string(keyPair.PublicKey),
+		ReadOnly: true,
+	}
+	giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOptRo)
+
 	return environment{
-		kubeCfgPath: kubeCfgPath,
-		httpClone:   repo.CloneURL,
-		sshClone:    fmt.Sprintf("ssh://git@%s:%d/%s/%s.git", giteaName, sshPort, username, randSuffix),
-		username:    username,
-		password:    password,
-		privateKey:  string(keyPair.PrivateKey),
+		kubeCfgPath:  kubeCfgPath,
+		httpClone:    repo.CloneURL,
+		sshClone:     fmt.Sprintf("ssh://git@%s:%d/%s/%s.git", giteaName, sshPort, username, randSuffix),
+		username:     username,
+		password:     password,
+		privateKey:   string(keyPair.PrivateKey),
+		privateKeyRo: string(keyPairRo.PrivateKey),
 	}
 }
 

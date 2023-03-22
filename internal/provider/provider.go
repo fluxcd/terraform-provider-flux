@@ -50,6 +50,12 @@ type Http struct {
 	CertificateAuthority types.String `tfsdk:"certificate_authority"`
 }
 
+type BaseGit struct {
+	Url  customtypes.URL `tfsdk:"url"`
+	Ssh  *Ssh            `tfsdk:"ssh"`
+	Http *Http           `tfsdk:"http"`
+}
+
 type Git struct {
 	Url                   customtypes.URL `tfsdk:"url"`
 	Branch                types.String    `tfsdk:"branch"`
@@ -81,8 +87,9 @@ type Kubernetes struct {
 }
 
 type ProviderModel struct {
-	Kubernetes *Kubernetes `tfsdk:"kubernetes"`
-	Git        *Git        `tfsdk:"git"`
+	Kubernetes    *Kubernetes `tfsdk:"kubernetes"`
+	Git           *Git        `tfsdk:"git"`
+	ControllerGit *BaseGit    `tfsdk:"controller_git"`
 }
 
 var _ provider.Provider = &fluxProvider{}
@@ -106,6 +113,58 @@ func (p *fluxProvider) Metadata(ctx context.Context, req provider.MetadataReques
 }
 
 func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+	bootstrapUrlAttribute := schema.StringAttribute{
+		CustomType:  customtypes.URLType{},
+		Description: "Url of git repository to bootstrap from.",
+		Required:    true,
+		Validators: []validator.String{
+			validators.URLScheme("http", "https", "ssh"),
+		},
+	}
+	controllerUrlAttribute := bootstrapUrlAttribute
+	controllerUrlAttribute.Description = "Url of git repository used by the controller."
+
+	sshAttribute := schema.SingleNestedAttribute{
+		Attributes: map[string]schema.Attribute{
+			"username": schema.StringAttribute{
+				Description: "Username for Git SSH server.",
+				Optional:    true,
+			},
+			"password": schema.StringAttribute{
+				Description: "Password for private key.",
+				Optional:    true,
+				Sensitive:   true,
+			},
+			"private_key": schema.StringAttribute{
+				Description: "Private key used for authenticating to the Git SSH server.",
+				Optional:    true,
+				Sensitive:   true,
+			},
+		},
+		Optional: true,
+	}
+	httpAttribute := schema.SingleNestedAttribute{
+		Attributes: map[string]schema.Attribute{
+			"username": schema.StringAttribute{
+				Description: "Username for basic authentication.",
+				Optional:    true,
+			},
+			"password": schema.StringAttribute{
+				Description: "Password for basic authentication.",
+				Optional:    true,
+				Sensitive:   true,
+			},
+			"allow_insecure_http": schema.BoolAttribute{
+				Description: "Allows http Git url connections.",
+				Optional:    true,
+			},
+			"certificate_authority": schema.StringAttribute{
+				Description: "Certificate authority to validate self-signed certificates.",
+				Optional:    true,
+			},
+		},
+		Optional: true,
+	}
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"kubernetes": schema.SingleNestedAttribute{
@@ -173,14 +232,7 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 			"git": schema.SingleNestedAttribute{
 				Description: "Configuration block with settings for Kubernetes.",
 				Attributes: map[string]schema.Attribute{
-					"url": schema.StringAttribute{
-						CustomType:  customtypes.URLType{},
-						Description: "Url of git repository to bootstrap from.",
-						Required:    true,
-						Validators: []validator.String{
-							validators.URLScheme("http", "https", "ssh"),
-						},
-					},
+					"url": bootstrapUrlAttribute,
 					"branch": schema.StringAttribute{
 						Description: fmt.Sprintf("Branch in repository to reconcile from. Defaults to `%s`.", defaultBranch),
 						Optional:    true,
@@ -210,47 +262,17 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 						Description: "String to add to the commit messages.",
 						Optional:    true,
 					},
-					"ssh": schema.SingleNestedAttribute{
-						Attributes: map[string]schema.Attribute{
-							"username": schema.StringAttribute{
-								Description: "Username for Git SSH server.",
-								Optional:    true,
-							},
-							"password": schema.StringAttribute{
-								Description: "Password for private key.",
-								Optional:    true,
-								Sensitive:   true,
-							},
-							"private_key": schema.StringAttribute{
-								Description: "Private key used for authenticating to the Git SSH server.",
-								Optional:    true,
-								Sensitive:   true,
-							},
-						},
-						Optional: true,
-					},
-					"http": schema.SingleNestedAttribute{
-						Attributes: map[string]schema.Attribute{
-							"username": schema.StringAttribute{
-								Description: "Username for basic authentication.",
-								Optional:    true,
-							},
-							"password": schema.StringAttribute{
-								Description: "Password for basic authentication.",
-								Optional:    true,
-								Sensitive:   true,
-							},
-							"allow_insecure_http": schema.BoolAttribute{
-								Description: "Allows http Git url connections.",
-								Optional:    true,
-							},
-							"certificate_authority": schema.StringAttribute{
-								Description: "Certificate authority to validate self-signed certificates.",
-								Optional:    true,
-							},
-						},
-						Optional: true,
-					},
+					"ssh":  sshAttribute,
+					"http": httpAttribute,
+				},
+				Optional: true,
+			},
+			"controller_git": schema.SingleNestedAttribute{
+				Description: "Configuration block for controller git repo and credentials, when different from bootstrapping.",
+				Attributes: map[string]schema.Attribute{
+					"url":  controllerUrlAttribute,
+					"ssh":  sshAttribute,
+					"http": httpAttribute,
 				},
 				Optional: true,
 			},
@@ -265,26 +287,33 @@ func (p *fluxProvider) ValidateConfig(ctx context.Context, req provider.Validate
 		return
 	}
 
+	gitConfigs := make(map[string]BaseGit)
 	if data.Git != nil && data.Git.Url.ValueURL() != nil {
-		if data.Git.Url.ValueURL().Scheme == "ssh" && data.Git.Http != nil {
+		gitConfigs["git"] = BaseGit{Url: data.Git.Url, Http: data.Git.Http, Ssh: data.Git.Ssh}
+	}
+	if data.ControllerGit != nil && data.ControllerGit.Url.ValueURL() != nil {
+		gitConfigs["controller_git"] = *data.ControllerGit
+	}
+	for key, gitConfig := range gitConfigs {
+		if gitConfig.Url.ValueURL().Scheme == "ssh" && gitConfig.Http != nil {
 			resp.Diagnostics.AddAttributeError(
-				path.Root("git.http"),
+				path.Root(key+".http"),
 				"Unexpected Attribute Configuration",
 				"Did not expect http to be configured when url scheme is ssh",
 			)
 		}
 
-		if (data.Git.Url.ValueURL().Scheme == "http" || data.Git.Url.ValueURL().Scheme == "https") && data.Git.Ssh != nil {
+		if (gitConfig.Url.ValueURL().Scheme == "http" || gitConfig.Url.ValueURL().Scheme == "https") && gitConfig.Ssh != nil {
 			resp.Diagnostics.AddAttributeError(
-				path.Root("git.ssh"),
+				path.Root(key+".ssh"),
 				"Unexpected Attribute Configuration",
 				"Did not expect ssh to be configured when url scheme is http(s)",
 			)
 		}
 
-		if data.Git.Url.ValueURL().Scheme == "http" && !data.Git.Http.InsecureHttpAllowed.ValueBool() {
+		if gitConfig.Url.ValueURL().Scheme == "http" && !gitConfig.Http.InsecureHttpAllowed.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
-				path.Root("git.allow_insecure_http"),
+				path.Root(key+".allow_insecure_http"),
 				"Scheme Validation Error",
 				"Expected allow_insecure_http to be true when url scheme is http.",
 			)

@@ -43,8 +43,9 @@ import (
 )
 
 type providerResourceData struct {
-	rcg *utils.RESTClientGetter
-	git *Git
+	rcg            *utils.RESTClientGetter
+	git            *Git
+	controller_git *BaseGit
 }
 
 func NewProviderResourceData(ctx context.Context, data ProviderModel) (*providerResourceData, error) {
@@ -112,27 +113,35 @@ func (prd *providerResourceData) GetBootstrapOptions() ([]bootstrap.GitOption, e
 }
 
 func (prd *providerResourceData) GetSecretOptions(secretName, namespace, targetPath string) (sourcesecret.Options, error) {
+
+	var git BaseGit
+
+	if prd.controller_git != nil {
+		git = *prd.controller_git
+	} else {
+		git = BaseGit{Url: prd.git.Url, Http: prd.git.Http, Ssh: prd.git.Ssh}
+	}
 	secretOpts := sourcesecret.Options{
 		Name:         secretName,
 		Namespace:    namespace,
 		TargetPath:   targetPath,
 		ManifestFile: sourcesecret.MakeDefaultOptions().ManifestFile,
 	}
-	if prd.git.Http != nil {
-		secretOpts.Username = prd.git.Http.Username.ValueString()
-		secretOpts.Password = prd.git.Http.Password.ValueString()
-		secretOpts.CAFile = []byte(prd.git.Http.CertificateAuthority.ValueString())
+	if git.Http != nil {
+		secretOpts.Username = git.Http.Username.ValueString()
+		secretOpts.Password = git.Http.Password.ValueString()
+		secretOpts.CAFile = []byte(git.Http.CertificateAuthority.ValueString())
 	}
-	if prd.git.Ssh != nil {
-		if prd.git.Ssh.PrivateKey.ValueString() != "" {
-			keypair, err := sourcesecret.LoadKeyPair([]byte(prd.git.Ssh.PrivateKey.ValueString()), prd.git.Ssh.Password.ValueString())
+	if git.Ssh != nil {
+		if git.Ssh.PrivateKey.ValueString() != "" {
+			keypair, err := sourcesecret.LoadKeyPair([]byte(git.Ssh.PrivateKey.ValueString()), git.Ssh.Password.ValueString())
 			if err != nil {
 				return sourcesecret.Options{}, fmt.Errorf("Failed to load SSH Key Pair: %w", err)
 			}
 			secretOpts.Keypair = keypair
-			secretOpts.Password = prd.git.Ssh.Password.ValueString()
+			secretOpts.Password = git.Ssh.Password.ValueString()
 		}
-		secretOpts.SSHHostname = prd.git.Url.ValueURL().Host
+		secretOpts.SSHHostname = git.Url.ValueURL().Host
 	}
 	return secretOpts, nil
 }
