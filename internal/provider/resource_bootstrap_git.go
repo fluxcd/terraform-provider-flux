@@ -55,6 +55,7 @@ import (
 	"github.com/fluxcd/flux2/v2/pkg/bootstrap"
 	"github.com/fluxcd/flux2/v2/pkg/log"
 	"github.com/fluxcd/flux2/v2/pkg/manifestgen/install"
+	"github.com/fluxcd/flux2/v2/pkg/manifestgen/sourcesecret"
 	"github.com/fluxcd/flux2/v2/pkg/manifestgen/sync"
 	"github.com/fluxcd/flux2/v2/pkg/uninstall"
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
@@ -99,6 +100,7 @@ type bootstrapGitResourceData struct {
 	WatchAllNamespaces    types.Bool           `tfsdk:"watch_all_namespaces"`
 	Interval              customtypes.Duration `tfsdk:"interval"`
 	SecretName            types.String         `tfsdk:"secret_name"`
+	DisableSecretCreation types.Bool           `tfsdk:"disable_secret_creation"`
 	RecurseSubmodules     types.Bool           `tfsdk:"recurse_submodules"`
 	KustomizationOverride types.String         `tfsdk:"kustomization_override"`
 	RepositoryFiles       types.Map            `tfsdk:"repository_files"`
@@ -276,6 +278,10 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 					stringvalidator.LengthAtMost(253),
 				},
 			},
+			"disable_secret_creation": schema.BoolAttribute{
+				Description: "Use the existing secret for flux controller and don't create one from bootstrap",
+				Optional:    true,
+			},
 			"kustomization_override": schema.StringAttribute{
 				Description: "Kustomization to override configuration set by default.",
 				Optional:    true,
@@ -356,10 +362,18 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 
 	installOpts := getInstallOptions(data)
 	syncOpts := getSyncOptions(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
-	secretOpts, err := r.prd.GetSecretOptions(data.SecretName.ValueString(), data.Namespace.ValueString(), data.Path.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Could not get secret options", err.Error())
-		return
+	var secretOpts sourcesecret.Options
+	if data.DisableSecretCreation.ValueBool() {
+		secretOpts = sourcesecret.Options{
+			Name:      data.SecretName.ValueString(),
+			Namespace: data.Namespace.ValueString(),
+		}
+	} else {
+		secretOpts, err = r.prd.GetSecretOptions(data.SecretName.ValueString(), data.Namespace.ValueString(), data.Path.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Could not get secret options", err.Error())
+			return
+		}
 	}
 
 	bootstrapOpts, err := r.prd.GetBootstrapOptions()

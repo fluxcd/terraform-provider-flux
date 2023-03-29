@@ -29,6 +29,7 @@ resource "flux_bootstrap_git" "this" {
 - `cluster_domain` (String) The internal cluster domain. Defaults to `cluster.local`
 - `components` (Set of String) Toolkit components to include in the install manifests. Defaults to `[source-controller kustomize-controller helm-controller notification-controller]`
 - `components_extra` (Set of String) List of extra components to include in the install manifests.
+- `disable_secret_creation` (Boolean) Use the existing secret for flux controller and don't create one from bootstrap
 - `image_pull_secret` (String) Kubernetes secret name used for pulling the toolkit images from a private registry.
 - `interval` (String) Interval at which to reconcile from bootstrap repository. Defaults to `1m0s`.
 - `kustomization_override` (String) Kustomization to override configuration set by default.
