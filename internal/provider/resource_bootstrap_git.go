@@ -52,6 +52,7 @@ import (
 	"github.com/fluxcd/flux2/pkg/bootstrap"
 	"github.com/fluxcd/flux2/pkg/log"
 	"github.com/fluxcd/flux2/pkg/manifestgen/install"
+	"github.com/fluxcd/flux2/pkg/manifestgen/sourcesecret"
 	"github.com/fluxcd/flux2/pkg/manifestgen/sync"
 	"github.com/fluxcd/flux2/pkg/uninstall"
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1beta2"
@@ -90,6 +91,7 @@ type bootstrapGitResourceData struct {
 	WatchAllNamespaces    types.Bool           `tfsdk:"watch_all_namespaces"`
 	Interval              customtypes.Duration `tfsdk:"interval"`
 	SecretName            types.String         `tfsdk:"secret_name"`
+	WriteSecret           types.Bool           `tfsdk:"write_secret"`
 	RecurseSubmodules     types.Bool           `tfsdk:"recurse_submodules"`
 	KustomizationOverride types.String         `tfsdk:"kustomization_override"`
 	RepositoryFiles       types.Map            `tfsdk:"repository_files"`
@@ -276,6 +278,10 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 					stringvalidator.LengthAtMost(253),
 				},
 			},
+			"write_secret": schema.BoolAttribute{
+				Description: "If false the Git credential secret will not be written to the Kubernetes cluster.",
+				Optional:    true,
+			},
 			"kustomization_override": schema.StringAttribute{
 				Description: "Kustomization to override configuration set by default.",
 				Optional:    true,
@@ -347,10 +353,14 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 
 	installOpts := getInstallOptions(data)
 	syncOpts := getSyncOptions(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
-	secretOpts, err := r.prd.GetSecretOptions(data.SecretName.ValueString(), data.Namespace.ValueString(), data.Path.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Could not get secret options", err.Error())
-		return
+
+	secretOpts := sourcesecret.Options{Name: data.SecretName.ValueString(), Namespace: data.Namespace.ValueString()}
+	if data.WriteSecret.ValueBool() {
+		secretOpts, err = r.prd.GetSecretOptions(data.SecretName.ValueString(), data.Namespace.ValueString(), data.Path.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Could not get secret options", err.Error())
+			return
+		}
 	}
 
 	bootstrapOpts, err := r.prd.GetBootstrapOptions()

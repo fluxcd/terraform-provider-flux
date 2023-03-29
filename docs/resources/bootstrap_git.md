@@ -44,6 +44,7 @@ resource "flux_bootstrap_git" "this" {
 - `toleration_keys` (Set of String) List of toleration keys used to schedule the components pods onto nodes with matching taints.
 - `version` (String) Flux version. Defaults to `v0.41.1`.
 - `watch_all_namespaces` (Boolean) If true watch for custom resources in all namespaces. Defaults to `true`.
+- `write_secret` (Boolean) If false the Git credential secret will not be written to the Kubernetes cluster.
 
 ### Read-Only
 
