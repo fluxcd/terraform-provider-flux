@@ -61,6 +61,8 @@ import (
 	"github.com/fluxcd/pkg/git"
 	"github.com/fluxcd/pkg/git/repository"
 	sourcev1 "github.com/fluxcd/source-controller/api/v1beta2"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	customtypes "github.com/fluxcd/terraform-provider-flux/internal/framework/types"
 	"github.com/fluxcd/terraform-provider-flux/internal/framework/validators"
@@ -68,6 +70,11 @@ import (
 )
 
 const (
+	defaultCreateTimeout = 15 * time.Minute
+	defaultReadTimeout   = 5 * time.Minute
+	defaultUpdateTimeout = 15 * time.Minute
+	defaultDeleteTimeout = 5 * time.Minute
+
 	rfc1123LabelRegex  = `^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`
 	rfc1123LabelError  = "a lowercase RFC 1123 label must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character"
 	rfc1123DomainRegex = `^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
@@ -95,6 +102,7 @@ type bootstrapGitResourceData struct {
 	RecurseSubmodules     types.Bool           `tfsdk:"recurse_submodules"`
 	KustomizationOverride types.String         `tfsdk:"kustomization_override"`
 	RepositoryFiles       types.Map            `tfsdk:"repository_files"`
+	Timeouts              timeouts.Value       `tfsdk:"timeouts"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -278,6 +286,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: "Git repository files created and managed by the provider.",
 				Computed:    true,
 			},
+			"timeouts": timeouts.AttributesAll(ctx),
 		},
 	}
 }
@@ -323,6 +332,14 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	timeout, diags := data.Timeouts.Create(ctx, defaultCreateTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 
 	kubeClient, err := r.prd.GetKubernetesClient()
 	if err != nil {
@@ -378,7 +395,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	manifestsBase := ""
-	err = bootstrap.Run(ctx, b, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, 10*time.Minute)
+	err = bootstrap.Run(ctx, b, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, timeout)
 	if err != nil {
 		resp.Diagnostics.AddError("Bootstrap run error", err.Error())
 		return
@@ -417,6 +434,14 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	timeout, diags := data.Timeouts.Read(ctx, defaultCreateTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 
 	gitClient, err := r.prd.GetGitClient(ctx)
 	if err != nil {
@@ -460,70 +485,80 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	gitClient, err := r.prd.GetGitClient(ctx)
-	if err != nil {
-		resp.Diagnostics.AddError("Git Client", err.Error())
+	timeout, diags := data.Timeouts.Update(ctx, defaultUpdateTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
-	defer os.RemoveAll(gitClient.Path())
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 
-	// Files should be removed if they are present in the state but not the plan.
 	previousRepositoryFiles := types.MapNull(types.StringType)
 	diags = req.State.GetAttribute(ctx, path.Root("repository_files"), &previousRepositoryFiles)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	for k := range previousRepositoryFiles.Elements() {
-		_, ok := data.RepositoryFiles.Elements()[k]
-		if ok {
-			continue
-		}
-		path := filepath.Join(gitClient.Path(), k)
-		_, err := os.Stat(path)
-		if errors.Is(err, os.ErrNotExist) {
-			tflog.Debug(ctx, "Skipping removing no longer tracked file as it does not exist", map[string]interface{}{"path": path})
-			continue
-		}
-		if err != nil {
-			resp.Diagnostics.AddError("Could not stat no longer tracked file", err.Error())
-			return
-		}
-		err = os.Remove(path)
-		if err != nil {
-			resp.Diagnostics.AddError("Could not remove no longer tracked file", err.Error())
-			return
-		}
-	}
-
-	// Write expected file contents to repo
 	repositoryFiles := map[string]string{}
 	diags = data.RepositoryFiles.ElementsAs(ctx, &repositoryFiles, false)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	files := map[string]io.Reader{}
-	for k, v := range repositoryFiles {
-		files[k] = strings.NewReader(v)
-	}
-	commit, signer, err := r.prd.CreateCommit("Update Flux")
-	if err != nil {
-		resp.Diagnostics.AddError("Unable to create commit", err.Error())
-		return
-	}
-	_, err = gitClient.Commit(commit, signer, repository.WithFiles(files))
-	if err != nil && !errors.Is(err, git.ErrNoStagedFiles) {
-		resp.Diagnostics.AddError("Unable to commit updated files", err.Error())
-		return
-	}
-	// Only push if changes are committed
-	if err == nil {
+
+	err := retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+		gitClient, err := r.prd.GetGitClient(ctx)
+		if err != nil {
+			return retry.NonRetryableError(err)
+		}
+		defer os.RemoveAll(gitClient.Path())
+
+		// Files should be removed if they are present in the state but not the plan.
+		for k := range previousRepositoryFiles.Elements() {
+			_, ok := data.RepositoryFiles.Elements()[k]
+			if ok {
+				continue
+			}
+			path := filepath.Join(gitClient.Path(), k)
+			_, err := os.Stat(path)
+			if errors.Is(err, os.ErrNotExist) {
+				tflog.Debug(ctx, "Skipping removing no longer tracked file as it does not exist", map[string]interface{}{"path": path})
+				continue
+			}
+			if err != nil {
+				retry.NonRetryableError(fmt.Errorf("Could not stat no longer tracked file: %w", err))
+			}
+			err = os.Remove(path)
+			if err != nil {
+				return retry.NonRetryableError(fmt.Errorf("Could not remove no longer tracked file: %w", err))
+			}
+		}
+
+		// Write expected file contents to repo
+		files := map[string]io.Reader{}
+		for k, v := range repositoryFiles {
+			files[k] = strings.NewReader(v)
+		}
+		commit, signer, err := r.prd.CreateCommit("Update Flux")
+		if err != nil {
+			return retry.NonRetryableError(fmt.Errorf("Unable to create commit: %w", err))
+		}
+		_, err = gitClient.Commit(commit, signer, repository.WithFiles(files))
+		if err != nil && !errors.Is(err, git.ErrNoStagedFiles) {
+			return retry.NonRetryableError(fmt.Errorf("Unable to commit updated files: %w", err))
+		}
+		// Skip pushing if no changes have been made
+		if err != nil {
+			return nil
+		}
 		err = gitClient.Push(ctx)
 		if err != nil {
-			resp.Diagnostics.AddError("Unable to push updated files", err.Error())
-			return
+			return retry.RetryableError(fmt.Errorf("Unable to push file update: %w", err))
 		}
+		return nil
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Could not update Flux", err.Error())
 	}
 
 	diags = resp.State.Set(ctx, &data)
@@ -538,19 +573,19 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
+	timeout, diags := data.Timeouts.Delete(ctx, defaultDeleteTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
 	kubeClient, err := r.prd.GetKubernetesClient()
 	if err != nil {
 		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
 		return
 	}
-
-	gitClient, err := r.prd.GetGitClient(ctx)
-	if err != nil {
-		resp.Diagnostics.AddError("Git Client", err.Error())
-		return
-	}
-	defer os.RemoveAll(gitClient.Path())
-
 	// TODO: Uninstall fails when flux-system namespace does not exist
 	err = uninstall.Components(ctx, log.NopLogger{}, kubeClient, data.Namespace.ValueString(), false)
 	if err != nil {
@@ -573,35 +608,43 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	// Remove all tracked files from git
-	for k := range data.RepositoryFiles.Elements() {
-		path := filepath.Join(gitClient.Path(), k)
-		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			tflog.Debug(ctx, "Skipping file removal as the file does not exist", map[string]interface{}{"path": path})
-			continue
-		}
-		err := os.Remove(path)
+	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+		gitClient, err := r.prd.GetGitClient(ctx)
 		if err != nil {
-			resp.Diagnostics.AddError("Could not remove file from git repository", err.Error())
-			return
+			return retry.NonRetryableError(err)
 		}
-	}
-	// TODO: If no files are removed we should not commit anything.
-	commit, signer, err := r.prd.CreateCommit("Uninstall Flux")
+		defer os.RemoveAll(gitClient.Path())
+
+		// Remove all tracked files from git
+		for k := range data.RepositoryFiles.Elements() {
+			path := filepath.Join(gitClient.Path(), k)
+			if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+				tflog.Debug(ctx, "Skipping file removal as the file does not exist", map[string]interface{}{"path": path})
+				continue
+			}
+			err := os.Remove(path)
+			if err != nil {
+				return retry.NonRetryableError(fmt.Errorf("Could not remove file from git repository: %w", err))
+			}
+		}
+		// TODO: If no files are removed we should not commit anything.
+		commit, signer, err := r.prd.CreateCommit("Uninstall Flux")
+		if err != nil {
+			return retry.NonRetryableError(fmt.Errorf("Unable to create commit: %w", err))
+		}
+		// TODO: If all files are removed from the repository delete will fail. This needs a test and to be fixed.
+		_, err = gitClient.Commit(commit, signer)
+		if err != nil {
+			return retry.NonRetryableError(fmt.Errorf("Unable to commit removed file(s): %w", err))
+		}
+		err = gitClient.Push(ctx)
+		if err != nil {
+			return retry.RetryableError(fmt.Errorf("Unable to psuh removed file(s): %w", err))
+		}
+		return nil
+	})
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to create commit", err.Error())
-		return
-	}
-	// TODO: If all files are removed from the repository delete will fail. This needs a test and to be fixed.
-	_, err = gitClient.Commit(commit, signer)
-	if err != nil {
-		resp.Diagnostics.AddError("Unable to commit removed file(s)", err.Error())
-		return
-	}
-	err = gitClient.Push(ctx)
-	if err != nil {
-		resp.Diagnostics.AddError("Unable to push removed file(s)", err.Error())
-		return
+		resp.Diagnostics.AddError("Could not delete Flux", err.Error())
 	}
 }
 
@@ -614,6 +657,14 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	}
 
 	data := bootstrapGitResourceData{}
+	data.Timeouts = timeouts.Value{
+		Object: types.ObjectNull(map[string]attr.Type{
+			"create": types.StringType,
+			"delete": types.StringType,
+			"read":   types.StringType,
+			"update": types.StringType,
+		}),
+	}
 	data.ID = types.StringValue(req.ID)
 	data.Namespace = data.ID
 
