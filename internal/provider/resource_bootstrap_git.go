@@ -37,7 +37,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -59,7 +62,6 @@ import (
 	"github.com/fluxcd/pkg/git/repository"
 	sourcev1 "github.com/fluxcd/source-controller/api/v1beta2"
 
-	"github.com/fluxcd/terraform-provider-flux/internal/framework/planmodifiers"
 	customtypes "github.com/fluxcd/terraform-provider-flux/internal/framework/types"
 	"github.com/fluxcd/terraform-provider-flux/internal/framework/validators"
 	"github.com/fluxcd/terraform-provider-flux/internal/utils"
@@ -130,6 +132,12 @@ func (r *bootstrapGitResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	defaultOpts := install.MakeDefaultOptions()
+	componentsSet, diags := types.SetValueFrom(ctx, types.StringType, defaultOpts.Components)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Commits Flux components to a Git repository and configures a Kubernetes cluster to synchronize with the same Git repository.",
 		Attributes: map[string]schema.Attribute{
@@ -140,9 +148,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: fmt.Sprintf("Flux version. Defaults to `%s`.", utils.DefaultFluxVersion),
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					planmodifiers.DefaultStringValue(utils.DefaultFluxVersion),
-				},
+				Default:     stringdefault.StaticString(utils.DefaultFluxVersion),
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("(latest|^v.*)"), "must either be latest or start with 'v'"),
 				},
@@ -151,18 +157,14 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: fmt.Sprintf("The internal cluster domain. Defaults to `%s`", defaultOpts.ClusterDomain),
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					planmodifiers.DefaultStringValue(defaultOpts.ClusterDomain),
-				},
+				Default:     stringdefault.StaticString(defaultOpts.ClusterDomain),
 			},
 			"components": schema.SetAttribute{
 				ElementType: types.StringType,
 				Description: fmt.Sprintf("Toolkit components to include in the install manifests. Defaults to `%s`", defaultOpts.Components),
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.Set{
-					planmodifiers.DefaultStringSetValue(defaultOpts.Components),
-				},
+				Default:     setdefault.StaticValue(componentsSet),
 				Validators: []validator.Set{
 					setvalidator.SizeAtLeast(2),
 					setvalidator.ValueStringsAre(stringvalidator.OneOf("source-controller", "kustomize-controller", "helm-controller", "notification-controller")),
@@ -190,9 +192,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: fmt.Sprintf("Log level for toolkit components. Defaults to `%s`.", defaultOpts.LogLevel),
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					planmodifiers.DefaultStringValue(defaultOpts.LogLevel),
-				},
+				Default:     stringdefault.StaticString(defaultOpts.LogLevel),
 				Validators: []validator.String{
 					stringvalidator.OneOf("info", "debug", "error"),
 				},
@@ -201,9 +201,9 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: fmt.Sprintf("The namespace scope for install manifests. Defaults to `%s`.", defaultOpts.Namespace),
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString(defaultOpts.Namespace),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
-					planmodifiers.DefaultStringValue(defaultOpts.Namespace),
 				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile(rfc1123LabelRegex), rfc1123LabelError),
@@ -214,18 +214,14 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: fmt.Sprintf("Deny ingress access to the toolkit controllers from other namespaces using network policies. Defaults to `%v`.", defaultOpts.NetworkPolicy),
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.Bool{
-					planmodifiers.DefaultBoolValue(defaultOpts.NetworkPolicy),
-				},
+				Default:     booldefault.StaticBool(defaultOpts.NetworkPolicy),
 			},
 			"registry": schema.StringAttribute{
 				CustomType:  customtypes.URLType{},
 				Description: fmt.Sprintf("Container registry where the toolkit images are published. Defaults to `%s`.", defaultOpts.Registry),
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					planmodifiers.DefaultStringValue(defaultOpts.Registry),
-				},
+				Default:     stringdefault.StaticString(defaultOpts.Registry),
 			},
 			"toleration_keys": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -242,18 +238,14 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: fmt.Sprintf("If true watch for custom resources in all namespaces. Defaults to `%v`.", defaultOpts.WatchAllNamespaces),
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.Bool{
-					planmodifiers.DefaultBoolValue(defaultOpts.WatchAllNamespaces),
-				},
+				Default:     booldefault.StaticBool(defaultOpts.WatchAllNamespaces),
 			},
 			"interval": schema.StringAttribute{
 				CustomType:  customtypes.DurationType{},
 				Description: fmt.Sprintf("Interval at which to reconcile from bootstrap repository. Defaults to `%s`.", time.Minute.String()),
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					planmodifiers.DefaultStringValue(time.Minute.String()),
-				},
+				Default:     stringdefault.StaticString(time.Minute.String()),
 			},
 			"path": schema.StringAttribute{
 				Description: "Path relative to the repository root, when specified the cluster sync will be scoped to this path.",
@@ -267,9 +259,9 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: fmt.Sprintf("Name of the secret the sync credentials can be found in or stored to. Defaults to `%s`.", defaultOpts.Namespace),
 				Optional:    true,
 				Computed:    true,
+				Default:     stringdefault.StaticString(defaultOpts.Namespace),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
-					planmodifiers.DefaultStringValue(defaultOpts.Namespace),
 				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile(rfc1123DomainRegex), rfc1123DomainError),
