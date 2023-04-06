@@ -1,6 +1,7 @@
 ---
 subcategory: ""
 page_title: "Multi Environment Considerations"
+subcategory: "Deprecated"
 description: |-
     Considerations when deploying multiple environments.
 ---

@@ -1,6 +1,7 @@
 ---
 subcategory: ""
 page_title: "Bootstrap a GKE cluster with GitHub"
+subcategory: "Deprecated"
 description: |-
     An example of how to bootstrap Flux on GKE and sync it with a GitHub repository.
 ---

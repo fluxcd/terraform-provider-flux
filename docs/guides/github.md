@@ -1,6 +1,7 @@
 ---
 subcategory: ""
 page_title: "Bootstrap a cluster with GitHub"
+subcategory: "Deprecated"
 description: |-
     An example of how to bootstrap a Kubernetes cluster and sync it with a GitHub repository.
 ---

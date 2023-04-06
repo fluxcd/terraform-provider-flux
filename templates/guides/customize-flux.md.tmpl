@@ -1,6 +1,7 @@
 ---
 subcategory: ""
 page_title: "Customize Flux"
+subcategory: "Deprecated"
 description: |-
   Customizing Flux past the exposed parameters.
 ---

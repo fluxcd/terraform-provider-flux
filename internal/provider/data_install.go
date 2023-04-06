@@ -66,6 +66,7 @@ func (s *installDataSource) Metadata(ctx context.Context, req datasource.Metadat
 func (s *installDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	opts := install.MakeDefaultOptions()
 	resp.Schema = schema.Schema{
+		DeprecationMessage:  "This datasource is deprecated and will be removed in the future. Use flux_bootstrap_git resource instead. https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/migrating-to-resource",
 		MarkdownDescription: "`flux_install` can be used to generate Kubernetes manifests for deploying Flux.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

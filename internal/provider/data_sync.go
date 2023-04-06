@@ -70,6 +70,7 @@ func (s *syncDataSource) Metadata(ctx context.Context, req datasource.MetadataRe
 func (s *syncDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	opts := sync.MakeDefaultOptions()
 	resp.Schema = schema.Schema{
+		DeprecationMessage:  "This datasource is deprecated and will be removed in the future. Use flux_bootstrap_git resource instead. https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/migrating-to-resource",
 		MarkdownDescription: "`flux_sync` can be used to generate manifests for reconciling the specified repository path on the cluster.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
