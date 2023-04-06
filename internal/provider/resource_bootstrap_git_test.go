@@ -213,30 +213,37 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 	})
 }
 
-func TestAccBootstrapGit_Upgrade(t *testing.T) {
-	env := setupEnvironment(t)
-	resource.ParallelTest(t, resource.TestCase{
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: bootstrapGitVersion(env, "v0.41.2"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
-				),
-			},
-			{
-				Config: bootstrapGitVersion(env, "v2.0.0-rc.1"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
-				),
-			},
-		},
-	})
-}
+// NOTE: Enable this in a subsequent release post v1 or replace it with a new
+// e2e test setup that uses the latest released version of the provider to
+// do the first bootstrap and then use the current version to perform an
+// upgrade. Since the version of flux2/v2 used by the provider may not have
+// support for the previous version of the flux CRD APIs, installing previous
+// version may not succeed always.
+//
+// func TestAccBootstrapGit_Upgrade(t *testing.T) {
+// 	env := setupEnvironment(t)
+// 	resource.ParallelTest(t, resource.TestCase{
+// 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: bootstrapGitVersion(env, "v0.41.2"),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
+// 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
+// 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+// 				),
+// 			},
+// 			{
+// 				Config: bootstrapGitVersion(env, "v2.0.0-rc.1"),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
+// 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
+// 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+// 				),
+// 			},
+// 		},
+// 	})
+// }
 
 func TestAccBootstrapGit_Components(t *testing.T) {
 	env := setupEnvironment(t)
