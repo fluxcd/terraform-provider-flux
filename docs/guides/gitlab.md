@@ -2,7 +2,7 @@
 subcategory: ""
 page_title: "Bootstrap with GitLab"
 description: |-
-	Install Flux and synchronize with GitLab.
+    Install Flux and synchronize with GitLab.
 ---
 
 # Bootstrap with GitLab

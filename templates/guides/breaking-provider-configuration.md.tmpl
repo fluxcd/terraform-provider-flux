@@ -2,14 +2,14 @@
 subcategory: ""
 page_title: "Breaking changes to the provider configuration"
 description: |-
-    Guide for how to deault with the breaking changes made to the provider configuration.
+    Guide for how to default with the breaking changes made to the provider configuration.
 ---
 
 # Breaking changes to the provider configuration
 
 Change have been made to the provider configuration to move any Git credential configuration from the individual resources to the provider.
 This is to simplify the process of adding more resources without requiring end users to configure the same Git crendentials in each resource.
-As part of the breaking change the existing Kuberentes configuration has been moved inside of a single nested attributed, which groups relevant attributes together.
+As part of the breaking change the existing Kubernetes configuration has been moved inside of a single nested attributed, which groups relevant attributes together.
 
 Before the breaking change simple bootstrap resource configuration could look like the following.
 

@@ -2,7 +2,7 @@
 subcategory: ""
 page_title: "Bootstrap with GitHub"
 description: |-
-	Install Flux and synchronize with GitHub.
+    Install Flux and synchronize with GitHub.
 ---
 
 # Bootstrap with GitHub

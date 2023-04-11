@@ -1,5 +1,4 @@
 ---
-subcategory: ""
 page_title: "Customize Flux"
 subcategory: "Deprecated"
 description: |-
