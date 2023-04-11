@@ -1,233 +1,119 @@
 ---
 subcategory: ""
-page_title: "Bootstrap a cluster with GitLab"
+page_title: "Bootstrap with GitLab"
 description: |-
-    An example of how to bootstrap a Kubernetes cluster and sync it with a GitLab repository.
+    Install Flux and synchronize with GitLab.
 ---
 
-# Bootstrap a cluster with GitLab
+# Bootstrap with GitLab
 
-In order to follow the guide you'll need a GitLab account and a [personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
-that can create repositories.
+This guide will walk through how to install Flux into a Kubernetes cluster and configure it to synchronize from a GitLab repository. Begin with creating a GitLab repository, in this guide it will be named `fleet-infra`, which will be used by Flux.
+Generate a [personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) (PAT) that grants complete read/write access to the GitLab API., make sure to copy the generated token.
 
-Create the staging cluster using Kubernetes kind or set the kubectl context to an existing cluster:
-```
-kind create cluster --name staging
-kubectl cluster-info --context kind-staging
-```
+It is a good idea to use variables so that you do not accidentally store GitLab credentials in your Terraform configuration.
 
-With the following variables default values are set for all but `gitlab_owner` and `gitlab_token`.
 ```terraform
-variable "gitlab_owner" {
-  description = "gitlab owner"
-  type        = string
-}
-
 variable "gitlab_token" {
-  description = "gitlab token"
-  type        = string
-  sensitive   = true
+  sensitive = true
+  type      = string
 }
 
-variable "repository_name" {
-  description = "gitlab repository name"
-  type        = string
-  default     = "test-provider"
+variable "gitlab_group" {
+  type = string
 }
 
-variable "repository_visibility" {
-  description = "how visible is the gitlab repo"
-  type        = string
-  default     = "private"
-}
-
-variable "branch" {
-  description = "branch name"
-  type        = string
-  default     = "main"
-}
-
-variable "target_path" {
-  description = "flux sync target path"
-  type        = string
-  default     = "staging-cluster"
+variable "gitlab_project" {
+  type = string
 }
 ```
 
-You can set these in the terminal that you are running your terraform command by exporting variables.
-```shell
-export TF_VAR_gitlab_owner=<owner>
-export TF_VAR_gitlab_token=<token>
-```
+Configure the required providers and their versions.
 
-By using the GitLab provider to create a repository you can commit the manifests given by the
-data sources `flux_install` and `flux_sync`. The cluster has been successfully provisioned
-after the same manifests are applied to it.
 ```terraform
 terraform {
-  required_version = ">= 1.1.5"
+  required_version = ">=1.1.5"
 
   required_providers {
-    gitlab = {
-      source  = "gitlabhq/gitlab"
-      version = ">= 3.11.1"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">= 2.0.2"
-    }
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = ">= 1.10.0"
-    }
     flux = {
       source  = "fluxcd/flux"
-      version = ">= 0.11.0"
+      version = ">= 1.0.0-rc.1"
     }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "3.1.0"
+    kind = {
+      source  = "tehcyx/kind"
+      version = ">=0.0.16"
+    }
+    gitlab = {
+      source  = "gitlabhq/gitlab"
+      version = ">=15.10.0"
     }
   }
 }
+```
 
-provider "flux" {}
+A Kind cluster is used as the target Kubernetes cluster where Flux is installed.
 
-provider "kubectl" {}
+```terraform
+provider "kind" {}
 
-provider "kubernetes" {
-  config_path = "~/.kube/config"
+resource "kind_cluster" "this" {
+  name = "flux-e2e"
 }
+```
 
+The GitLab repository is created separatly so a datasource is used to get a reference to the repository. Creating GitLab repositories with Terraform is generally not a good idea as they could easily be removed. Additionally it is not possible to use the same repository for multiple environments if the repository is created with Terraform.
+	
+```terraform
 provider "gitlab" {
   token = var.gitlab_token
 }
 
-# SSH
-locals {
-  known_hosts = "gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY="
-}
-
-resource "tls_private_key" "main" {
+resource "tls_private_key" "flux" {
   algorithm   = "ECDSA"
   ecdsa_curve = "P256"
 }
 
-# Flux
-data "flux_install" "main" {
-  target_path = var.target_path
+data "gitlab_project" "this" {
+  path_with_namespace = "${var.gitlab_group}/${var.gitlab_project}"
 }
 
-data "flux_sync" "main" {
-  target_path = var.target_path
-  url         = "ssh://git@gitlab.com/${var.gitlab_owner}/${var.repository_name}.git"
-  branch      = var.branch
-}
-
-# Kubernetes
-resource "kubernetes_namespace" "flux_system" {
-  metadata {
-    name = "flux-system"
-  }
-
-  lifecycle {
-    ignore_changes = [
-      metadata[0].labels,
-    ]
-  }
-}
-
-data "kubectl_file_documents" "install" {
-  content = data.flux_install.main.content
-}
-
-data "kubectl_file_documents" "sync" {
-  content = data.flux_sync.main.content
-}
-
-locals {
-  install = [for v in data.kubectl_file_documents.install.documents : {
-    data : yamldecode(v)
-    content : v
-    }
-  ]
-  sync = [for v in data.kubectl_file_documents.sync.documents : {
-    data : yamldecode(v)
-    content : v
-    }
-  ]
-}
-
-resource "kubectl_manifest" "install" {
-  for_each   = { for v in local.install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
-  depends_on = [kubernetes_namespace.flux_system]
-  yaml_body  = each.value
-}
-
-resource "kubectl_manifest" "sync" {
-  for_each   = { for v in local.sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
-  depends_on = [kubernetes_namespace.flux_system]
-  yaml_body  = each.value
-}
-
-resource "kubernetes_secret" "main" {
-  depends_on = [kubectl_manifest.install]
-
-  metadata {
-    name      = data.flux_sync.main.secret
-    namespace = data.flux_sync.main.namespace
-  }
-
-  data = {
-    identity       = tls_private_key.main.private_key_pem
-    "identity.pub" = tls_private_key.main.public_key_pem
-    known_hosts    = local.known_hosts
-  }
-}
-
-# Gitlab
-resource "gitlab_project" "main" {
-  name                   = var.repository_name
-  visibility_level       = var.repository_visibility
-  initialize_with_readme = true
-  default_branch         = var.branch
-}
-
-resource "gitlab_deploy_key" "main" {
-  title   = "staging-cluster"
-  project = gitlab_project.main.id
-  key     = tls_private_key.main.public_key_openssh
-
-  depends_on = [gitlab_project.main]
-}
-
-resource "gitlab_repository_file" "install" {
-  project        = gitlab_project.main.id
-  branch         = gitlab_project.main.default_branch
-  file_path      = data.flux_install.main.path
-  content        = base64encode(data.flux_install.main.content)
-  commit_message = "Add ${data.flux_install.main.path}"
-
-  depends_on = [gitlab_project.main]
-}
-
-resource "gitlab_repository_file" "sync" {
-  project        = gitlab_project.main.id
-  branch         = gitlab_project.main.default_branch
-  file_path      = data.flux_sync.main.path
-  content        = base64encode(data.flux_sync.main.content)
-  commit_message = "Add ${data.flux_sync.main.path}"
-
-  depends_on = [gitlab_repository_file.install]
-}
-
-resource "gitlab_repository_file" "kustomize" {
-  project        = gitlab_project.main.id
-  branch         = gitlab_project.main.default_branch
-  file_path      = data.flux_sync.main.kustomize_path
-  content        = base64encode(data.flux_sync.main.kustomize_content)
-  commit_message = "Add ${data.flux_sync.main.kustomize_path}"
-
-  depends_on = [gitlab_repository_file.sync]
+resource "gitlab_deploy_key" "this" {
+  project  = data.gitlab_project.this.id
+  title    = "Flux"
+  key      = tls_private_key.flux.public_key_openssh
+  can_push = true
 }
 ```
+
+The Flux provider needs to be configured both with Git and Kubernetes credentials. 
+
+```terraform
+provider "flux" {
+  kubernetes = {
+    host                   = kind_cluster.this.endpoint
+    client_certificate     = kind_cluster.this.client_certificate
+    client_key             = kind_cluster.this.client_key
+    cluster_ca_certificate = kind_cluster.this.cluster_ca_certificate
+  }
+  git = {
+    url = "ssh://git@gitlab.com/${data.gitlab_project.this.path_with_namespace}.git"
+    ssh = {
+      username    = "git"
+      private_key = tls_private_key.flux.private_key_pem
+    }
+  }
+}
+
+resource "flux_bootstrap_git" "this" {
+  depends_on = [gitlab_deploy_key.this]
+
+  path = "clusters/my-cluster"
+}
+```
+
+Apply the Terraform, remember to include values for the varaibles.
+
+```hcl
+terraform apply -var "gitlab_group=<group>" -var "gitlab_token=<token>" -var "gitlab_repository=fleet-infra"
+```
+
+When Terraform apply has completed a Kind cluster will exist with Flux installed and configured in it.

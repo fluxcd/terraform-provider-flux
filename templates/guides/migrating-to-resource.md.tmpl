@@ -2,7 +2,7 @@
 subcategory: ""
 page_title: "Migrating to bootstrap resource"
 description: |-
-    Guide to migrate from boostraping Flux with datasources to using the bootstrap resource. 
+    Guide to migrate from bootstrapping Flux with datasources to using the bootstrap resource.
 ---
 
 # Migrating to bootstrap resource
@@ -63,7 +63,7 @@ terraform {
     }
     flux = {
       source = "fluxcd/flux"
-      version = ">= 0.22.0"
+      version = ">= 1.0.0-rc.1"
     }
   }
 }
@@ -244,7 +244,7 @@ terraform {
     }
     flux = {
       source = "fluxcd/flux"
-      version = ">= 0.22.0"
+      version = ">= 1.0.0-rc.1"
     }
   }
 }

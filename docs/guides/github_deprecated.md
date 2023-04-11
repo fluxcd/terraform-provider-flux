@@ -1,3 +1,68 @@
+---
+page_title: "Bootstrap a cluster with GitHub and flux_install"
+subcategory: "Deprecated"
+description: |-
+    An example of how to bootstrap a Kubernetes cluster and sync it with a GitHub repository.
+---
+
+# Bootstrap a cluster with GitHub
+
+In order to follow the guide you'll need a GitHub account and a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+that can create repositories (check all permissions under repo).
+
+Create the staging cluster using Kubernetes kind or set the kubectl context to an existing cluster:
+```
+kind create cluster --name staging
+kubectl cluster-info --context kind-staging
+```
+
+With the following variables default values are set for all but `github_owner` and `github_token`.
+```terraform
+variable "github_owner" {
+  type        = string
+  description = "github owner"
+}
+
+variable "github_token" {
+  type        = string
+  description = "github token"
+}
+
+variable "repository_name" {
+  type        = string
+  default     = "test-provider"
+  description = "github repository name"
+}
+
+variable "repository_visibility" {
+  type        = string
+  default     = "private"
+  description = "How visible is the github repo"
+}
+
+variable "branch" {
+  type        = string
+  default     = "main"
+  description = "branch name"
+}
+
+variable "target_path" {
+  type        = string
+  default     = "staging-cluster"
+  description = "flux sync target path"
+}
+```
+
+You can set these in the terminal that you are running your terraform command by exporting variables.
+```shell
+export TF_VAR_github_owner=<owner>
+export TF_VAR_github_token=<token>
+```
+
+By using the GitHub provider to create a repository you can commit the manifests given by the
+data sources `flux_install` and `flux_sync`. The cluster has been successfully after the same
+manifests are applied to it.
+```terraform
 terraform {
   required_version = ">= 1.1.5"
 
@@ -160,3 +225,4 @@ resource "github_repository_file" "kustomize" {
   content    = data.flux_sync.main.kustomize_content
   branch     = var.branch
 }
+```

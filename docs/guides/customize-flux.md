@@ -1,6 +1,6 @@
 ---
-subcategory: ""
 page_title: "Customize Flux"
+subcategory: "Deprecated"
 description: |-
   Customizing Flux past the exposed parameters.
 ---
@@ -14,7 +14,7 @@ has to be done. This could be changing the resource requests or limits for a con
 When deploying Flux with the CLI the recommended solution is to [modify the Kustomization file](https://fluxcd.io/flux/installation/#customize-flux-manifests).
 When using terraform to bootstrap flux, the `flux_sync` data source provides a `patch_names` argument and corresponding `patch_file_paths` output value that allow users to provide patches to the `kustomize.yaml` in the same manner.
 
-This guide assumes that you have setup Flux with Terraform already. Follow the [GitHub guide](./github) for a quick example to get a Kubernetes cluster with Flux installed in it.
+This guide assumes that you have setup Flux with Terraform already. Follow the [GitHub guide](./github_deprecated) for a quick example to get a Kubernetes cluster with Flux installed in it.
 
 The following patch file, `psp-patch.yaml`,  will set PSP rules for all of the Flux deployments.
 
@@ -63,12 +63,12 @@ terraform {
       version = ">= 4.0.0"
     }
     github = {
-      source = "integrations/github"
+      source  = "integrations/github"
       version = "4.5.2"
     }
     flux = {
       source  = "fluxcd/flux"
-      version = ">= 0.0.13"
+      version = ">= 1.0.0-rc.1"
     }
   }
 }
@@ -112,7 +112,7 @@ resource "github_repository_file" "kustomize" {
 resource "github_repository_file" "patches" {
   #  `patch_file_paths` is a map keyed by the keys of `flux_sync.main`
   #  whose values are the paths where the patch files should be installed.
-  for_each   = data.flux_sync.main.patch_file_paths
+  for_each = data.flux_sync.main.patch_file_paths
 
   repository = github_repository.main.name
   file       = each.value

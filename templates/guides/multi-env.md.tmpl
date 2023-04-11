@@ -1,6 +1,6 @@
 ---
-subcategory: ""
-page_title: "Multi Environment Considerations"
+page_title: "Multi Environment Considerations for flux_install"
+subcategory: "Deprecated"
 description: |-
     Considerations when deploying multiple environments.
 ---

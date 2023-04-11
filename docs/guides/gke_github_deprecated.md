@@ -1,6 +1,6 @@
 ---
-subcategory: ""
-page_title: "Bootstrap a GKE cluster with GitHub"
+page_title: "Bootstrap a GKE cluster with GitHub and flux_install"
+subcategory: "Deprecated"
 description: |-
     An example of how to bootstrap Flux on GKE and sync it with a GitHub repository.
 ---
@@ -101,7 +101,7 @@ terraform {
     }
     flux = {
       source  = "fluxcd/flux"
-      version = ">= 0.0.13"
+      version = ">= 1.0.0-rc.1"
     }
     tls = {
       source  = "hashicorp/tls"
@@ -218,8 +218,8 @@ resource "kubernetes_secret" "main" {
 
 # Github
 provider "github" {
-  token        = var.github_token
-  owner        = var.github_owner
+  token = var.github_token
+  owner = var.github_owner
 }
 
 # To make sure the repository exists and the correct permissions are set.

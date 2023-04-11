@@ -1,31 +1,39 @@
 ---
 subcategory: ""
-page_title: "Bootstrap a cluster with GitLab"
+page_title: "Bootstrap with GitLab"
 description: |-
-    An example of how to bootstrap a Kubernetes cluster and sync it with a GitLab repository.
+    Install Flux and synchronize with GitLab.
 ---
 
-# Bootstrap a cluster with GitLab
+# Bootstrap with GitLab
 
-In order to follow the guide you'll need a GitLab account and a [personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
-that can create repositories.
+This guide will walk through how to install Flux into a Kubernetes cluster and configure it to synchronize from a GitLab repository. Begin with creating a GitLab repository, in this guide it will be named `fleet-infra`, which will be used by Flux.
+Generate a [personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) (PAT) that grants complete read/write access to the GitLab API., make sure to copy the generated token.
 
-Create the staging cluster using Kubernetes kind or set the kubectl context to an existing cluster:
+It is a good idea to use variables so that you do not accidentally store GitLab credentials in your Terraform configuration.
+
+{{ tffile "examples/gitlab-ssh/variables.tf" }}
+
+Configure the required providers and their versions.
+
+{{ tffile "examples/gitlab-ssh/main.tf" }}
+
+A Kind cluster is used as the target Kubernetes cluster where Flux is installed.
+
+{{ tffile "examples/gitlab-ssh/kind.tf" }}
+
+The GitLab repository is created separatly so a datasource is used to get a reference to the repository. Creating GitLab repositories with Terraform is generally not a good idea as they could easily be removed. Additionally it is not possible to use the same repository for multiple environments if the repository is created with Terraform.
+	
+{{ tffile "examples/gitlab-ssh/gitlab.tf" }}
+
+The Flux provider needs to be configured both with Git and Kubernetes credentials. 
+
+{{ tffile "examples/gitlab-ssh/flux.tf" }}
+
+Apply the Terraform, remember to include values for the varaibles.
+
+```hcl
+terraform apply -var "gitlab_group=<group>" -var "gitlab_token=<token>" -var "gitlab_repository=fleet-infra"
 ```
-kind create cluster --name staging
-kubectl cluster-info --context kind-staging
-```
 
-With the following variables default values are set for all but `gitlab_owner` and `gitlab_token`.
-{{ tffile "examples/gitlab/variables.tf" }}
-
-You can set these in the terminal that you are running your terraform command by exporting variables.
-```shell
-export TF_VAR_gitlab_owner=<owner>
-export TF_VAR_gitlab_token=<token>
-```
-
-By using the GitLab provider to create a repository you can commit the manifests given by the
-data sources `flux_install` and `flux_sync`. The cluster has been successfully provisioned
-after the same manifests are applied to it.
-{{ tffile "examples/gitlab/main.tf" }}
+When Terraform apply has completed a Kind cluster will exist with Flux installed and configured in it.

@@ -1,3 +1,69 @@
+---
+page_title: "Bootstrap a cluster with GitLab and flux_install"
+subcategory: "Deprecated"
+description: |-
+    An example of how to bootstrap a Kubernetes cluster and sync it with a GitLab repository.
+---
+
+# Bootstrap a cluster with GitLab
+
+In order to follow the guide you'll need a GitLab account and a [personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
+that can create repositories.
+
+Create the staging cluster using Kubernetes kind or set the kubectl context to an existing cluster:
+```
+kind create cluster --name staging
+kubectl cluster-info --context kind-staging
+```
+
+With the following variables default values are set for all but `gitlab_owner` and `gitlab_token`.
+```terraform
+variable "gitlab_owner" {
+  description = "gitlab owner"
+  type        = string
+}
+
+variable "gitlab_token" {
+  description = "gitlab token"
+  type        = string
+  sensitive   = true
+}
+
+variable "repository_name" {
+  description = "gitlab repository name"
+  type        = string
+  default     = "test-provider"
+}
+
+variable "repository_visibility" {
+  description = "how visible is the gitlab repo"
+  type        = string
+  default     = "private"
+}
+
+variable "branch" {
+  description = "branch name"
+  type        = string
+  default     = "main"
+}
+
+variable "target_path" {
+  description = "flux sync target path"
+  type        = string
+  default     = "staging-cluster"
+}
+```
+
+You can set these in the terminal that you are running your terraform command by exporting variables.
+```shell
+export TF_VAR_gitlab_owner=<owner>
+export TF_VAR_gitlab_token=<token>
+```
+
+By using the GitLab provider to create a repository you can commit the manifests given by the
+data sources `flux_install` and `flux_sync`. The cluster has been successfully provisioned
+after the same manifests are applied to it.
+```terraform
 terraform {
   required_version = ">= 1.1.5"
 
@@ -164,3 +230,4 @@ resource "gitlab_repository_file" "kustomize" {
 
   depends_on = [gitlab_repository_file.sync]
 }
+```
