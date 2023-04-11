@@ -1,0 +1,17 @@
+---
+subcategory: ""
+page_title: "Install Only with Helm Chart"
+description: |-
+	A guide for installing Flux with Terraform without any bootstrap.
+---
+
+# Install Only with Helm Chart
+
+Using the [Flux Helm chart](https://github.com/fluxcd-community/helm-charts/tree/main/charts/flux2) is a better option when Flux needs to be installed without any bootstrap configuration.
+The Helm Terraform provider can be used to install the chart in a Kubernetes cluster. Custom resource definitions will be applied along with all of the Flux components.
+
+Define a Kind cluster and pass the cluster configuration to the Helm provider along with a `helm_release` resource that refers to the Flux Helm chart.
+
+{{ tffile "examples/install-helm-release/main.tf" }}
+
+After applying the example Terraform configuration, a Kind cluster should exist with Flux installed in the `flux_system` namespace.
