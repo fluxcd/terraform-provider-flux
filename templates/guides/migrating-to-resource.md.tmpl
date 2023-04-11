@@ -63,7 +63,7 @@ terraform {
     }
     flux = {
       source = "fluxcd/flux"
-      version = ">= 0.22.0"
+      version = ">= 1.0.0-rc.1"
     }
   }
 }
@@ -244,7 +244,7 @@ terraform {
     }
     flux = {
       source = "fluxcd/flux"
-      version = ">= 0.22.0"
+      version = ">= 1.0.0-rc.1"
     }
   }
 }

@@ -63,12 +63,12 @@ terraform {
       version = ">= 4.0.0"
     }
     github = {
-      source = "integrations/github"
+      source  = "integrations/github"
       version = "4.5.2"
     }
     flux = {
       source  = "fluxcd/flux"
-      version = ">= 0.0.13"
+      version = ">= 1.0.0-rc.1"
     }
   }
 }
@@ -112,7 +112,7 @@ resource "github_repository_file" "kustomize" {
 resource "github_repository_file" "patches" {
   #  `patch_file_paths` is a map keyed by the keys of `flux_sync.main`
   #  whose values are the paths where the patch files should be installed.
-  for_each   = data.flux_sync.main.patch_file_paths
+  for_each = data.flux_sync.main.patch_file_paths
 
   repository = github_repository.main.name
   file       = each.value
