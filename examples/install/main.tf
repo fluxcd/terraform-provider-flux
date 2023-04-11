@@ -11,8 +11,7 @@ terraform {
       version = ">= 1.10.0"
     }
     flux = {
-      source  = "fluxcd/flux"
-      version = ">= 1.0.0-rc.1"
+      source = "fluxcd/flux"
     }
   }
 }
