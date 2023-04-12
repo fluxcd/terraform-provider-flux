@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.0.0-rc.1
+
+**Release date:** 2023-04-11
+
+This release includes flux2 [v2.0.0-rc.1](https://github.com/fluxcd/flux2/releases/tag/v2.0.0-rc.1).
+
+The datasources `flux_install` and `flux_sync` are deprecated, with a warning about their removal in the future. Users of the datasources should migrate to the `flux_bootstrap_git` resources using the [migration guide](https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/migrating-to-resource).
+
+This release also implements a timeout configuration for `flux_bootstrap_git` which enables retrying of update actions when multiple commits are pushed in parallel.
+
 ## 0.25.3
 
 **Release date:** 2023-03-21
