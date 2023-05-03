@@ -2,7 +2,7 @@
 subcategory: ""
 page_title: "Install Only with Helm Chart"
 description: |-
-	A guide for installing Flux with Terraform without any bootstrap.
+  A guide for installing Flux with Terraform without any bootstrap.
 ---
 
 # Install Only with Helm Chart

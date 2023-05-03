@@ -29,7 +29,7 @@ require (
 	github.com/fluxcd/pkg/ssh v0.7.3
 	github.com/fluxcd/source-controller/api v1.0.0-rc.1
 	github.com/google/go-containerregistry v0.14.0
-	github.com/hashicorp/terraform-plugin-docs v0.13.0
+	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/hashicorp/terraform-plugin-framework v1.2.0
 	github.com/hashicorp/terraform-plugin-framework-timeouts v0.3.1
 	github.com/hashicorp/terraform-plugin-framework-validators v0.9.0
