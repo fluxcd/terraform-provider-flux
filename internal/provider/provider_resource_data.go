@@ -61,6 +61,9 @@ func NewProviderResourceData(ctx context.Context, data ProviderModel) (*provider
 }
 
 func (prd *providerResourceData) GetKubernetesClient() (client.WithWatch, error) {
+	if prd.rcg == nil {
+		return nil, fmt.Errorf("Kubernetes client cannot be created without any Kubernetes provider configuration")
+	}
 	kubeClient, err := utils.KubeClient(prd.rcg, &runclient.Options{})
 	if err != nil {
 		return nil, err
