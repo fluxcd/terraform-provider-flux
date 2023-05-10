@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.0.0-rc.2
+
+**Release date:** 2023-05-10
+
+This release includes flux2 [v2.0.0-rc.2](https://github.com/fluxcd/flux2/releases/tag/v2.0.0-rc.2).
+
+This release includes the new attribute `disable_secret_creation` in the `flux_bootstrap_git` resource. This empowers users to override the git credentials used by Flux inside of the Kubernetes cluster.
+
 ## 1.0.0-rc.1
 
 **Release date:** 2023-04-11
