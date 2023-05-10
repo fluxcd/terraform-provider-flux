@@ -35,6 +35,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/fluxcd/flux2/v2/pkg/manifestgen"
+	"github.com/fluxcd/flux2/v2/pkg/manifestgen/sourcesecret"
 	"github.com/fluxcd/pkg/git"
 	"github.com/fluxcd/pkg/git/gogit"
 	"github.com/fluxcd/pkg/git/repository"
@@ -43,6 +44,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -330,6 +332,81 @@ patches:
 	})
 }
 
+func TestAccBootstrapGit_WithExistingSecret(t *testing.T) {
+	env := setupEnvironment(t)
+	namespace := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "flux-system",
+		},
+	}
+
+	existingSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "flux-system",
+			Namespace: namespace.Name,
+		},
+		StringData: map[string]string{
+			"identity":     env.privateKeyRo,
+			"identity.pub": env.publicKeyRo,
+			"known_hosts":  env.sshHostKey,
+		},
+		Type: corev1.SecretTypeOpaque,
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					cfg, err := clientcmd.BuildConfigFromFlags("", env.kubeCfgPath)
+					if err != nil {
+						t.Fatalf("Can not initialize kubeconfig: %s", err)
+					}
+					client, err := kubernetes.NewForConfig(cfg)
+					if err != nil {
+						t.Fatalf("Can not initialize kubeconfig: %s", err)
+					}
+					_, err = client.CoreV1().Namespaces().Create(context.TODO(), namespace, metav1.CreateOptions{})
+					if err != nil {
+						t.Fatalf("Can not create namespace: %s", err)
+					}
+					_, err = client.CoreV1().Secrets(namespace.Name).Create(context.TODO(), existingSecret, metav1.CreateOptions{})
+					if err != nil {
+						t.Fatalf("Can not create secret: %s", err)
+					}
+				},
+				Config: bootstrapGitWithExistingSecret(env),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					func(state *terraform.State) error {
+						cfg, err := clientcmd.BuildConfigFromFlags("", env.kubeCfgPath)
+						if err != nil {
+							return nil
+						}
+						client, err := kubernetes.NewForConfig(cfg)
+						if err != nil {
+							return nil
+						}
+						secret, err := client.CoreV1().Secrets(namespace.Name).Get(context.TODO(), existingSecret.Name, metav1.GetOptions{})
+						if err != nil {
+							return nil
+						}
+						if string(secret.Data["identity"]) != env.privateKeyRo {
+							return fmt.Errorf("The existing private key was overwritten: expected:\n%s\ngot:\n%s", string(secret.Data["identity"]), env.privateKeyRo)
+						}
+						if string(secret.Data["identity.pub"]) != env.publicKeyRo {
+							return fmt.Errorf("The existing public key was overwritten: expected:\n%s\ngot:\n%s", string(secret.Data["identity.pub"]), env.publicKeyRo)
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
 func bootstrapGitTolerationKeys(env environment, tolerationKeys []string) string {
 	return fmt.Sprintf(`
     provider "flux" {
@@ -496,13 +573,40 @@ func bootstrapGitComponents(env environment) string {
 	`, env.kubeCfgPath, env.httpClone, env.username, env.password)
 }
 
+func bootstrapGitWithExistingSecret(env environment) string {
+	return fmt.Sprintf(`
+    provider "flux" {
+	  kubernetes = {
+        config_path = "%s"
+	  }
+	  git = {
+        url = "%s"
+        ssh = {
+          username = "git"
+          private_key = <<EOF
+%s
+EOF
+        }
+	  }
+    }
+
+    resource "flux_bootstrap_git" "this" {
+      disable_secret_creation = true
+    }
+	`, env.kubeCfgPath, env.sshClone, env.privateKey)
+}
+
 type environment struct {
-	kubeCfgPath string
-	httpClone   string
-	sshClone    string
-	username    string
-	password    string
-	privateKey  string
+	kubeCfgPath  string
+	httpClone    string
+	sshClone     string
+	username     string
+	password     string
+	privateKey   string
+	publicKey    string
+	sshHostKey   string
+	privateKeyRo string
+	publicKeyRo  string
 }
 
 func setupEnvironment(t *testing.T) environment {
@@ -616,13 +720,27 @@ func setupEnvironment(t *testing.T) environment {
 	}
 	giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOpt)
 
+	keyPairRo, err := ssh.GenerateKeyPair(ssh.ECDSA_P256)
+	require.NoError(t, err)
+	createPublicKeyOptRo := gitea.CreateKeyOption{
+		Title:    "KeyRo",
+		Key:      string(keyPairRo.PublicKey),
+		ReadOnly: true,
+	}
+	giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOptRo)
+
+	sshHostKey, err := sourcesecret.ScanHostKey(fmt.Sprintf("%s:%d", giteaName, sshPort))
 	return environment{
-		kubeCfgPath: kubeCfgPath,
-		httpClone:   repo.CloneURL,
-		sshClone:    fmt.Sprintf("ssh://git@%s:%d/%s/%s.git", giteaName, sshPort, username, randSuffix),
-		username:    username,
-		password:    password,
-		privateKey:  string(keyPair.PrivateKey),
+		kubeCfgPath:  kubeCfgPath,
+		httpClone:    repo.CloneURL,
+		sshClone:     fmt.Sprintf("ssh://git@%s:%d/%s/%s.git", giteaName, sshPort, username, randSuffix),
+		username:     username,
+		password:     password,
+		privateKey:   string(keyPair.PrivateKey),
+		publicKey:    string(keyPair.PublicKey),
+		sshHostKey:   string(sshHostKey),
+		privateKeyRo: string(keyPairRo.PrivateKey),
+		publicKeyRo:  string(keyPairRo.PublicKey),
 	}
 }
 
