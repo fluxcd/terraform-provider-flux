@@ -229,7 +229,7 @@ func TestAccBootstrapGit_Upgrade(t *testing.T) {
 				),
 			},
 			{
-				Config: bootstrapGitVersion(env, "v2.0.0-rc.2"),
+				Config: bootstrapGitVersion(env, "v2.0.0-rc.3"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
