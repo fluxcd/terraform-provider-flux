@@ -16,18 +16,18 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230426101702-58e86b294756
 	github.com/docker/docker v23.0.3+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/fluxcd/flux2/v2 v2.0.0-rc.2
-	github.com/fluxcd/helm-controller/api v0.32.2
-	github.com/fluxcd/image-automation-controller/api v0.33.0
-	github.com/fluxcd/image-reflector-controller/api v0.27.1
-	github.com/fluxcd/kustomize-controller/api v1.0.0-rc.2
-	github.com/fluxcd/notification-controller/api v1.0.0-rc.2
+	github.com/fluxcd/flux2/v2 v2.0.0-rc.3
+	github.com/fluxcd/helm-controller/api v0.33.0
+	github.com/fluxcd/image-automation-controller/api v0.33.1
+	github.com/fluxcd/image-reflector-controller/api v0.27.2
+	github.com/fluxcd/kustomize-controller/api v1.0.0-rc.3
+	github.com/fluxcd/notification-controller/api v1.0.0-rc.3
 	github.com/fluxcd/pkg/git v0.11.0
 	github.com/fluxcd/pkg/git/gogit v0.8.1
 	github.com/fluxcd/pkg/runtime v0.35.0
 	github.com/fluxcd/pkg/ssa v0.27.0
 	github.com/fluxcd/pkg/ssh v0.7.3
-	github.com/fluxcd/source-controller/api v1.0.0-rc.2
+	github.com/fluxcd/source-controller/api v1.0.0-rc.3
 	github.com/google/go-containerregistry v0.14.0
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/hashicorp/terraform-plugin-framework v1.2.0
@@ -68,10 +68,10 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chai2010/gettext-go v1.0.2 // indirect
-	github.com/cloudflare/circl v1.3.2 // indirect
+	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/docker/distribution v2.8.1+incompatible // indirect
+	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.10.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
