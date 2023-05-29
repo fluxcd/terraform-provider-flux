@@ -187,12 +187,16 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 			{
 				PreConfig: func() {
 					gitClient := getTestGitClient(t, env.username, env.password)
-					_, err := gitClient.Clone(context.TODO(), env.httpClone, repository.CloneOptions{CheckoutStrategy: repository.CheckoutStrategy{Branch: defaultBranch}})
+					_, err := gitClient.Clone(context.TODO(), env.httpClone, repository.CloneConfig{
+						CheckoutStrategy: repository.CheckoutStrategy{
+							Branch: defaultBranch,
+						},
+					})
 					require.NoError(t, err)
 					os.Remove(filepath.Join(gitClient.Path(), "flux-system/kustomization.yaml"))
 					_, err = gitClient.Commit(git.Commit{})
 					require.NoError(t, err)
-					err = gitClient.Push(context.TODO())
+					err = gitClient.Push(context.TODO(), repository.PushConfig{})
 					require.NoError(t, err)
 				},
 				Config: bootstrapGitHTTP(env),

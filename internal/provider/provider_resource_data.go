@@ -91,7 +91,11 @@ func (prd *providerResourceData) GetGitClient(ctx context.Context) (*gogit.Clien
 		return nil, fmt.Errorf("could not create git client: %w", err)
 	}
 	// TODO: Need to conditionally clone here. If repository is empty this will fail.
-	_, err = client.Clone(ctx, prd.GetRepositoryURL().String(), repository.CloneOptions{CheckoutStrategy: repository.CheckoutStrategy{Branch: prd.git.Branch.ValueString()}})
+	_, err = client.Clone(ctx, prd.GetRepositoryURL().String(), repository.CloneConfig{
+		CheckoutStrategy: repository.CheckoutStrategy{
+			Branch: prd.git.Branch.ValueString(),
+		},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("could not clone git repository: %w", err)
 	}

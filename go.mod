@@ -2,10 +2,10 @@ module github.com/fluxcd/terraform-provider-flux
 
 go 1.18
 
-// Pin kustomize to v4.5.7
+// Pin kustomize to v5.0.3
 replace (
-	sigs.k8s.io/kustomize/api => sigs.k8s.io/kustomize/api v0.12.1
-	sigs.k8s.io/kustomize/kyaml => sigs.k8s.io/kustomize/kyaml v0.13.9
+	sigs.k8s.io/kustomize/api => sigs.k8s.io/kustomize/api v0.13.4
+	sigs.k8s.io/kustomize/kyaml => sigs.k8s.io/kustomize/kyaml v0.14.2
 )
 
 // Fix CVE-2022-28948
