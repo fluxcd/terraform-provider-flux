@@ -565,7 +565,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		if err != nil {
 			return nil
 		}
-		err = gitClient.Push(ctx)
+		err = gitClient.Push(ctx, repository.PushConfig{})
 		if err != nil {
 			return retry.RetryableError(fmt.Errorf("Unable to push file update: %w", err))
 		}
@@ -651,7 +651,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		if err != nil {
 			return retry.NonRetryableError(fmt.Errorf("Unable to commit removed file(s): %w", err))
 		}
-		err = gitClient.Push(ctx)
+		err = gitClient.Push(ctx, repository.PushConfig{})
 		if err != nil {
 			return retry.RetryableError(fmt.Errorf("Unable to psuh removed file(s): %w", err))
 		}
