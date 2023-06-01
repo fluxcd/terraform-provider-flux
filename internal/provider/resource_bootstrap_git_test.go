@@ -49,6 +49,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/kind/pkg/cluster"
+
+	"github.com/fluxcd/terraform-provider-flux/internal/utils"
 )
 
 const (
@@ -233,7 +235,7 @@ func TestAccBootstrapGit_Upgrade(t *testing.T) {
 				),
 			},
 			{
-				Config: bootstrapGitVersion(env, "v2.0.0-rc.3"),
+				Config: bootstrapGitVersion(env, utils.DefaultFluxVersion),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),

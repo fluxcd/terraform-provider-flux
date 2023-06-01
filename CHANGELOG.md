@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.0.0-rc.5
+
+**Release date:** 2023-06-01
+
+This release includes flux2 [v2.0.0-rc.5](https://github.com/fluxcd/flux2/releases/tag/v2.0.0-rc.5).
+
+Flux `v2.0.0-rc.5` addresses a regression that was introduced in `v2.0.0-rc.4`.
+This regression caused a disruption in the compatibility with Git servers
+utilizing v2 of the wire protocol, such as Azure Devops and AWS CodeCommit.
+
 ## 1.0.0-rc.4
 
 **Release date:** 2023-05-29
