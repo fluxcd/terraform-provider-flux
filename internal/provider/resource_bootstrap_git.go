@@ -108,6 +108,7 @@ type bootstrapGitResourceData struct {
 	KustomizationOverride types.String         `tfsdk:"kustomization_override"`
 	RepositoryFiles       types.Map            `tfsdk:"repository_files"`
 	Timeouts              timeouts.Value       `tfsdk:"timeouts"`
+	ManifestsPath         types.String         `tfsdk:"manifests_path"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -296,6 +297,10 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Computed:    true,
 			},
 			"timeouts": timeouts.AttributesAll(ctx),
+			"manifests_path": schema.StringAttribute{
+				Description: fmt.Sprintf("The install manifests are built from a GitHub release or kustomize overlay if using a local path. Defaults to `%s`.", defaultOpts.BaseURL),
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -952,8 +957,13 @@ func getInstallOptions(data bootstrapGitResourceData) install.Options {
 	data.TolerationKeys.ElementsAs(context.Background(), &tolerationKeys, false)
 	sort.Strings(tolerationKeys)
 
+	baseURL := data.ManifestsPath.ValueString()
+	if baseURL == "" {
+		baseURL = install.MakeDefaultOptions().BaseURL
+	}
+
 	installOptions := install.Options{
-		BaseURL:                install.MakeDefaultOptions().BaseURL,
+		BaseURL:                baseURL,
 		Version:                data.Version.ValueString(),
 		Namespace:              data.Namespace.ValueString(),
 		Components:             components,
