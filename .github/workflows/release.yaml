@@ -56,5 +56,6 @@ jobs:
       contents: write # To add assets to the release.
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0
     with:
+      provenance-name: "provenance.intoto.jsonl"
       base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
       upload-assets: true
