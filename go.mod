@@ -1,6 +1,6 @@
 module github.com/fluxcd/terraform-provider-flux
 
-go 1.18
+go 1.20
 
 // Pin kustomize to v5.0.3
 replace (

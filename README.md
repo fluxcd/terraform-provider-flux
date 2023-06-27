@@ -1,6 +1,6 @@
 # Terraform Provider Flux
 
-[![tests](https://github.com/fluxcd/helm-controller/workflows/tests/badge.svg)](https://github.com/fluxcd/terraform-provider-flux/actions)
+[![tests](https://github.com/fluxcd/terraform-provider-flux/workflows/tests/badge.svg)](https://github.com/fluxcd/terraform-provider-flux/actions)
 [![report](https://goreportcard.com/badge/github.com/fluxcd/terraform-provider-flux)](https://goreportcard.com/report/github.com/fluxcd/terraform-provider-flux)
 [![license](https://img.shields.io/github/license/fluxcd/terraform-provider-flux.svg)](https://github.com/fluxcd/terraform-provider-flux/blob/main/LICENSE)
 [![release](https://img.shields.io/github/release/fluxcd/terraform-provider-flux/all.svg)](https://github.com/fluxcd/terraform-provider-flux/releases)
