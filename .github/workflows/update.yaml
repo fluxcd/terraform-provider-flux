@@ -1,4 +1,4 @@
-name: Update manifestgen
+name: update
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     - cron: "0 * * * *"
 
 jobs:
-  update-manifestgen:
+  update-flux:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
