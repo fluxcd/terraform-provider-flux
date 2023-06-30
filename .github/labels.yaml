@@ -1,0 +1,9 @@
+# Configuration file to declaratively configure labels
+# Ref: https://github.com/EndBug/label-sync#Config-files
+
+- name: area/git
+  description: Git bootstrap related issues and pull requests
+  color: '#863faf'
+- name: area/kubernetes
+  description: Kubernetes bootstrap related issues and pull requests
+  color: '#00e54d'
