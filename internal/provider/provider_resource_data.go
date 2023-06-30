@@ -50,7 +50,7 @@ type providerResourceData struct {
 func NewProviderResourceData(ctx context.Context, data ProviderModel) (*providerResourceData, error) {
 	clientCfg, err := getClientConfiguration(ctx, data.Kubernetes)
 	if err != nil {
-		return nil, fmt.Errorf("Invalid Kubernetes configuration: %w", err)
+		return nil, fmt.Errorf("invalid Kubernetes configuration: %w", err)
 	}
 	rcg := utils.NewRestClientGetter(clientCfg)
 	return &providerResourceData{
@@ -189,7 +189,7 @@ func (prd *providerResourceData) GetEntityList() (openpgp.EntityList, error) {
 		var err error
 		entityList, err = openpgp.ReadKeyRing(strings.NewReader(prd.git.GpgKeyRing.ValueString()))
 		if err != nil {
-			return nil, fmt.Errorf("Failed to read GPG key ring: %w", err)
+			return nil, fmt.Errorf("failed to read GPG key ring: %w", err)
 		}
 	}
 	return entityList, nil
@@ -202,9 +202,7 @@ func getOpenPgpEntity(keyRing openpgp.EntityList, passphrase, keyID string) (*op
 
 	var entity *openpgp.Entity
 	if keyID != "" {
-		if strings.HasPrefix(keyID, "0x") {
-			keyID = strings.TrimPrefix(keyID, "0x")
-		}
+		keyID = strings.TrimPrefix(keyID, "0x")
 		if len(keyID) != 16 {
 			return nil, fmt.Errorf("invalid GPG key id length; expected %d, got %d", 16, len(keyID))
 		}
