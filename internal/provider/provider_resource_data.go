@@ -36,6 +36,7 @@ import (
 	apimachineryschema "k8s.io/apimachinery/pkg/runtime/schema"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/clientcmd/api"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -50,7 +51,7 @@ type providerResourceData struct {
 func NewProviderResourceData(ctx context.Context, data ProviderModel) (*providerResourceData, error) {
 	clientCfg, err := getClientConfiguration(ctx, data.Kubernetes)
 	if err != nil {
-		return nil, fmt.Errorf("invalid Kubernetes configuration: %w", err)
+		return nil, fmt.Errorf("Invalid Kubernetes configuration: %w", err)
 	}
 	rcg := utils.NewRestClientGetter(clientCfg)
 	return &providerResourceData{
@@ -189,7 +190,7 @@ func (prd *providerResourceData) GetEntityList() (openpgp.EntityList, error) {
 		var err error
 		entityList, err = openpgp.ReadKeyRing(strings.NewReader(prd.git.GpgKeyRing.ValueString()))
 		if err != nil {
-			return nil, fmt.Errorf("failed to read GPG key ring: %w", err)
+			return nil, fmt.Errorf("Failed to read GPG key ring: %w", err)
 		}
 	}
 	return entityList, nil
@@ -290,9 +291,7 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 		if diag.HasError() {
 			return nil, fmt.Errorf("%s", diag)
 		}
-		for _, p := range pp {
-			configPaths = append(configPaths, p)
-		}
+		configPaths = append(configPaths, pp...)
 	}
 	if len(configPaths) > 0 {
 		expandedPaths := []string{}
@@ -355,6 +354,33 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 		overrides.AuthInfo.ClientKeyData = bytes.NewBufferString(kubernetes.ClientKey.ValueString()).Bytes()
 	}
 	overrides.ClusterDefaults.ProxyURL = kubernetes.ProxyURL.ValueString()
+
+	if kubernetes.Exec != nil {
+		var args []string
+		if diag := kubernetes.Exec.Args.ElementsAs(ctx, &args, false); diag.HasError() {
+			return nil, fmt.Errorf("%s", diag)
+		}
+		var envMap map[string]string
+		if diag := kubernetes.Exec.Env.ElementsAs(ctx, &envMap, false); diag.HasError() {
+			return nil, fmt.Errorf("%s", diag)
+		}
+		var env []api.ExecEnvVar
+		for k, v := range envMap {
+			env = append(env, api.ExecEnvVar{
+				Name:  k,
+				Value: v,
+			})
+		}
+
+		exec := &clientcmdapi.ExecConfig{
+			InteractiveMode: clientcmdapi.IfAvailableExecInteractiveMode,
+			APIVersion:      kubernetes.Exec.APIVersion.ValueString(),
+			Command:         kubernetes.Exec.Command.ValueString(),
+			Args:            args,
+			Env:             env,
+		}
+		overrides.AuthInfo.Exec = exec
+	}
 
 	cc := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
 	return cc, nil

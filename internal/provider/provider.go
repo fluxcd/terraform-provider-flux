@@ -19,7 +19,10 @@ package provider
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -63,21 +66,29 @@ type Git struct {
 	Http                  *Http           `tfsdk:"http"`
 }
 
+type KubernetesExec struct {
+	APIVersion types.String `tfsdk:"api_version"`
+	Command    types.String `tfsdk:"command"`
+	Env        types.Map    `tfsdk:"env"`
+	Args       types.List   `tfsdk:"args"`
+}
+
 type Kubernetes struct {
-	Host                  types.String `tfsdk:"host"`
-	Username              types.String `tfsdk:"username"`
-	Password              types.String `tfsdk:"password"`
-	Insecure              types.Bool   `tfsdk:"insecure"`
-	ClientCertificate     types.String `tfsdk:"client_certificate"`
-	ClientKey             types.String `tfsdk:"client_key"`
-	ClusterCACertificate  types.String `tfsdk:"cluster_ca_certificate"`
-	ConfigPaths           types.Set    `tfsdk:"config_paths"`
-	ConfigPath            types.String `tfsdk:"config_path"`
-	ConfigContext         types.String `tfsdk:"config_context"`
-	ConfigContextAuthInfo types.String `tfsdk:"config_context_auth_info"`
-	ConfigContextCluster  types.String `tfsdk:"config_context_cluster"`
-	Token                 types.String `tfsdk:"token"`
-	ProxyURL              types.String `tfsdk:"proxy_url"`
+	Host                  types.String    `tfsdk:"host"`
+	Username              types.String    `tfsdk:"username"`
+	Password              types.String    `tfsdk:"password"`
+	Insecure              types.Bool      `tfsdk:"insecure"`
+	ClientCertificate     types.String    `tfsdk:"client_certificate"`
+	ClientKey             types.String    `tfsdk:"client_key"`
+	ClusterCACertificate  types.String    `tfsdk:"cluster_ca_certificate"`
+	ConfigPaths           types.Set       `tfsdk:"config_paths"`
+	ConfigPath            types.String    `tfsdk:"config_path"`
+	ConfigContext         types.String    `tfsdk:"config_context"`
+	ConfigContextAuthInfo types.String    `tfsdk:"config_context_auth_info"`
+	ConfigContextCluster  types.String    `tfsdk:"config_context_cluster"`
+	Token                 types.String    `tfsdk:"token"`
+	ProxyURL              types.String    `tfsdk:"proxy_url"`
+	Exec                  *KubernetesExec `tfsdk:"exec"`
 }
 
 type ProviderModel struct {
@@ -166,6 +177,30 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 					"proxy_url": schema.StringAttribute{
 						Optional:    true,
 						Description: "URL to the proxy to be used for all API requests",
+					},
+					"exec": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"api_version": schema.StringAttribute{
+								Description: "Kubernetes client authentication API Version",
+								Required:    true,
+							},
+							"command": schema.StringAttribute{
+								Description: "Client authentication exec command",
+								Required:    true,
+							},
+							"env": schema.MapAttribute{
+								ElementType: types.StringType,
+								Description: "Client authentication exec environment variables",
+								Optional:    true,
+							},
+							"args": schema.ListAttribute{
+								ElementType: types.StringType,
+								Description: "Client authentication exec command arguments",
+								Optional:    true,
+							},
+						},
+						Optional:    true,
+						Description: "Kubernetes client authentication exec plugin configuration",
 					},
 				},
 				Optional: true,
@@ -320,6 +355,20 @@ func (p *fluxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	}
 	if data.Git.AuthorName.IsNull() {
 		data.Git.AuthorName = types.StringValue(defaultAuthor)
+	}
+	if data.Kubernetes.ConfigPath.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_CONFIG_PATH"); ok {
+			data.Kubernetes.ConfigPath = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.ConfigPaths.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_CONFIG_PATHS"); ok {
+			var paths []attr.Value
+			for _, p := range filepath.SplitList(v) {
+				paths = append(paths, types.StringValue(p))
+			}
+			data.Kubernetes.ConfigPaths = types.SetValueMust(types.StringType, paths)
+		}
 	}
 
 	prd, err := NewProviderResourceData(ctx, data)
