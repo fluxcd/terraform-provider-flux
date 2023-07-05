@@ -2,6 +2,41 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.0.0
+
+**Release date:** 2023-07-05
+
+This is the first stable release of the Terraform provider for Flux. From now on,
+this provider follows the [Flux 2 release cadence and support pledge](https://fluxcd.io/flux/releases/).
+
+Starting with this version, the build, release and provenance portions of the
+Flux project supply chain [provisionally meet SLSA Build Level 3](https://fluxcd.io/flux/security/slsa-assessment/).
+
+This release adds support for using exec plugins to authenticate the kubernetes
+client used in the bootstrap git resource.
+
+Improvements:
+- Update flux dependencies and init logger
+  [#513](https://github.com/fluxcd/terraform-provider-flux/pull/513)
+- Update docs for v1
+  [#510](https://github.com/fluxcd/terraform-provider-flux/pull/510)
+- Declaratively define (and sync) labels
+  [#507](https://github.com/fluxcd/terraform-provider-flux/pull/507)
+- Add Kubernetes client auth exec config support
+  [#506](https://github.com/fluxcd/terraform-provider-flux/pull/506)
+- Align go.mod version with Kubernetes (Go 1.20)
+  [#505](https://github.com/fluxcd/terraform-provider-flux/pull/505)
+- Add SLSA3 generator to release workflow
+  [#504](https://github.com/fluxcd/terraform-provider-flux/pull/504)
+- Update dependencies
+  [#502](https://github.com/fluxcd/terraform-provider-flux/pull/502)
+  [#497](https://github.com/fluxcd/terraform-provider-flux/pull/497)
+  [#496](https://github.com/fluxcd/terraform-provider-flux/pull/496)
+
+Fixes:
+- Fix panic due to missing configuration
+  [#509](https://github.com/fluxcd/terraform-provider-flux/pull/509)
+
 ## 1.0.0-rc.5
 
 **Release date:** 2023-06-01
