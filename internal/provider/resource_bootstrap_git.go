@@ -82,6 +82,9 @@ const (
 	rfc1123DomainError = "a lowercase RFC 1123 subdomain must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character"
 	tolerationKeyRegex = `^[A-Za-z0-9]([A-Za-z0-9._-]*)$`
 	tolerationKeyError = "a toleration key must begin with a letter or number, and may contain letters, numbers, hyphens, dots, and underscores."
+
+	missingConfiguration                   = "Missing configuration"
+	bootstrapGitResourceMissingConfigError = "Git and Kubernetes configuration not found"
 )
 
 type bootstrapGitResourceData struct {
@@ -298,6 +301,10 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 }
 
 func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if r.prd == nil {
+		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
+	}
+
 	// Skip when deleting or on initial creation
 	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
 		return
@@ -332,6 +339,10 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 
 // TODO: If kustomization file exists and not all resource files exist bootstrap will fail. This is because kustomize build is run.
 func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	if r.prd == nil {
+		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
+	}
+
 	var data bootstrapGitResourceData
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -442,6 +453,10 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 // TODO: Consider if more value reading should be done here to detect drift. Similar to how import works.
 // TODO: Resources in the cluster should be verified to exist. If not resource id should be set to nil. This is to detect changing clusters.
 func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	if r.prd == nil {
+		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
+	}
+
 	var data bootstrapGitResourceData
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -492,6 +507,10 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 
 // TODO: Verify Flux components after updating Git
 func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	if r.prd == nil {
+		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
+	}
+
 	var data bootstrapGitResourceData
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -580,6 +599,10 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 }
 
 func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	if r.prd == nil {
+		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
+	}
+
 	var data bootstrapGitResourceData
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -664,6 +687,10 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 
 // TODO: Validate Flux installation before proceeding with import
 func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if r.prd == nil {
+		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
+	}
+
 	kubeClient, err := r.prd.GetKubernetesClient()
 	if err != nil {
 		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
