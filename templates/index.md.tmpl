@@ -17,4 +17,87 @@ Get Kubernetes credentials from a kubeconfig file. The current context set in th
 
 {{ tffile .ExampleFile }}
 
+## Kubernetes Authentication
+
+The Flux provider can be configured to authenticate against Kubernetes using
+either of these methods:
+
+* [Using a kubeconfig file](#file-config)
+* [Supplying credentials](#credentials-config)
+* [Exec plugins](#exec-plugins)
+
+For a full list of supported provider authentication arguments, see the [argument reference](#nestedatt--kubernetes) below.
+
+### File config
+
+You can provide a path to a kubeconfig file using the `config_path` attribute or
+using the `KUBE_CONFIG_PATH` environment variable.
+A kubeconfig file can have multiple contexts, specify the desired one using the
+`config_context` attribute, otherwise, the `default` context will be used.
+
+```hcl
+provider "flux" {
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+}
+```
+
+Similar to kubectl, the provider can also support multiple config paths using
+the `config_paths` attribute or setting the `KUBE_CONFIG_PATHS` environment
+variable.
+
+```hcl
+provider "flux" {
+  kubernetes = {
+    config_paths = [
+      "/path/a/kubeconfig",
+      "/path/b/kubeconfig"
+    ]
+  }
+}
+```
+
+
+### Credentials config
+
+The basic configuration attributes can also be explicitly specified using the
+respective attributes:
+
+```hcl
+provider "flux" {
+  kubernetes = {
+    host = "https://cluster-api-hostname:port"
+
+    client_certificate     = file("~/.kube/client-cert.pem")
+    client_key             = file("~/.kube/client-key.pem")
+    cluster_ca_certificate = file("~/.kube/cluster-ca-cert.pem")
+  }
+}
+```
+
+
+### Exec plugins
+
+For Kubernetes cluster providers using short-lived authentication tokens the
+exec client authentication plugin can be used to fetch a new token using a CLI
+tool before initializing the provider.
+
+One good example of such a scenario is on EKS:
+
+```hcl
+provider "flux" {
+  kubernetes = {
+    host                   = var.cluster_endpoint
+    cluster_ca_certificate = base64decode(var.cluster_ca_cert)
+    exec = {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      args        = ["eks", "get-token", "--cluster-name", var.cluster_name]
+      command     = "aws"
+    }
+  }
+}
+```
+
+
 {{ .SchemaMarkdown | trimspace }}

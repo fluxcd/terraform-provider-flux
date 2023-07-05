@@ -36,6 +36,7 @@ import (
 	apimachineryschema "k8s.io/apimachinery/pkg/runtime/schema"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/clientcmd/api"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -202,9 +203,7 @@ func getOpenPgpEntity(keyRing openpgp.EntityList, passphrase, keyID string) (*op
 
 	var entity *openpgp.Entity
 	if keyID != "" {
-		if strings.HasPrefix(keyID, "0x") {
-			keyID = strings.TrimPrefix(keyID, "0x")
-		}
+		keyID = strings.TrimPrefix(keyID, "0x")
 		if len(keyID) != 16 {
 			return nil, fmt.Errorf("invalid GPG key id length; expected %d, got %d", 16, len(keyID))
 		}
@@ -292,9 +291,7 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 		if diag.HasError() {
 			return nil, fmt.Errorf("%s", diag)
 		}
-		for _, p := range pp {
-			configPaths = append(configPaths, p)
-		}
+		configPaths = append(configPaths, pp...)
 	}
 	if len(configPaths) > 0 {
 		expandedPaths := []string{}
@@ -357,6 +354,33 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 		overrides.AuthInfo.ClientKeyData = bytes.NewBufferString(kubernetes.ClientKey.ValueString()).Bytes()
 	}
 	overrides.ClusterDefaults.ProxyURL = kubernetes.ProxyURL.ValueString()
+
+	if kubernetes.Exec != nil {
+		var args []string
+		if diag := kubernetes.Exec.Args.ElementsAs(ctx, &args, false); diag.HasError() {
+			return nil, fmt.Errorf("%s", diag)
+		}
+		var envMap map[string]string
+		if diag := kubernetes.Exec.Env.ElementsAs(ctx, &envMap, false); diag.HasError() {
+			return nil, fmt.Errorf("%s", diag)
+		}
+		var env []api.ExecEnvVar
+		for k, v := range envMap {
+			env = append(env, api.ExecEnvVar{
+				Name:  k,
+				Value: v,
+			})
+		}
+
+		exec := &clientcmdapi.ExecConfig{
+			InteractiveMode: clientcmdapi.IfAvailableExecInteractiveMode,
+			APIVersion:      kubernetes.Exec.APIVersion.ValueString(),
+			Command:         kubernetes.Exec.Command.ValueString(),
+			Args:            args,
+			Env:             env,
+		}
+		overrides.AuthInfo.Exec = exec
+	}
 
 	cc := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
 	return cc, nil
