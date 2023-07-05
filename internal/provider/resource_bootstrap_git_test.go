@@ -40,6 +40,7 @@ import (
 	"github.com/fluxcd/pkg/git/gogit"
 	"github.com/fluxcd/pkg/git/repository"
 	"github.com/fluxcd/pkg/ssh"
+	"github.com/go-logr/logr"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -48,6 +49,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/kind/pkg/cluster"
 
 	"github.com/fluxcd/terraform-provider-flux/internal/utils"
@@ -59,6 +61,7 @@ const (
 )
 
 func TestMain(m *testing.M) {
+	ctrllog.SetLogger(logr.New(ctrllog.NullLogSink{}))
 	tmpDir, err := os.MkdirTemp("", "boostrap-git-test")
 	if err != nil {
 		fmt.Println(err)

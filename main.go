@@ -21,7 +21,9 @@ import (
 	"flag"
 	"log"
 
+	"github.com/go-logr/logr"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/fluxcd/terraform-provider-flux/internal/provider"
 )
@@ -31,6 +33,7 @@ var (
 )
 
 func main() {
+	ctrllog.SetLogger(logr.New(ctrllog.NullLogSink{}))
 	debugFlag := flag.Bool("debug", false, "Start provider in debug mode.")
 	flag.Parse()
 
