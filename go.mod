@@ -28,6 +28,7 @@ require (
 	github.com/fluxcd/pkg/ssa v0.28.2
 	github.com/fluxcd/pkg/ssh v0.8.0
 	github.com/fluxcd/source-controller/api v1.0.0
+	github.com/go-logr/logr v1.2.4
 	github.com/google/go-containerregistry v0.15.2
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/hashicorp/terraform-plugin-framework v1.2.0
@@ -91,7 +92,6 @@ require (
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.4.1 // indirect
 	github.com/go-git/go-git/v5 v5.7.0 // indirect
-	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.1 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
