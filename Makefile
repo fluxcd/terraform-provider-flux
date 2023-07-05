@@ -27,7 +27,7 @@ build:
 
 .PHONY: docs
 docs: tools
-	tfplugindocs generate
+	tfplugindocs generate --ignore-deprecated true
 
 tools:
 	GO111MODULE=on go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
