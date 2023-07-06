@@ -409,6 +409,21 @@ func TestAccBootstrapGit_WithExistingSecret(t *testing.T) {
 	})
 }
 
+func TestAccBootstrapGit_MissingConfig(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "flux" {}
+				resource "flux_bootstrap_git" "this" {}
+				`,
+				ExpectError: regexp.MustCompile("Missing configuration"),
+			},
+		},
+	})
+}
+
 func bootstrapGitTolerationKeys(env environment, tolerationKeys []string) string {
 	return fmt.Sprintf(`
     provider "flux" {
