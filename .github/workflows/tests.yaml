@@ -60,7 +60,7 @@ jobs:
         with:
           version: v0.17.0
       - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@af153ea0cf4fd480c75accacc0c0dc7a2afdad0d # v0.41.0 
+        uses: fluxcd/flux2/action@9ea0a535eab2c99121fb3ac742e333b4a9f07970 # v2.0.0
       - name: Apply Terraform
         env:
           GOOS: linux
@@ -89,7 +89,7 @@ jobs:
             **/go.sum
             **/go.mod
       - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@af153ea0cf4fd480c75accacc0c0dc7a2afdad0d # v0.41.0 
+        uses: fluxcd/flux2/action@9ea0a535eab2c99121fb3ac742e333b4a9f07970 # v2.0.0
       - name: Set outputs
         id: vars
         run: |
