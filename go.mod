@@ -16,7 +16,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230626094100-7e9e0395ebec
 	github.com/docker/docker v23.0.5+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/fluxcd/flux2/v2 v2.0.0
+	github.com/fluxcd/flux2/v2 v2.0.1
 	github.com/fluxcd/helm-controller/api v0.35.0
 	github.com/fluxcd/image-automation-controller/api v0.35.0
 	github.com/fluxcd/image-reflector-controller/api v0.29.0

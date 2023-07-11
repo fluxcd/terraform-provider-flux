@@ -110,8 +110,8 @@ github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5Kwzbycv
 github.com/fatih/color v1.13.0 h1:8LOYc1KYPPmyKMuN8QV2DNRWNbLo6LZ0iLs8+mlH53w=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
 github.com/flowstack/go-jsonschema v0.1.1/go.mod h1:yL7fNggx1o8rm9RlgXv7hTBWxdBM0rVwpMwimd3F3N0=
-github.com/fluxcd/flux2/v2 v2.0.0 h1:QqiJPnd8oUDtSZDkgimBrm6Wreit4niSPw2gyyBn8QU=
-github.com/fluxcd/flux2/v2 v2.0.0/go.mod h1:pKycTpib6Unm5qxuZTcDgxrzO0zylU04+WzwwB8576c=
+github.com/fluxcd/flux2/v2 v2.0.1 h1:rovomePS9x1UgLOr+3n7V+Nzhi1CZpMAPmFYwrMtar8=
+github.com/fluxcd/flux2/v2 v2.0.1/go.mod h1:pKycTpib6Unm5qxuZTcDgxrzO0zylU04+WzwwB8576c=
 github.com/fluxcd/gitkit v0.6.0 h1:iNg5LTx6ePo+Pl0ZwqHTAkhbUHxGVSY3YCxCdw7VIFg=
 github.com/fluxcd/go-git-providers v0.18.0 h1:4Whs6GzQdx3d7UTeIahRmzUrTZKhucySC53pwdXFV7Y=
 github.com/fluxcd/go-git-providers v0.18.0/go.mod h1:++kUR1LegtRWU30bdPb9FuRUH/6+DgoHSbwOkZ5NiKo=
