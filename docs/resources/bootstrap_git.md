@@ -42,7 +42,7 @@ resource "flux_bootstrap_git" "this" {
 - `secret_name` (String) Name of the secret the sync credentials can be found in or stored to. Defaults to `flux-system`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `toleration_keys` (Set of String) List of toleration keys used to schedule the components pods onto nodes with matching taints.
-- `version` (String) Flux version. Defaults to `v2.0.0`.
+- `version` (String) Flux version. Defaults to `v2.0.1`.
 - `watch_all_namespaces` (Boolean) If true watch for custom resources in all namespaces. Defaults to `true`.
 
 ### Read-Only
