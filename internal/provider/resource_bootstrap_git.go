@@ -676,7 +676,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		}
 		err = gitClient.Push(ctx, repository.PushConfig{})
 		if err != nil {
-			return retry.RetryableError(fmt.Errorf("Unable to psuh removed file(s): %w", err))
+			return retry.RetryableError(fmt.Errorf("Unable to push removed file(s): %w", err))
 		}
 		return nil
 	})
