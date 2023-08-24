@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.1.0
+
+**Release date:** 2023-08-24
+
+This release includes flux2 [v2.1.0](https://github.com/fluxcd/flux2/releases/tag/v2.1.0).
+
+Improvements:
+- Update dependencies
+  [#540](https://github.com/fluxcd/terraform-provider-flux/pull/540),
+  [#533](https://github.com/fluxcd/terraform-provider-flux/pull/533),
+  [#525](https://github.com/fluxcd/terraform-provider-flux/pull/525),
+  [#524](https://github.com/fluxcd/terraform-provider-flux/pull/524)
+- Fix typo
+  [#522](https://github.com/fluxcd/terraform-provider-flux/pull/522)
+
 ## 1.0.1
 
 **Release date:** 2023-07-11
