@@ -20,7 +20,7 @@ jobs:
           # Allow goreleaser to access older tag information.
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
         with:
           go-version: 1.20.x
       - name: Import GPG key
@@ -31,7 +31,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
       - name: Run GoReleaser
         id: run-goreleaser
-        uses: goreleaser/goreleaser-action@336e29918d653399e599bfca99fadc1d7ffbc9f7 # v4.3.0
+        uses: goreleaser/goreleaser-action@3fa32b8bb5620a2c1afe798654bbad59f9da4906 # v4.4.0
         with:
           version: latest
           args: release --rm-dist
@@ -54,7 +54,7 @@ jobs:
       actions: read # To read the workflow path.
       id-token: write # To sign the provenance.
       contents: write # To add assets to the release.
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.8.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
     with:
       provenance-name: "provenance.intoto.jsonl"
       base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
