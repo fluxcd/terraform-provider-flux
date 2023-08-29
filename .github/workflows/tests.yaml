@@ -52,7 +52,7 @@ jobs:
         with:
           go-version: 1.20.x
       - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@ba6bb2989f94daf58a4cc6eac2c1ca7398a678bf # v3.0.0
+        uses: terraform-linters/setup-tflint@3bb7d777f5c38e288977551bc117a79437bdc6fd # v3.1.0
       - name: Lint Terraform
         run: make lint
       - name: Setup Kubernetes
