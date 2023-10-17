@@ -735,7 +735,8 @@ func setupEnvironment(t *testing.T) environment {
 		Key:      string(keyPair.PublicKey),
 		ReadOnly: false,
 	}
-	giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOpt)
+	_, _, err = giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOpt)
+	require.NoError(t, err)
 
 	keyPairRo, err := ssh.GenerateKeyPair(ssh.ECDSA_P256)
 	require.NoError(t, err)
@@ -744,9 +745,11 @@ func setupEnvironment(t *testing.T) environment {
 		Key:      string(keyPairRo.PublicKey),
 		ReadOnly: true,
 	}
-	giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOptRo)
+	_, _, err = giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOptRo)
+	require.NoError(t, err)
 
 	sshHostKey, err := sourcesecret.ScanHostKey(fmt.Sprintf("%s:%d", giteaName, sshPort))
+	require.NoError(t, err)
 	return environment{
 		kubeCfgPath:  kubeCfgPath,
 		httpClone:    repo.CloneURL,
