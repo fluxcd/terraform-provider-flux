@@ -62,6 +62,7 @@ const (
 
 func TestMain(m *testing.M) {
 	ctrllog.SetLogger(logr.New(ctrllog.NullLogSink{}))
+
 	tmpDir, err := os.MkdirTemp("", "boostrap-git-test")
 	if err != nil {
 		fmt.Println(err)
@@ -75,16 +76,21 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 		return
 	}
-	f.Close()
-	err = os.Setenv(hostaliasesEnvKey, hostAliases)
-	if err != nil {
+	if err = f.Close(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 		return
 	}
+
+	if err = os.Setenv(hostaliasesEnvKey, hostAliases); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+		return
+	}
+
 	exitVal := m.Run()
+	_ = os.Unsetenv(hostaliasesEnvKey)
 	os.Exit(exitVal)
-	os.Unsetenv(hostaliasesEnvKey)
 }
 
 func TestAccBootstrapGit_InvalidCustomization(t *testing.T) {
