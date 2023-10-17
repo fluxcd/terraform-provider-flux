@@ -628,7 +628,7 @@ type environment struct {
 
 func setupEnvironment(t *testing.T) environment {
 	t.Helper()
-	rand.Seed(time.Now().UnixNano())
+
 	httpPort := rand.Intn(65535-1024) + 1024
 	sshPort := httpPort + 10
 	randSuffix := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
