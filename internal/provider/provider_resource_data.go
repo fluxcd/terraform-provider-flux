@@ -36,7 +36,6 @@ import (
 	apimachineryschema "k8s.io/apimachinery/pkg/runtime/schema"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/tools/clientcmd/api"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -364,9 +363,9 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 		if diag := kubernetes.Exec.Env.ElementsAs(ctx, &envMap, false); diag.HasError() {
 			return nil, fmt.Errorf("%s", diag)
 		}
-		var env []api.ExecEnvVar
+		var env []clientcmdapi.ExecEnvVar
 		for k, v := range envMap {
-			env = append(env, api.ExecEnvVar{
+			env = append(env, clientcmdapi.ExecEnvVar{
 				Name:  k,
 				Value: v,
 			})

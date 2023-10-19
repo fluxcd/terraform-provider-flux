@@ -62,6 +62,7 @@ const (
 
 func TestMain(m *testing.M) {
 	ctrllog.SetLogger(logr.New(ctrllog.NullLogSink{}))
+
 	tmpDir, err := os.MkdirTemp("", "boostrap-git-test")
 	if err != nil {
 		fmt.Println(err)
@@ -75,16 +76,21 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 		return
 	}
-	f.Close()
-	err = os.Setenv(hostaliasesEnvKey, hostAliases)
-	if err != nil {
+	if err = f.Close(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 		return
 	}
+
+	if err = os.Setenv(hostaliasesEnvKey, hostAliases); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+		return
+	}
+
 	exitVal := m.Run()
+	_ = os.Unsetenv(hostaliasesEnvKey)
 	os.Exit(exitVal)
-	os.Unsetenv(hostaliasesEnvKey)
 }
 
 func TestAccBootstrapGit_InvalidCustomization(t *testing.T) {
@@ -628,7 +634,7 @@ type environment struct {
 
 func setupEnvironment(t *testing.T) environment {
 	t.Helper()
-	rand.Seed(time.Now().UnixNano())
+
 	httpPort := rand.Intn(65535-1024) + 1024
 	sshPort := httpPort + 10
 	randSuffix := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
@@ -735,7 +741,8 @@ func setupEnvironment(t *testing.T) environment {
 		Key:      string(keyPair.PublicKey),
 		ReadOnly: false,
 	}
-	giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOpt)
+	_, _, err = giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOpt)
+	require.NoError(t, err)
 
 	keyPairRo, err := ssh.GenerateKeyPair(ssh.ECDSA_P256)
 	require.NoError(t, err)
@@ -744,9 +751,11 @@ func setupEnvironment(t *testing.T) environment {
 		Key:      string(keyPairRo.PublicKey),
 		ReadOnly: true,
 	}
-	giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOptRo)
+	_, _, err = giteaClient.AdminCreateUserPublicKey(username, createPublicKeyOptRo)
+	require.NoError(t, err)
 
 	sshHostKey, err := sourcesecret.ScanHostKey(fmt.Sprintf("%s:%d", giteaName, sshPort))
+	require.NoError(t, err)
 	return environment{
 		kubeCfgPath:  kubeCfgPath,
 		httpClone:    repo.CloneURL,
