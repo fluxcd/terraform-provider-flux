@@ -187,7 +187,7 @@ func (prd *providerResourceData) GetEntityList() (openpgp.EntityList, error) {
 	var entityList openpgp.EntityList
 	if prd.git.GpgKeyRing.ValueString() != "" {
 		var err error
-		entityList, err = openpgp.ReadKeyRing(strings.NewReader(prd.git.GpgKeyRing.ValueString()))
+		entityList, err = bootstrap.LoadEntityListFromPath(prd.git.GpgKeyRing.ValueString())
 		if err != nil {
 			return nil, fmt.Errorf("Failed to read GPG key ring: %w", err)
 		}

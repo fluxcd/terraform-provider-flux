@@ -229,7 +229,7 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 						Optional:    true,
 					},
 					"gpg_key_ring": schema.StringAttribute{
-						Description: "GPG key ring for signing commits.",
+						Description: "Path to the GPG key ring for signing commits.",
 						Optional:    true,
 					},
 					"gpg_passphrase": schema.StringAttribute{
