@@ -212,7 +212,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"namespace": schema.StringAttribute{
-				Description: fmt.Sprintf("The namespace scope for install manifests. Defaults to `%s`.", defaultOpts.Namespace),
+				Description: fmt.Sprintf("The namespace scope for install manifests. Defaults to `%s`. It will be created if it does not exist.", defaultOpts.Namespace),
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString(defaultOpts.Namespace),

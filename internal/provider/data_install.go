@@ -84,7 +84,7 @@ func (s *installDataSource) Schema(ctx context.Context, req datasource.SchemaReq
 				},
 			},
 			"namespace": schema.StringAttribute{
-				Description: fmt.Sprintf("The namespace scope for install manifests. Defaults to `%s`.", opts.Namespace),
+				Description: fmt.Sprintf("The namespace scope for install manifests. Defaults to `%s`. It will be created if it does not exist.", opts.Namespace),
 				Optional:    true,
 			},
 			"cluster_domain": schema.StringAttribute{
