@@ -35,7 +35,7 @@ resource "flux_bootstrap_git" "this" {
 - `kustomization_override` (String) Kustomization to override configuration set by default.
 - `log_level` (String) Log level for toolkit components. Defaults to `info`.
 - `manifests_path` (String) The install manifests are built from a GitHub release or kustomize overlay if using a local path. Defaults to `https://github.com/fluxcd/flux2/releases`.
-- `namespace` (String) The namespace scope for install manifests. Defaults to `flux-system`.
+- `namespace` (String) The namespace scope for install manifests. Defaults to `flux-system`. It will be created if it does not exist.
 - `network_policy` (Boolean) Deny ingress access to the toolkit controllers from other namespaces using network policies. Defaults to `true`.
 - `path` (String) Path relative to the repository root, when specified the cluster sync will be scoped to this path.
 - `recurse_submodules` (Boolean) Configures the GitRepository source to initialize and include Git submodules in the artifact it produces.
