@@ -50,4 +50,4 @@ resource "helm_release" "this" {
 }
 ```
 
-After applying the example Terraform configuration, a Kind cluster should exist with Flux installed in the `flux_system` namespace.
+After applying the example Terraform configuration, a Kind cluster should exist with Flux installed in the `flux-system` namespace.
