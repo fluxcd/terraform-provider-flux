@@ -59,6 +59,9 @@ jobs:
         uses: helm/kind-action@dda0770415bac9fc20092cacbc54aa298604d140 # v1.8.0
         with:
           version: v0.17.0
+          # The versions below should target the newest Kubernetes version
+          # Keep this up-to-date with https://endoflife.date/kubernetes
+          node_image: kindest/node:v1.28.0@sha256:9f3ff58f19dcf1a0611d11e8ac989fdb30a28f40f236f59f0bea31fb956ccf5c
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@a18d4f345021182d6516bf3e8e00210567f46ab5 # v2.1.2
       - name: Apply Terraform
