@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.2.0
+
+**Release date:** 2023-12-12
+
+This release includes flux2 [v2.2.0](https://github.com/fluxcd/flux2/releases/tag/v2.2.0).
+
+Improvements:
+- docs: Provider can deploy to pre-existing namespace
+  [#577](https://github.com/fluxcd/terraform-provider-flux/pull/577)
+- docs: Fix namespace typo in install-helm-release.md
+  [#576](https://github.com/fluxcd/terraform-provider-flux/pull/576)
+- Address various issues throughout code base
+  [#565](https://github.com/fluxcd/terraform-provider-flux/pull/565)
+- Support air-gapped, offline, or otherwise customized install manifests
+  [#503](https://github.com/fluxcd/terraform-provider-flux/pull/503)
+- Dependency updates
+  [#579](https://github.com/fluxcd/terraform-provider-flux/pull/579)
+  [#567](https://github.com/fluxcd/terraform-provider-flux/pull/567)
+  [#582](https://github.com/fluxcd/terraform-provider-flux/pull/582)
+
+Fixes:
+- Fix signing commits with GPG key
+  [#572](https://github.com/fluxcd/terraform-provider-flux/pull/572)
+
 ## 1.1.2
 
 **Release date:** 2023-10-12
