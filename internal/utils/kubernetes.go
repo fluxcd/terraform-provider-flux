@@ -33,9 +33,9 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
-	"sigs.k8s.io/cli-utils/pkg/kstatus/polling"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/fluxcd/cli-utils/pkg/kstatus/polling"
 	helmv2 "github.com/fluxcd/helm-controller/api/v2beta1"
 	imageautov1 "github.com/fluxcd/image-automation-controller/api/v1beta1"
 	imagereflectv1 "github.com/fluxcd/image-reflector-controller/api/v1beta2"
