@@ -17,18 +17,18 @@ require (
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/fluxcd/cli-utils v0.36.0-flux.2
-	github.com/fluxcd/flux2/v2 v2.2.0
-	github.com/fluxcd/helm-controller/api v0.37.0
+	github.com/fluxcd/flux2/v2 v2.2.1
+	github.com/fluxcd/helm-controller/api v0.37.1
 	github.com/fluxcd/image-automation-controller/api v0.37.0
 	github.com/fluxcd/image-reflector-controller/api v0.31.1
-	github.com/fluxcd/kustomize-controller/api v1.2.0
-	github.com/fluxcd/notification-controller/api v1.2.2
+	github.com/fluxcd/kustomize-controller/api v1.2.1
+	github.com/fluxcd/notification-controller/api v1.2.3
 	github.com/fluxcd/pkg/git v0.16.0
 	github.com/fluxcd/pkg/git/gogit v0.16.1
 	github.com/fluxcd/pkg/runtime v0.43.2
 	github.com/fluxcd/pkg/ssa v0.35.0
 	github.com/fluxcd/pkg/ssh v0.10.0
-	github.com/fluxcd/source-controller/api v1.2.2
+	github.com/fluxcd/source-controller/api v1.2.3
 	github.com/go-logr/logr v1.3.0
 	github.com/google/go-containerregistry v0.17.0
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
