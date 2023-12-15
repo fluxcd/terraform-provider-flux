@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.2.1
+
+**Release date:** 2023-12-15
+
+This release includes flux2 [v2.2.1](https://github.com/fluxcd/flux2/releases/tag/v2.2.1).
+
 ## 1.2.0
 
 **Release date:** 2023-12-12
