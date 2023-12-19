@@ -17,8 +17,8 @@ require (
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/fluxcd/cli-utils v0.36.0-flux.2
-	github.com/fluxcd/flux2/v2 v2.2.1
-	github.com/fluxcd/helm-controller/api v0.37.1
+	github.com/fluxcd/flux2/v2 v2.2.2
+	github.com/fluxcd/helm-controller/api v0.37.2
 	github.com/fluxcd/image-automation-controller/api v0.37.0
 	github.com/fluxcd/image-reflector-controller/api v0.31.1
 	github.com/fluxcd/kustomize-controller/api v1.2.1
@@ -181,7 +181,7 @@ require (
 	github.com/xlab/treeprint v1.2.0 // indirect
 	github.com/zclconf/go-cty v1.13.2 // indirect
 	go.starlark.net v0.0.0-20231121155337-90ade8b19d09 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
