@@ -63,7 +63,7 @@ jobs:
           # Keep this up-to-date with https://endoflife.date/kubernetes
           node_image: kindest/node:v1.28.0@sha256:9f3ff58f19dcf1a0611d11e8ac989fdb30a28f40f236f59f0bea31fb956ccf5c
       - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@5c5c15ea212b8f029a110f9975851d25c8272695 # v2.2.2
+        uses: fluxcd/flux2/action@534684601ec8888beb0cc4f51117b59e97606c4d # v2.2.3
       - name: Apply Terraform
         env:
           GOOS: linux
@@ -92,7 +92,7 @@ jobs:
             **/go.sum
             **/go.mod
       - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@5c5c15ea212b8f029a110f9975851d25c8272695 # v2.2.2
+        uses: fluxcd/flux2/action@534684601ec8888beb0cc4f51117b59e97606c4d # v2.2.3
       - name: Set outputs
         id: vars
         run: |
