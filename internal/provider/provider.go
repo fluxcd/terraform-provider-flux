@@ -349,7 +349,7 @@ func (p *fluxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
-	// Set default values
+	// Set default values.
 	if data.Git.Branch.IsNull() {
 		data.Git.Branch = types.StringValue(defaultBranch)
 	}

@@ -32,17 +32,17 @@ func TestAccDataInstall_basic(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				// Without required target_path set
+				// Without required target_path set.
 				Config:      testAccDataInstallEmpty,
 				ExpectError: regexp.MustCompile(`The argument "target_path" is required, but no definition was found\.`),
 			},
 			{
-				// With invalid log level
+				// With invalid log level.
 				Config:      testAccDataInstallLogLevel,
 				ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 			},
 			{
-				// Check default values
+				// Check default values.
 				Config: testAccDataInstallBasic,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "content"),
@@ -58,7 +58,7 @@ func TestAccDataInstall_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "baseurl", "https://github.com/fluxcd/flux2/releases"),
 				),
 			},
-			// Ensure attribute value changes are propagated correctly into the state
+			// Ensure attribute value changes are propagated correctly into the state.
 			{
 				Config: testAccDataInstallWithArg("log_level", "debug"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "log_level", "debug"),

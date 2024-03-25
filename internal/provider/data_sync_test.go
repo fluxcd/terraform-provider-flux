@@ -30,22 +30,22 @@ func TestAccDataSync_Basic(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				// Without required target_path set
+				// Without required target_path set.
 				Config:      testAccDataSyncMissingTargetPath,
 				ExpectError: regexp.MustCompile(`The argument "target_path" is required, but no definition was found\.`),
 			},
 			{
-				// Without required url set
+				// Without required url set.
 				Config:      testAccDataSyncMissingURL,
 				ExpectError: regexp.MustCompile(`The argument "url" is required, but no definition was found\.`),
 			},
 			{
-				// Incorrect url syntax
+				// Incorrect url syntax.
 				Config:      testAccDataSyncInCorrectURL,
 				ExpectError: regexp.MustCompile(`Invalid URL scheme`),
 			},
 			{
-				// Check default values
+				// Check default values.
 				Config: testAccDataSyncBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "content"),
@@ -60,7 +60,7 @@ func TestAccDataSync_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "content", testAccDataSyncBasicExpectedContent),
 				),
 			},
-			// Ensure attribute value changes are propagated correctly into the state
+			// Ensure attribute value changes are propagated correctly into the state.
 			{
 				Config: testAccDataSyncWithArg("namespace", "test-system"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "namespace", "test-system"),

@@ -310,7 +310,7 @@ terraform state rm kubernetes_namespace.flux_system
 terraform state rm kubectl_manifest.install
 terraform state rm kubectl_manifest.sync
 terraform state rm kubernetes_secret.this
-terraform state rm data.flux_install.this 
+terraform state rm data.flux_install.this
 terraform state rm data.flux_sync.this
 terraform state rm data.kubectl_file_documents.install
 terraform state rm data.kubectl_file_documents.sync

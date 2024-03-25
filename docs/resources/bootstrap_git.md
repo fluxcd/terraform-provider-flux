@@ -93,7 +93,7 @@ patches:
         template:
           metadata:
             annotations:
-              cluster-autoscaler.kubernetes.io/safe-to-evict: "true"      
+              cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
     target:
       kind: Deployment
       labelSelector: app.kubernetes.io/part-of=flux
@@ -131,7 +131,7 @@ patches:
               - effect: NoSchedule
                 key: role
                 operator: Equal
-                value: flux      
+                value: flux
     target:
       kind: Deployment
       labelSelector: app.kubernetes.io/part-of=flux

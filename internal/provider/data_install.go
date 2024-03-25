@@ -194,13 +194,13 @@ func (s *installDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	// Set data values to option
 	opt.TargetPath = data.TargetPath.ValueString()
-	components := []string{}
+	var components []string
 	diags = data.Components.ElementsAs(ctx, &components, false)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	componentsExtra := []string{}
+	var componentsExtra []string
 	diags = data.ComponentsExtra.ElementsAs(ctx, &componentsExtra, false)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -209,7 +209,7 @@ func (s *installDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	components = append(components, componentsExtra...)
 	opt.Components = components
 	opt.ComponentsExtra = componentsExtra
-	tolerationKeys := []string{}
+	var tolerationKeys []string
 	diags = data.TolerationKeys.ElementsAs(ctx, &tolerationKeys, false)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -231,7 +231,7 @@ func (s *installDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	// Compute manifests
 	manifest, err := install.Generate(opt, "")
 	if err != nil {
-		resp.Diagnostics.AddError("coudl not generate manifests", err.Error())
+		resp.Diagnostics.AddError("could not generate manifests", err.Error())
 		return
 	}
 
