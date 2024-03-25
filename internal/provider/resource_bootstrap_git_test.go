@@ -185,7 +185,7 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Basic installation of Flux
+			// Basic installation of Flux.
 			{
 				Config: bootstrapGitHTTP(env),
 				Check: resource.ComposeTestCheckFunc(
@@ -313,15 +313,15 @@ patches:
 					func(state *terraform.State) error {
 						cfg, err := clientcmd.BuildConfigFromFlags("", env.kubeCfgPath)
 						if err != nil {
-							return nil
+							t.Fatalf("Can not initialize kubeconfig: %s", err)
 						}
-						client, err := kubernetes.NewForConfig(cfg)
+						kClient, err := kubernetes.NewForConfig(cfg)
 						if err != nil {
-							return nil
+							t.Fatalf("Can not initialize kubeconfig: %s", err)
 						}
-						deploymentList, err := client.AppsV1().Deployments("flux-system").List(context.TODO(), metav1.ListOptions{})
+						deploymentList, err := kClient.AppsV1().Deployments("flux-system").List(context.TODO(), metav1.ListOptions{})
 						if err != nil {
-							return nil
+							t.Fatalf("Can not list deployments: %s", err)
 						}
 						for _, deployment := range deploymentList.Items {
 							v, ok := deployment.Spec.Template.Annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
@@ -370,15 +370,15 @@ func TestAccBootstrapGit_WithExistingSecret(t *testing.T) {
 					if err != nil {
 						t.Fatalf("Can not initialize kubeconfig: %s", err)
 					}
-					client, err := kubernetes.NewForConfig(cfg)
+					kClient, err := kubernetes.NewForConfig(cfg)
 					if err != nil {
 						t.Fatalf("Can not initialize kubeconfig: %s", err)
 					}
-					_, err = client.CoreV1().Namespaces().Create(context.TODO(), namespace, metav1.CreateOptions{})
+					_, err = kClient.CoreV1().Namespaces().Create(context.TODO(), namespace, metav1.CreateOptions{})
 					if err != nil {
 						t.Fatalf("Can not create namespace: %s", err)
 					}
-					_, err = client.CoreV1().Secrets(namespace.Name).Create(context.TODO(), existingSecret, metav1.CreateOptions{})
+					_, err = kClient.CoreV1().Secrets(namespace.Name).Create(context.TODO(), existingSecret, metav1.CreateOptions{})
 					if err != nil {
 						t.Fatalf("Can not create secret: %s", err)
 					}
@@ -391,15 +391,15 @@ func TestAccBootstrapGit_WithExistingSecret(t *testing.T) {
 					func(state *terraform.State) error {
 						cfg, err := clientcmd.BuildConfigFromFlags("", env.kubeCfgPath)
 						if err != nil {
-							return nil
+							t.Fatalf("Can not initialize kubeconfig: %s", err)
 						}
-						client, err := kubernetes.NewForConfig(cfg)
+						kClient, err := kubernetes.NewForConfig(cfg)
 						if err != nil {
-							return nil
+							t.Fatalf("Can not initialize kubeconfig: %s", err)
 						}
-						secret, err := client.CoreV1().Secrets(namespace.Name).Get(context.TODO(), existingSecret.Name, metav1.GetOptions{})
+						secret, err := kClient.CoreV1().Secrets(namespace.Name).Get(context.TODO(), existingSecret.Name, metav1.GetOptions{})
 						if err != nil {
-							return nil
+							t.Fatalf("Can not get secret: %s", err)
 						}
 						if string(secret.Data["identity"]) != env.privateKeyRo {
 							return fmt.Errorf("The existing private key was overwritten: expected:\n%s\ngot:\n%s", string(secret.Data["identity"]), env.privateKeyRo)
@@ -447,7 +447,7 @@ func bootstrapGitTolerationKeys(env environment, tolerationKeys []string) string
     }
 
     resource "flux_bootstrap_git" "this" {
-		toleration_keys = [%s]		
+		toleration_keys = [%s]
 	}
 	`, env.kubeCfgPath, env.httpClone, env.username, env.password, `"`+strings.Join(tolerationKeys, `", "`)+`"`)
 }
@@ -469,7 +469,7 @@ func bootstrapGitHTTP(env environment) string {
     }
 
     resource "flux_bootstrap_git" "this" {
-		toleration_keys = ["FooBar", "test"]		
+		toleration_keys = ["FooBar", "test"]
 	}
 	`, env.kubeCfgPath, env.httpClone, env.username, env.password)
 }
@@ -492,7 +492,7 @@ EOF
     }
 
     resource "flux_bootstrap_git" "this" {
-		toleration_keys = ["FooBar", "test"]		
+		toleration_keys = ["FooBar", "test"]
 	}
 	`, env.kubeCfgPath, env.sshClone, env.privateKey)
 }
@@ -577,7 +577,7 @@ func bootstrapGitComponents(env environment) string {
 	      username = "%s"
 	      password = "%s"
 	      allow_insecure_http = true
-	    }	
+	    }
 	  }
     }
 
@@ -644,7 +644,7 @@ func setupEnvironment(t *testing.T) environment {
 	tmpDir := t.TempDir()
 	giteaUrl := fmt.Sprintf("http://%s:%d", giteaName, httpPort)
 
-	// Add entry to host aliases
+	// Add entry to host aliases.
 	hostAliases := os.Getenv(hostaliasesEnvKey)
 	f, err := os.OpenFile(hostAliases, os.O_CREATE|os.O_WRONLY|os.O_APPEND, os.ModePerm)
 	require.NoError(t, err)
@@ -652,14 +652,17 @@ func setupEnvironment(t *testing.T) environment {
 	_, err = f.WriteString(fmt.Sprintf("%s localhost\n", giteaName))
 	require.NoError(t, err)
 
-	// Run Gitea server
+	// Run Gitea server.
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	require.NoError(t, err)
 	defer cli.Close()
 	reader, err := cli.ImagePull(context.TODO(), giteaImageName, dockertypes.ImagePullOptions{})
 	require.NoError(t, err)
 	defer reader.Close()
-	io.Copy(io.Discard, reader)
+	_, err = io.Copy(io.Discard, reader)
+	if err != nil {
+		return environment{}
+	}
 
 	portSet, portMap, err := nat.ParsePortSpecs([]string{fmt.Sprintf("127.0.0.1:%d:%d", httpPort, httpPort), fmt.Sprintf("127.0.0.1:%d:%d", sshPort, sshPort)})
 	require.NoError(t, err)
@@ -683,16 +686,22 @@ func setupEnvironment(t *testing.T) environment {
 	err = cli.ContainerStart(context.TODO(), resp.ID, dockertypes.ContainerStartOptions{})
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		cli.ContainerRemove(context.TODO(), resp.ID, dockertypes.ContainerRemoveOptions{Force: true})
+		err := cli.ContainerRemove(context.TODO(), resp.ID, dockertypes.ContainerRemoveOptions{Force: true})
+		if err != nil {
+			return
+		}
 	})
 
-	// Start Kind cluster
+	// Start Kind cluster.
 	kubeCfgPath := filepath.Join(tmpDir, ".kube", "config")
 	p := cluster.NewProvider(cluster.ProviderWithDocker())
 	err = p.Create(randSuffix, cluster.CreateWithKubeconfigPath(kubeCfgPath))
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		p.Delete(randSuffix, kubeCfgPath)
+		err := p.Delete(randSuffix, kubeCfgPath)
+		if err != nil {
+			return
+		}
 	})
 	networks, err := cli.NetworkList(context.TODO(), dockertypes.NetworkListOptions{Filters: filters.NewArgs(filters.Arg("name", "kind"))})
 	require.NoError(t, err)
@@ -700,8 +709,8 @@ func setupEnvironment(t *testing.T) environment {
 	err = cli.NetworkConnect(context.TODO(), networks[0].ID, resp.ID, nil)
 	require.NoError(t, err)
 
-	// Create admin user in gitea
-	// TODO: Need a better solution than just sleeping
+	// Create admin user in gitea.
+	// TODO: Need a better solution than just sleeping.
 	time.Sleep(1 * time.Second)
 	execCfg := dockertypes.ExecConfig{
 		User: "git",
@@ -713,7 +722,7 @@ func setupEnvironment(t *testing.T) environment {
 	require.NoError(t, err)
 	time.Sleep(1 * time.Second)
 
-	// Create Gitea user
+	// Create Gitea user.
 	giteaClient, err := gitea.NewClient(giteaUrl, gitea.SetBasicAuth("gitea_admin", "foobar"))
 	require.NoError(t, err)
 	mustChangePassword := false

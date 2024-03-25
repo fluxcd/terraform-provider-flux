@@ -25,7 +25,7 @@ patches:
               - effect: NoSchedule
                 key: role
                 operator: Equal
-                value: flux      
+                value: flux
     target:
       kind: Deployment
       labelSelector: app.kubernetes.io/part-of=flux

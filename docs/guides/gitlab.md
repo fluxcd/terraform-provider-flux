@@ -61,7 +61,7 @@ resource "kind_cluster" "this" {
 ```
 
 The GitLab repository is created separatly so a datasource is used to get a reference to the repository. Creating GitLab repositories with Terraform is generally not a good idea as they could easily be removed. Additionally it is not possible to use the same repository for multiple environments if the repository is created with Terraform.
-	
+
 ```terraform
 provider "gitlab" {
   token = var.gitlab_token
@@ -84,7 +84,7 @@ resource "gitlab_deploy_key" "this" {
 }
 ```
 
-The Flux provider needs to be configured both with Git and Kubernetes credentials. 
+The Flux provider needs to be configured both with Git and Kubernetes credentials.
 
 ```terraform
 provider "flux" {

@@ -9,4 +9,3 @@ variable "clone_url" {
   type = string
   description = "Git repository clone url"
 }
-

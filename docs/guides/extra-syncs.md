@@ -51,4 +51,3 @@ resource "helm_release" "my-app-sync" {
   ]
 }
 ```
-

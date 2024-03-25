@@ -50,7 +50,7 @@ type providerResourceData struct {
 func NewProviderResourceData(ctx context.Context, data ProviderModel) (*providerResourceData, error) {
 	clientCfg, err := getClientConfiguration(ctx, data.Kubernetes)
 	if err != nil {
-		return nil, fmt.Errorf("Invalid Kubernetes configuration: %w", err)
+		return nil, fmt.Errorf("invalid Kubernetes configuration: %w", err)
 	}
 	rcg := utils.NewRestClientGetter(clientCfg)
 	return &providerResourceData{
@@ -62,7 +62,7 @@ func NewProviderResourceData(ctx context.Context, data ProviderModel) (*provider
 
 func (prd *providerResourceData) GetKubernetesClient() (client.WithWatch, error) {
 	if prd.rcg == nil {
-		return nil, fmt.Errorf("Kubernetes client cannot be created without any Kubernetes provider configuration")
+		return nil, fmt.Errorf("kubernetes client cannot be created without any Kubernetes provider configuration")
 	}
 	kubeClient, err := utils.KubeClient(prd.rcg, &runclient.Options{})
 	if err != nil {
@@ -128,13 +128,13 @@ func (prd *providerResourceData) GetSecretOptions(secretName, namespace, targetP
 	if prd.git.Http != nil {
 		secretOpts.Username = prd.git.Http.Username.ValueString()
 		secretOpts.Password = prd.git.Http.Password.ValueString()
-		secretOpts.CAFile = []byte(prd.git.Http.CertificateAuthority.ValueString())
+		secretOpts.CACrt = []byte(prd.git.Http.CertificateAuthority.ValueString())
 	}
 	if prd.git.Ssh != nil {
 		if prd.git.Ssh.PrivateKey.ValueString() != "" {
 			keypair, err := sourcesecret.LoadKeyPair([]byte(prd.git.Ssh.PrivateKey.ValueString()), prd.git.Ssh.Password.ValueString())
 			if err != nil {
-				return sourcesecret.Options{}, fmt.Errorf("Failed to load SSH Key Pair: %w", err)
+				return sourcesecret.Options{}, fmt.Errorf("failed to load SSH Key Pair: %w", err)
 			}
 			secretOpts.Keypair = keypair
 			secretOpts.Password = prd.git.Ssh.Password.ValueString()
@@ -189,7 +189,7 @@ func (prd *providerResourceData) GetEntityList() (openpgp.EntityList, error) {
 		var err error
 		entityList, err = bootstrap.LoadEntityListFromPath(prd.git.GpgKeyRing.ValueString())
 		if err != nil {
-			return nil, fmt.Errorf("Failed to read GPG key ring: %w", err)
+			return nil, fmt.Errorf("failed to read GPG key ring: %w", err)
 		}
 	}
 	return entityList, nil
@@ -237,7 +237,7 @@ func getAuthOpts(g *Git) (*git.AuthOptions, error) {
 	switch u.Scheme {
 	case "http":
 		if g.Http == nil {
-			return nil, fmt.Errorf("Git URL scheme is http but http configuration is empty")
+			return nil, fmt.Errorf("git URL scheme is http but http configuration is empty")
 		}
 		return &git.AuthOptions{
 			Transport: git.HTTP,
@@ -246,7 +246,7 @@ func getAuthOpts(g *Git) (*git.AuthOptions, error) {
 		}, nil
 	case "https":
 		if g.Http == nil {
-			return nil, fmt.Errorf("Git URL scheme is https but http configuration is empty")
+			return nil, fmt.Errorf("git URL scheme is https but http configuration is empty")
 		}
 		return &git.AuthOptions{
 			Transport: git.HTTPS,
@@ -256,7 +256,7 @@ func getAuthOpts(g *Git) (*git.AuthOptions, error) {
 		}, nil
 	case "ssh":
 		if g.Ssh == nil {
-			return nil, fmt.Errorf("Git URL scheme is ssh but ssh configuration is empty")
+			return nil, fmt.Errorf("git URL scheme is ssh but ssh configuration is empty")
 		}
 		if g.Ssh.PrivateKey.ValueString() != "" {
 			kh, err := sourcesecret.ScanHostKey(u.Host)
@@ -281,7 +281,7 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 	overrides := &clientcmd.ConfigOverrides{}
 	loader := &clientcmd.ClientConfigLoadingRules{}
 
-	configPaths := []string{}
+	var configPaths []string
 	if kubernetes.ConfigPath.ValueString() != "" {
 		configPaths = []string{kubernetes.ConfigPath.ValueString()}
 	} else if len(kubernetes.ConfigPaths.Elements()) > 0 {
@@ -310,7 +310,7 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 
 		ctxSuffix := "; default context"
 		if kubernetes.ConfigContext.ValueString() != "" || kubernetes.ConfigContextAuthInfo.ValueString() != "" || kubernetes.ConfigContextCluster.ValueString() != "" {
-			ctxSuffix = "; overriden context"
+			ctxSuffix = "; overridden context"
 			if kubernetes.ConfigContext.ValueString() != "" {
 				overrides.CurrentContext = kubernetes.ConfigContext.ValueString()
 				ctxSuffix += fmt.Sprintf("; config ctx: %s", overrides.CurrentContext)
@@ -327,7 +327,7 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 		}
 	}
 
-	// Overriding with static configuration
+	// Overriding with static configuration.
 	overrides.ClusterInfo.InsecureSkipTLSVerify = kubernetes.Insecure.ValueBool()
 	if kubernetes.ClusterCACertificate.ValueString() != "" {
 		overrides.ClusterInfo.CertificateAuthorityData = bytes.NewBufferString(kubernetes.ClusterCACertificate.ValueString()).Bytes()
@@ -341,7 +341,7 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 		defaultTLS := hasCA || hasCert || overrides.ClusterInfo.InsecureSkipTLSVerify
 		host, _, err := restclient.DefaultServerURL(kubernetes.Host.ValueString(), "", apimachineryschema.GroupVersion{}, defaultTLS)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to parse host: %s", err)
+			return nil, fmt.Errorf("failed to parse host: %s", err)
 		}
 
 		overrides.ClusterInfo.Server = host.String()

@@ -23,10 +23,10 @@ A Kind cluster is used as the target Kubernetes cluster where Flux is installed.
 {{ tffile "examples/gitlab-ssh/kind.tf" }}
 
 The GitLab repository is created separatly so a datasource is used to get a reference to the repository. Creating GitLab repositories with Terraform is generally not a good idea as they could easily be removed. Additionally it is not possible to use the same repository for multiple environments if the repository is created with Terraform.
-	
+
 {{ tffile "examples/gitlab-ssh/gitlab.tf" }}
 
-The Flux provider needs to be configured both with Git and Kubernetes credentials. 
+The Flux provider needs to be configured both with Git and Kubernetes credentials.
 
 {{ tffile "examples/gitlab-ssh/flux.tf" }}
 
