@@ -60,7 +60,7 @@ resource "kind_cluster" "this" {
 ```
 
 The GitHub repository is created separatly so a datasource is used to get a reference to the repository. Creating GitHub repositories with Terraform is generally not a good idea as they could easily be removed. Additionally it is not possible to use the same repository for multiple environments if the repository is created with Terraform.
-	
+
 ```terraform
 provider "github" {
   owner = var.github_org
@@ -80,7 +80,7 @@ resource "github_repository_deploy_key" "this" {
 }
 ```
 
-The Flux provider needs to be configured both with Git and Kubernetes credentials. 
+The Flux provider needs to be configured both with Git and Kubernetes credentials.
 
 ```terraform
 provider "flux" {

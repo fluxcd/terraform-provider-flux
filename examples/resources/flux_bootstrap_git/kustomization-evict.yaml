@@ -13,7 +13,7 @@ patches:
         template:
           metadata:
             annotations:
-              cluster-autoscaler.kubernetes.io/safe-to-evict: "true"      
+              cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
     target:
       kind: Deployment
       labelSelector: app.kubernetes.io/part-of=flux

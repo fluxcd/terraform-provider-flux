@@ -111,7 +111,7 @@ type bootstrapGitResourceData struct {
 	ManifestsPath         types.String         `tfsdk:"manifests_path"`
 }
 
-// Ensure provider defined types fully satisfy framework interfaces
+// Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &bootstrapGitResource{}
 var _ resource.ResourceWithConfigure = &bootstrapGitResource{}
 var _ resource.ResourceWithImportState = &bootstrapGitResource{}
@@ -310,7 +310,7 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
 	}
 
-	// Skip when deleting or on initial creation
+	// Skip when deleting or on initial creation.
 	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
 		return
 	}
@@ -322,7 +322,7 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 		return
 	}
 
-	// Write expected repository files
+	// Write expected repository files.
 	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Getting expected repository files", err.Error())
@@ -337,7 +337,7 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 
 	diags = resp.Plan.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
-	// This has to be set here, probably a bug in the SDK
+	// This has to be set here, probably a bug in the SDK.
 	diags = resp.Plan.SetAttribute(ctx, path.Root("id"), data.Namespace)
 	resp.Diagnostics.Append(diags...)
 }
@@ -405,7 +405,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 
 	// Write own kustomization file
 	if data.KustomizationOverride.ValueString() != "" {
-		// Need to write empty gotk-components and gotk-sync because other wise Kustomize will not work.
+		// Need to write empty gotk-components and gotk-sync because otherwise Kustomize will not work.
 		basePath := filepath.Join(gitClient.Path(), data.Path.ValueString(), data.Namespace.ValueString())
 		files := map[string]io.Reader{
 			filepath.Join(basePath, konfig.DefaultKustomizationFileName()): strings.NewReader(data.KustomizationOverride.ValueString()),
@@ -431,7 +431,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	// TODO: Figure out a better way to track files commited to git
+	// TODO: Figure out a better way to track files committed to git.
 	repositoryFiles := map[string]string{}
 	files := []string{install.MakeDefaultOptions().ManifestFile, sync.MakeDefaultOptions().ManifestFile, konfig.DefaultKustomizationFileName()}
 	for _, f := range files {
@@ -510,7 +510,7 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 	resp.Diagnostics.Append(diags...)
 }
 
-// TODO: Verify Flux components after updating Git
+// TODO: Verify Flux components after updating Git.
 func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.prd == nil {
 		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
@@ -564,34 +564,34 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 				continue
 			}
 			if err != nil {
-				retry.NonRetryableError(fmt.Errorf("Could not stat no longer tracked file: %w", err))
+				retry.NonRetryableError(fmt.Errorf("could not stat no longer tracked file: %w", err))
 			}
 			err = os.Remove(path)
 			if err != nil {
-				return retry.NonRetryableError(fmt.Errorf("Could not remove no longer tracked file: %w", err))
+				return retry.NonRetryableError(fmt.Errorf("could not remove no longer tracked file: %w", err))
 			}
 		}
 
-		// Write expected file contents to repo
+		// Write expected file contents to repo.
 		files := map[string]io.Reader{}
 		for k, v := range repositoryFiles {
 			files[k] = strings.NewReader(v)
 		}
 		commit, signer, err := r.prd.CreateCommit("Update Flux")
 		if err != nil {
-			return retry.NonRetryableError(fmt.Errorf("Unable to create commit: %w", err))
+			return retry.NonRetryableError(fmt.Errorf("unable to create commit: %w", err))
 		}
 		_, err = gitClient.Commit(commit, signer, repository.WithFiles(files))
 		if err != nil && !errors.Is(err, git.ErrNoStagedFiles) {
-			return retry.NonRetryableError(fmt.Errorf("Unable to commit updated files: %w", err))
+			return retry.NonRetryableError(fmt.Errorf("unable to commit updated files: %w", err))
 		}
-		// Skip pushing if no changes have been made
+		// Skip pushing if no changes have been made.
 		if err != nil {
 			return nil
 		}
 		err = gitClient.Push(ctx, repository.PushConfig{})
 		if err != nil {
-			return retry.RetryableError(fmt.Errorf("Unable to push file update: %w", err))
+			return retry.RetryableError(fmt.Errorf("unable to push file update: %w", err))
 		}
 		return nil
 	})
@@ -657,7 +657,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		}
 		defer os.RemoveAll(gitClient.Path())
 
-		// Remove all tracked files from git
+		// Remove all tracked files from git.
 		for k := range data.RepositoryFiles.Elements() {
 			path := filepath.Join(gitClient.Path(), k)
 			if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
@@ -672,16 +672,16 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		// TODO: If no files are removed we should not commit anything.
 		commit, signer, err := r.prd.CreateCommit("Uninstall Flux")
 		if err != nil {
-			return retry.NonRetryableError(fmt.Errorf("Unable to create commit: %w", err))
+			return retry.NonRetryableError(fmt.Errorf("unable to create commit: %w", err))
 		}
 		// TODO: If all files are removed from the repository delete will fail. This needs a test and to be fixed.
 		_, err = gitClient.Commit(commit, signer)
 		if err != nil {
-			return retry.NonRetryableError(fmt.Errorf("Unable to commit removed file(s): %w", err))
+			return retry.NonRetryableError(fmt.Errorf("unable to commit removed file(s): %w", err))
 		}
 		err = gitClient.Push(ctx, repository.PushConfig{})
 		if err != nil {
-			return retry.RetryableError(fmt.Errorf("Unable to push removed file(s): %w", err))
+			return retry.RetryableError(fmt.Errorf("unable to push removed file(s): %w", err))
 		}
 		return nil
 	})
@@ -690,7 +690,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 }
 
-// TODO: Validate Flux installation before proceeding with import
+// TODO: Validate Flux installation before proceeding with import.
 func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	if r.prd == nil {
 		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
@@ -714,10 +714,10 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	data.ID = types.StringValue(req.ID)
 	data.Namespace = data.ID
 
-	// Set values that cant be null
+	// Set values that cant be null.
 	data.TolerationKeys = types.SetNull(types.StringType)
 
-	// Get Network NetworkPolicy
+	// Get Network NetworkPolicy.
 	networkPolicy := networkingv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "allow-webhooks",
@@ -734,7 +734,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		data.NetworkPolicy = types.BoolValue(false)
 	}
 
-	// Get values from kustomize-controller Deployment
+	// Get values from kustomize-controller Deployment.
 	kustomizeDeployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "kustomize-controller",
@@ -751,7 +751,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		return
 	}
 
-	// Get Flux Version beeing used
+	// Get Flux Version being used.
 	version, ok := kustomizeDeployment.Labels["app.kubernetes.io/version"]
 	if !ok {
 		resp.Diagnostics.AddError("Version label not found", "Label is not present in kustomize-controller Deployment")
@@ -759,7 +759,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	}
 	data.Version = types.StringValue(version)
 
-	// Get Image Registry
+	// Get Image Registry.
 	ref, err := name.ParseReference(managerContainer.Image)
 	if err != nil {
 		resp.Diagnostics.AddError("Could not parse image reference", err.Error())
@@ -773,7 +773,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	}
 	data.Registry = customtypes.URLValue(u)
 
-	// Get the toleration keys
+	// Get the toleration keys.
 	tolerationKeys := []string{}
 	for _, toleration := range kustomizeDeployment.Spec.Template.Spec.Tolerations {
 		tolerationKeys = append(tolerationKeys, toleration.Key)
@@ -785,13 +785,13 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	}
 	data.TolerationKeys = tolerationKeysSet
 
-	// Get image pull secrets
+	// Get image pull secrets.
 	data.ImagePullSecret = types.StringNull()
 	if len(kustomizeDeployment.Spec.Template.Spec.ImagePullSecrets) > 0 {
 		data.ImagePullSecret = types.StringValue(kustomizeDeployment.Spec.Template.Spec.ImagePullSecrets[0].Name)
 	}
 
-	// Get if watching all namespace
+	// Get if watching all namespace.
 	value, err := utils.GetArgValue(managerContainer, "--watch-all-namespaces")
 	if err != nil {
 		resp.Diagnostics.AddError("Could not get arg", err.Error())
@@ -823,13 +823,13 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		resp.Diagnostics.AddError("Could not parse events address", err.Error())
 		return
 	}
-	// TODO: Probably smarter to remove what we know comes before the cluster domain and remove that
+	// TODO: Probably smarter to remove what we know comes before the cluster domain and remove that.
 	host := strings.TrimSuffix(eventsUrl.Host, ".")
 	c := strings.Split(host, ".")
 	clusterDomain := strings.Join(c[len(c)-2:], ".")
 	data.ClusterDomain = types.StringValue(clusterDomain)
 
-	// Get values from flux-system GitRepository
+	// Get values from flux-system GitRepository.
 	gitRepository := sourcev1.GitRepository{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      data.Namespace.ValueString(),
@@ -843,7 +843,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	data.SecretName = types.StringValue(gitRepository.Spec.SecretRef.Name)
 	data.Interval = customtypes.DurationValue(gitRepository.Spec.Interval.Duration)
 
-	// Get values from flux-system Kustomization
+	// Get values from flux-system Kustomization.
 	kustomization := kustomizev1.Kustomization{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      data.Namespace.ValueString(),
@@ -861,7 +861,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		data.Path = types.StringValue(path)
 	}
 
-	// Check which components are present and which are not
+	// Check which components are present and which are not.
 	components := []attr.Value{}
 	for _, c := range install.MakeDefaultOptions().Components {
 		dep := appsv1.Deployment{
@@ -915,7 +915,7 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		data.ComponentsExtra = componentsExtraSet
 	}
 
-	// Set expected repository files
+	// Set expected repository files.
 	repositoryFiles, err := getExpectedRepositoryFiles(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Getting expected repository files", err.Error())
@@ -1002,13 +1002,13 @@ func getExpectedRepositoryFiles(data bootstrapGitResourceData, url *url.URL, bra
 	installOpts := getInstallOptions(data)
 	installManifests, err := install.Generate(installOpts, "")
 	if err != nil {
-		return nil, fmt.Errorf("Could not generate install manifests: %w", err)
+		return nil, fmt.Errorf("could not generate install manifests: %w", err)
 	}
 	repositoryFiles[installManifests.Path] = installManifests.Content
 	syncOpts := getSyncOptions(data, url, branch)
 	syncManifests, err := sync.Generate(syncOpts)
 	if err != nil {
-		return nil, fmt.Errorf("Could not generate sync manifests: %w", err)
+		return nil, fmt.Errorf("could not generate sync manifests: %w", err)
 	}
 	repositoryFiles[syncManifests.Path] = syncManifests.Content
 	repositoryFiles[filepath.Join(data.Path.ValueString(), data.Namespace.ValueString(), konfig.DefaultKustomizationFileName())] = getKustomizationFile(data)
