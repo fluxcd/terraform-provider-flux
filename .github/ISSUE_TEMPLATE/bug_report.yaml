@@ -1,0 +1,109 @@
+---
+name: Bug report
+description: Create a report to help us improve the Flux terraform provider
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Support
+        Find out more about your support options and getting help at: https://fluxcd.io/support/
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Describe the bug
+      description: A clear description of what the bug is.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Steps to reproduce the problem.
+      placeholder: |
+        For example:
+        1. Configure the following provider versions
+        2. Run command '...'
+        3. See error
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Expected behavior
+      description: A brief description of what you expected to happen.
+  - type: textarea
+    attributes:
+      label: Screenshots and recordings
+      description: |
+        If applicable, add screenshots to help explain your problem. You can also record an asciinema session: https://asciinema.org/
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Terraform and provider versions
+      description: The Terraform version and any provider versions you are using. Run `terraform version` to get this information.
+      placeholder: |
+        Terraform v1.7.0
+        on darwin_arm64
+        + provider registry.terraform.io/digitalocean/digitalocean v2.36.0
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Terraform provider configurations
+      description: The provider configurations you are using. This can be sensitive information, so please be sure to redact any secrets.
+      placeholder: |
+        provider "kubernetes" {
+          host                   = module.cluster.cluster.endpoint
+          cluster_ca_certificate = base64decode(module.cluster.cluster.certificate_authority.0.data)
+          token                  = data.aws_eks_cluster_auth.cluster.token
+        }
+
+        provider "helm" {
+          kubernetes {
+            host                   = module.cluster.cluster.endpoint
+            cluster_ca_certificate = base64decode(module.cluster.cluster.certificate_authority.0.data)
+            token                  = data.aws_eks_cluster_auth.cluster.token
+          }
+        }
+
+        provider "flux" {
+          git = {
+            url    = "ssh://${var.flux_bootstrap_configuration["git_repo"]}"
+            branch = "main"
+            ssh = {
+              username    = "git"
+              private_key = data.terraform_remote_state.keypairs.outputs.flux_ssh_key["private"]
+            }
+          }
+          kubernetes = {
+            host                   = module.cluster.cluster.endpoint
+            cluster_ca_certificate = base64decode(module.cluster.cluster.certificate_authority.0.data)
+            token                  = data.aws_eks_cluster_auth.cluster.token
+          }
+        }
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: flux_bootstrap_git resource
+      description: The full configuration of the flux_bootstrap_git resource that you are using.
+  - type: input
+    validations:
+      required: true
+    attributes:
+      label: Flux version
+      description: The version set in the flux_bootstrap_git resource.
+      placeholder: e.g. v2.2.3
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here. This can be logs (e.g. output from `terraform apply`), environment specific caveats, etc.
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/fluxcd/terraform-provider-flux/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
