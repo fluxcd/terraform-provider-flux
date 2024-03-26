@@ -5,8 +5,7 @@
 [![license](https://img.shields.io/github/license/fluxcd/terraform-provider-flux.svg)](https://github.com/fluxcd/terraform-provider-flux/blob/main/LICENSE)
 [![release](https://img.shields.io/github/release/fluxcd/terraform-provider-flux/all.svg)](https://github.com/fluxcd/terraform-provider-flux/releases)
 
-This is the Terraform provider for Flux v2. The provider allows you to install Flux on Kubernetes
-and configure it to reconcile the cluster state from a Git repository.
+This is the Terraform provider for Flux v2. The provider allows you to install Flux on Kubernetes and configure it to reconcile the cluster state from a Git repository.
 
 ## Get Started
 
@@ -35,6 +34,14 @@ resource "flux_bootstrap_git" "this" {
 
 ## Guides
 
-* [Customize Flux configuration](https://registry.terraform.io/providers/fluxcd/flux/latest/docs/resources/bootstrap_git#customizing-flux)
-* [Bootstrap with GitHub](https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/github)
-* [Bootstrap with GitLab](https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/gitlab)
+The following guides are available to help you use the provider:
+
+- [Configuration using a Github repository via SSH](examples/github-via-ssh)
+- [Configuration using a Github repository via SSH and GPG](examples/github-via-ssh-with-gpg)
+- [Configuration using a Github repository via SSH with flux customizations](examples/github-with-customizations)
+- [Configuration using a Github repository via SSH and GPG with inline flux customizations](examples/github-with-inline-customizations)
+- [Configuration using a Gitlab repository via SSH](examples/gitlab-via-ssh)
+- [Configuration using a Gitlab repository via SSH and GPG](examples/gitlab-via-ssh-with-gpg)
+- [Configuration using a Helm Release and not the flux_bootstrap_git resource](examples/helm-install) **
+
+** This is the recommended approach if you do not want to perform initial flux bootstrapping.
