@@ -30,7 +30,7 @@ resource "kind_cluster" "this" {
 }
 
 # ==========================================
-# Add deploy key to GitHub repository
+# Add deploy key to Gitlab repository
 # ==========================================
 
 resource "tls_private_key" "flux" {
