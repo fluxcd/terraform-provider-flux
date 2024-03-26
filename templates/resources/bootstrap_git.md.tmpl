@@ -9,37 +9,24 @@ description: |-
 
 {{ .Description | trimspace }}
 
--> **NOTE:** Checkout the [GitHub](https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/github) or [Gitlab](https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/gitlab) bootstrap guide for a detailed step by step guide.
-
 ## Example Usage
 
-Get Kubernetes credentials from a kubeconfig file. The current context set in the kubeconfig file will be used by default.
+The following examples are available to help you use the provider:
 
-{{ tffile .ExampleFile }}
+- [Configuration using a Github repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh)
+- [Configuration using a Github repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh-with-gpg)
+- [Configuration using a Github repository via SSH with flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-customizations)
+- [Configuration using a Github repository via SSH and GPG with inline flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-inline-customizations)
+- [Configuration using a Gitlab repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh)
+- [Configuration using a Gitlab repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh-with-gpg)
+- [Configuration using a Helm Release and not the flux_bootstrap_git resource]((https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/helm-install) that is the recommended approach if you do not want to perform bootstrapping.
 
 {{ .SchemaMarkdown | trimspace }}
-
-### Customizing Flux
-
-The Flux controller deployments, container command arguments, node affinity, etc can be customized using [Kustomize strategic merge patches and JSON patches](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/patchMultipleObjects.md).
-The Kustomize file is configured through the `kustomize_override` argument. Below are some examples of use cases when customizing Flux is useful, refer to the [customization examples documentation](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/patchMultipleObjects.md) for more examples.
-
-{{ tffile "examples/resources/flux_bootstrap_git/customize.tf" }}
-
-#### Safe to evict
-
-Allow the cluster autoscaler to evict the Flux controller pods.
-
-{{ codefile "yaml" "examples/resources/flux_bootstrap_git/kustomization-evict.yaml" }}
-
-#### Node affinity and tolerations
-
-Pin the Flux controllers to specific nodes.
-
-{{ codefile "yaml" "examples/resources/flux_bootstrap_git/kustomization-node.yaml" }}
 
 ## Import
 
 Existing Flux installations can be imported by passing the namespace where Flux is installed.
 
-{{ codefile "sh" .ImportFile }}
+```shell
+terraform import flux_bootstrap_git.this flux-system
+```

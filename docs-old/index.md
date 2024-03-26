@@ -13,21 +13,9 @@ The provider needs to be configured with Kubernetes credentials to be used.
 
 ## Example Usage
 
-The following examples are available to help you use the provider:
-
-- [Configuration using a Github repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh)
-- [Configuration using a Github repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh-with-gpg)
-- [Configuration using a Github repository via SSH with flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-customizations)
-- [Configuration using a Github repository via SSH and GPG with inline flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-inline-customizations)
-- [Configuration using a Gitlab repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh)
-- [Configuration using a Gitlab repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh-with-gpg)
-- [Configuration using a Helm Release and not the flux_bootstrap_git resource](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/helm-install) that is the recommended approach if you do not want to perform bootstrapping.
-
-## Provider Configuration
-
 Get Kubernetes credentials from a kubeconfig file. The current context set in the kubeconfig file will be used by default.
 
-```hcl
+```terraform
 provider "flux" {
   kubernetes = {
     config_path = "~/.kube/config"
@@ -164,7 +152,6 @@ Optional:
 - `password` (String, Sensitive) Password for private key.
 - `private_key` (String, Sensitive) Private key used for authenticating to the Git SSH server.
 - `username` (String) Username for Git SSH server.
-
 
 
 <a id="nestedatt--kubernetes"></a>
