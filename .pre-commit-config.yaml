@@ -45,3 +45,7 @@ repos:
           - '--args=--only=terraform_required_providers'
           - '--args=--only=terraform_standard_module_structure'
           - '--args=--only=terraform_workspace_remote'
+  - repo: https://github.com/FalcoSuessgott/tfplugindocs
+    rev: v0.0.2
+    hooks:
+      - id: tfplugindocs

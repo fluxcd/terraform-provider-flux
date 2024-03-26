@@ -21,7 +21,9 @@ The following examples are available to help you use the provider:
 - [Configuration using a Github repository via SSH and GPG with inline flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-inline-customizations)
 - [Configuration using a Gitlab repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh)
 - [Configuration using a Gitlab repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh-with-gpg)
-- [Configuration using a Helm Release and not the flux_bootstrap_git resource](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/helm-install) that is the recommended approach if you do not want to perform bootstrapping.
+- [Configuration using a Helm Release and not the flux_bootstrap_git resource](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/helm-install) **
+
+** This is the recommended approach if you do not want to perform initial flux bootstrapping.
 
 ## Provider Configuration
 
