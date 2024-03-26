@@ -4,6 +4,8 @@ The example demonstrates how to bootstrap a KinD cluster using the upstream [flu
 
 Note: Using `flux_bootstrap_git` is the recommended approach but this is another option if we are unable to use `flux_bootstrap_git`.
 
+However, using the Flux Helm chart is a better option when Flux needs to be installed without any bootstrap configuration.
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 

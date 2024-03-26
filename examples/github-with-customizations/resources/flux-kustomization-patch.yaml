@@ -1,17 +1,15 @@
-# Ref: https://registry.terraform.io/providers/fluxcd/flux/latest/docs/resources/bootstrap_git#customizing-flux
 apiVersion: kustomize.config.k8s.io/v1
 kind: Kustomization
 resources:
   - gotk-components.yaml
   - gotk-sync.yaml
 patches:
-  # Patch helm-controller deployment to enable drift detection and correction
-  # Ref: https://fluxcd.io/flux/installation/configuration/helm-drift-detection/
+  # Ref: https://fluxcd.io/flux/installation/configuration/boostrap-customization/
   - patch: |
       - op: add
         path: /spec/template/spec/containers/0/args/-
-        value: --feature-gates=DetectDrift=true,CorrectDrift=true
+        value: --concurrent=5
     target:
       kind: Deployment
-      name: helm-controller
+      name: source-controller
       namespace: flux-system
