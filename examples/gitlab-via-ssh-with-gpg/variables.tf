@@ -1,9 +1,3 @@
-variable "flux_version" {
-  description = "Flux version"
-  type        = string
-  default     = "2.2.3"
-}
-
 variable "gpg_key_id" {
   description = "The ID of the GPG key to use for signing commits when bootstraping FluxCD."
   type        = string

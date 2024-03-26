@@ -1,9 +1,3 @@
-variable "flux_version" {
-  description = "Flux version"
-  type        = string
-  default     = "2.2.3"
-}
-
 variable "github_token" {
   description = "GitHub token"
   sensitive   = true

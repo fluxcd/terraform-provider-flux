@@ -1,9 +1,3 @@
-variable "flux_version" {
-  description = "Flux version"
-  type        = string
-  default     = "2.2.3"
-}
-
 variable "gitlab_token" {
   description = "The GitLab token to use for authenticating against the GitLab API."
   sensitive   = true

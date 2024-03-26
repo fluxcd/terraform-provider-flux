@@ -56,6 +56,5 @@ resource "gitlab_deploy_key" "this" {
 resource "flux_bootstrap_git" "this" {
   depends_on = [gitlab_deploy_key.this]
 
-  version = var.flux_version
-  path    = "clusters/my-cluster"
+  path = "clusters/my-cluster"
 }

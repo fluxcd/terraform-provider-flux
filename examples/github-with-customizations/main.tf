@@ -52,8 +52,7 @@ resource "github_repository_deploy_key" "this" {
 resource "flux_bootstrap_git" "this" {
   depends_on = [github_repository_deploy_key.this]
 
-  version = var.flux_version
-  path    = "clusters/my-cluster"
+  path = "clusters/my-cluster"
   components_extra = [
     "image-reflector-controller",
     "image-automation-controller"
