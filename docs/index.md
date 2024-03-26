@@ -157,7 +157,6 @@ Optional:
 - `username` (String) Username for Git SSH server.
 
 
-
 <a id="nestedatt--kubernetes"></a>
 ### Nested Schema for `kubernetes`
 

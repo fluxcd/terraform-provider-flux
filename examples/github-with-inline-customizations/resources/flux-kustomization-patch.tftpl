@@ -1,0 +1,27 @@
+# Ref: https://fluxcd.io/flux/installation/configuration/workload-identity/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gotk-components.yaml
+  - gotk-sync.yaml
+patches:
+  - patch: |
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: controller
+        annotations:
+          eks.amazonaws.com/role-arn: ${role_arn}
+    target:
+      kind: ServiceAccount
+      name: "(source-controller|image-reflector-controller)"
+  - patch: |
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: controller
+        annotations:
+          eks.amazonaws.com/role-arn: ${role_arn}
+    target:
+      kind: ServiceAccount
+      name: "kustomize-controller"
