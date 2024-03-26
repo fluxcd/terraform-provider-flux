@@ -160,23 +160,24 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 						Description: "Path to the kube config file. Can be set with KUBE_CONFIG_PATH.",
 					},
 					"config_context": schema.StringAttribute{
-						Optional: true,
+						Optional:    true,
+						Description: "Context to choose from the config file.",
 					},
 					"config_context_auth_info": schema.StringAttribute{
 						Optional:    true,
-						Description: "",
+						Description: "Authentication info context of the kube config (name of the kubeconfig user, `--user` flag in `kubectl`).",
 					},
 					"config_context_cluster": schema.StringAttribute{
 						Optional:    true,
-						Description: "",
+						Description: "Cluster context of the kube config (name of the kubeconfig cluster, `--cluster` flag in `kubectl`).",
 					},
 					"token": schema.StringAttribute{
 						Optional:    true,
-						Description: "Token to authenticate an service account",
+						Description: "Token to authenticate an service account.",
 					},
 					"proxy_url": schema.StringAttribute{
 						Optional:    true,
-						Description: "URL to the proxy to be used for all API requests",
+						Description: "URL to the proxy to be used for all API requests.",
 					},
 					"exec": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
