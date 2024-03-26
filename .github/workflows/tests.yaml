@@ -102,41 +102,6 @@ jobs:
           TF_ACC: "1"
         run: go test -v -cover ./internal/provider/
         timeout-minutes: 10
-  e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
-      - name: Setup Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
-        with:
-          go-version: 1.20.x
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@19a52fbac37dacb22a09518e4ef6ee234f2d4987 # v4.0.0
-      - name: Lint Terraform
-        run: make lint
-      - name: Setup Kubernetes
-        uses: helm/kind-action@99576bfa6ddf9a8e612d83b513da5a75875caced # v1.9.0
-        with:
-          version: v0.17.0
-          # The versions below should target the newest Kubernetes version
-          # Keep this up-to-date with https://endoflife.date/kubernetes
-          node_image: kindest/node:v1.28.0@sha256:9f3ff58f19dcf1a0611d11e8ac989fdb30a28f40f236f59f0bea31fb956ccf5c
-      - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@534684601ec8888beb0cc4f51117b59e97606c4d # v2.2.3
-      - name: Apply Terraform
-        env:
-          GOOS: linux
-          GOARCH: amd64
-        run: |
-          make build
-          make terraformrc
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
-          cd examples/install
-          terraform init
-          terraform apply -auto-approve -var "components_extra=[\"image-reflector-controller\", \"image-automation-controller\"]"
-      - name: Health check Flux
-        run: flux check
   e2e-github:
     runs-on: ubuntu-latest
     if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && github.actor != 'dependabot[bot]'
@@ -178,7 +143,7 @@ jobs:
           make build
           make terraformrc
           export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
-          cd examples/github-ssh
+          cd examples/github-via-ssh
           terraform init
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
