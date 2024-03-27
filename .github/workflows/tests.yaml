@@ -133,6 +133,11 @@ jobs:
             -d '{"name":"${{ steps.vars.outputs.test_repo_name }}", "auto_init": true}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
+        with:
+          terraform_version: '1.7.5'
+          terraform_wrapper: false
       - name: Apply Terraform
         run: |
           make build

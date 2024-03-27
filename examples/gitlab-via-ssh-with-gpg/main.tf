@@ -1,22 +1,22 @@
 terraform {
-  required_version = "= 1.7.0"
+  required_version = ">= 1.7.0"
 
   required_providers {
     flux = {
       source  = "fluxcd/flux"
-      version = "~> 1.2"
+      version = ">= 1.2"
     }
     gitlab = {
       source  = "gitlabhq/gitlab"
-      version = ">=16.10.0"
+      version = ">= 16.10"
     }
     kind = {
       source  = "tehcyx/kind"
-      version = "0.4.0"
+      version = ">= 0.4"
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "4.0.5"
+      version = ">= 4.0"
     }
   }
 }
