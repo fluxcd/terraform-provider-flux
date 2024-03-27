@@ -1,0 +1,34 @@
+# Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#increase-the-number-of-workers-and-limits
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gotk-components.yaml
+  - gotk-sync.yaml
+patches:
+  - patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --concurrent=10
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --requeue-dependency=5s
+    target:
+      kind: Deployment
+      name: "(kustomize-controller|helm-controller|source-controller)"
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: all
+      spec:
+        template:
+          spec:
+            containers:
+              - name: manager
+                resources:
+                  limits:
+                    cpu: 2000m
+                    memory: 2Gi
+    target:
+      kind: Deployment
+      name: "(kustomize-controller|helm-controller|source-controller)"
