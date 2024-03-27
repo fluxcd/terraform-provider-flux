@@ -152,7 +152,7 @@ jobs:
         run: flux check
       - name: Destroy Terraform
         run: |
-          cd examples/github-ssh
+          cd examples/github-via-ssh
           terraform destroy -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
       - name: Delete repository
         if: ${{ always() }}
