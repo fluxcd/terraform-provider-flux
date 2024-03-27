@@ -52,7 +52,7 @@ func GenerateKustomizationYaml(paths []string, patches []string) (string, error)
 	return kustomize.String(), nil
 }
 
-const kustomizeTemplateString = `
+const kustomizeTemplateString = `---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -61,7 +61,7 @@ resources:
 {{- end }}
 `
 
-const kustomizeWithPatchesTemplateString = `
+const kustomizeWithPatchesTemplateString = `---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
