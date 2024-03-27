@@ -1,6 +1,6 @@
 # GitHub via SSH (with flux customizations)
 
-The example demonstrates how to bootstrap a KinD cluster with flux using a GitHub repository via SSH with customizations provided.
+The example demonstrates how to bootstrap a KinD cluster with Flux using a GitHub repository via SSH with customizations provided.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements

@@ -1,6 +1,6 @@
 # Gitlab via SSH (with GPG)
 
-The example demonstrates how to bootstrap a KinD cluster with flux using a Gitlab repository via SSH with GPG provided.
+The example demonstrates how to bootstrap a KinD cluster with Flux using a Gitlab repository via SSH with GPG provided.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements

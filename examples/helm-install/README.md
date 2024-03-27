@@ -1,6 +1,6 @@
 # Install Flux with Helm
 
-The example demonstrates how to bootstrap a KinD cluster using the upstream [flux helm chart](https://github.com/fluxcd-community/helm-charts/tree/main/charts/flux2).
+The example demonstrates how to bootstrap a KinD cluster using the upstream [Flux helm chart](https://github.com/fluxcd-community/helm-charts/tree/main/charts/flux2).
 
 Note: Using `flux_bootstrap_git` is the recommended approach but this is another option if we are unable to use `flux_bootstrap_git`.
 
