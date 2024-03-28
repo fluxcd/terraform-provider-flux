@@ -104,6 +104,7 @@ type bootstrapGitResourceData struct {
 	Interval              customtypes.Duration `tfsdk:"interval"`
 	SecretName            types.String         `tfsdk:"secret_name"`
 	DisableSecretCreation types.Bool           `tfsdk:"disable_secret_creation"`
+	DeleteGitManifests    types.Bool           `tfsdk:"delete_git_manifests"`
 	RecurseSubmodules     types.Bool           `tfsdk:"recurse_submodules"`
 	KustomizationOverride types.String         `tfsdk:"kustomization_override"`
 	RepositoryFiles       types.Map            `tfsdk:"repository_files"`
@@ -284,6 +285,10 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 			},
 			"disable_secret_creation": schema.BoolAttribute{
 				Description: "Use the existing secret for flux controller and don't create one from bootstrap",
+				Optional:    true,
+			},
+			"delete_git_manifests": schema.BoolAttribute{
+				Description: "Delete manifests from git repository. Defaults to `true`.",
 				Optional:    true,
 			},
 			"kustomization_override": schema.StringAttribute{
@@ -651,6 +656,10 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+		if ! (data.DeleteGitManifests.IsNull() || data.DeleteGitManifests.ValueBool()) {
+			return nil
+		}
+
 		gitClient, err := r.prd.GetGitClient(ctx)
 		if err != nil {
 			return retry.NonRetryableError(err)
