@@ -1,3 +1,6 @@
+# Copyright (c) The Flux authors
+# SPDX-License-Identifier: Apache-2.0
+
 # Visit https://golangci-lint.run/ for usage documentation
 # and information on other useful linters
 issues:

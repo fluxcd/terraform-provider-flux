@@ -1,3 +1,6 @@
+# Copyright (c) The Flux authors
+# SPDX-License-Identifier: Apache-2.0
+
 terraform {
   required_version = ">= 1.7.0"
 

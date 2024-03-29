@@ -1,3 +1,6 @@
+# Copyright (c) The Flux authors
+# SPDX-License-Identifier: Apache-2.0
+
 variable "gitlab_token" {
   description = "The GitLab token to use for authenticating against the GitLab API."
   sensitive   = true

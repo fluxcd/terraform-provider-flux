@@ -1,6 +1,9 @@
+# Copyright (c) Flux
+# SPDX-License-Identifier: Apache-2.0
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.5.0
     hooks:
       - id: check-byte-order-marker
       - id: check-case-conflict
@@ -13,7 +16,7 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/dnephin/pre-commit-golang.git
-    rev: v0.5.0
+    rev: v0.5.1
     files: internal
     hooks:
       - id: go-fmt
@@ -23,7 +26,7 @@ repos:
       - id: go-unit-tests
       - id: golangci-lint
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.88.0
+    rev: v1.88.4
     files: examples
     hooks:
       - id: terraform_fmt

@@ -1,3 +1,6 @@
+# Copyright (c) The Flux authors
+# SPDX-License-Identifier: Apache-2.0
+
 provider "flux" {
   kubernetes = {
     host                   = kind_cluster.this.endpoint

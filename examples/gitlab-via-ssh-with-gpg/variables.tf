@@ -1,3 +1,6 @@
+# Copyright (c) The Flux authors
+# SPDX-License-Identifier: Apache-2.0
+
 variable "gpg_key_id" {
   description = "The ID of the GPG key to use for signing commits when bootstraping FluxCD."
   type        = string

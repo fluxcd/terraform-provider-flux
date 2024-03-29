@@ -1,3 +1,6 @@
+# Copyright (c) The Flux authors
+# SPDX-License-Identifier: Apache-2.0
+
 provider "github" {
   owner = var.github_org
   token = var.github_token
