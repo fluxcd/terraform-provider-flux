@@ -5,12 +5,6 @@ variable "gitlab_token" {
   default     = ""
 }
 
-variable "gitlab_group" {
-  description = "The GitLab group to use for creating the GitLab project."
-  type        = string
-  default     = ""
-}
-
 variable "gitlab_project" {
   description = "The GitLab project to use for creating the GitLab project."
   type        = string
