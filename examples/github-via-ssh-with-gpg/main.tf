@@ -30,6 +30,17 @@ resource "kind_cluster" "this" {
 }
 
 # ==========================================
+# Initialise a Github project
+# ==========================================
+
+resource "github_repository" "this" {
+  name        = var.github_repository
+  description = var.github_repository
+  visibility  = "public"
+  auto_init   = true # This is extremely important as flux_bootstrap_git will not work without a repository that has been initialised
+}
+
+# ==========================================
 # Add deploy key to GitHub repository
 # ==========================================
 
@@ -40,7 +51,7 @@ resource "tls_private_key" "flux" {
 
 resource "github_repository_deploy_key" "this" {
   title      = "Flux"
-  repository = var.github_repository
+  repository = github_repository.this.name
   key        = tls_private_key.flux.public_key_openssh
   read_only  = "false"
 }
