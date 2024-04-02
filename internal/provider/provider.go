@@ -380,10 +380,7 @@ func (p *fluxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 }
 
 func (p *fluxProvider) DataSources(context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		NewSyncDataSource,
-		NewInstallDataSource,
-	}
+	return []func() datasource.DataSource{}
 }
 
 func (p *fluxProvider) Resources(context.Context) []func() resource.Resource {
