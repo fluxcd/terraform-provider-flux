@@ -48,11 +48,6 @@ resource "github_repository" "this" {
   auto_init   = true
 }
 
-resource "github_branch_default" "this" {
-  repository = github_repository.this.name
-  branch     = "main"
-}
-
 # =============================================================================================
 # Add deploy key to GitHub repository
 # =============================================================================================
@@ -130,7 +125,7 @@ resource "helm_release" "flux2_sync" {
 
   set {
     name  = "gitRepository.spec.ref.branch"
-    value = github_branch_default.this.branch
+    value = "main"
   }
 
   set {
