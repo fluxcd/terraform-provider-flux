@@ -209,6 +209,8 @@ jobs:
         run: |
           cd examples/helm-install
           terraform destroy -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
       - name: Delete repository
         if: ${{ always() }}
         continue-on-error: true
