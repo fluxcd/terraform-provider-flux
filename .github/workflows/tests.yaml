@@ -183,18 +183,9 @@ jobs:
           REPOSITORY_NAME=${{ github.event.repository.name }}
           BRANCH_NAME=${GITHUB_REF##*/}
           COMMIT_SHA=$(git rev-parse HEAD)
-          PSEUDO_RAND_SUFFIX=$(echo "${BRANCH_NAME}-${COMMIT_SHA}-helm-install" | shasum | awk '{print $1}')
-          TEST_REPO_NAME="${REPOSITORY_NAME}-${PSEUDO_RAND_SUFFIX}"
+          PSEUDO_RAND_SUFFIX=$(echo "${BRANCH_NAME}-${COMMIT_SHA}" | shasum | awk '{print $1}')
+          TEST_REPO_NAME="${REPOSITORY_NAME}-${PSEUDO_RAND_SUFFIX}-helm-install"
           echo "test_repo_name=$TEST_REPO_NAME" >> $GITHUB_OUTPUT
-      - name: Create repository
-        run: |
-          curl \
-            -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            --fail --silent \
-            https://api.github.com/orgs/fluxcd-testing/repos \
-            -d '{"name":"${{ steps.vars.outputs.test_repo_name }}", "auto_init": true}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
       - name: Install Terraform
@@ -220,6 +211,7 @@ jobs:
           terraform destroy -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
       - name: Delete repository
         if: ${{ always() }}
+        continue-on-error: true
         run: |
           curl \
             -X DELETE \
