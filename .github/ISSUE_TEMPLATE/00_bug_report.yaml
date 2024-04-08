@@ -1,18 +1,20 @@
----
-name: Bug report
-description: Create a report to help us improve the Flux terraform provider
+name: "Report a Bug"
+description: "Choose this option to let us know about an unexpected error, a crash, or otherwise incorrect behavior."
+title: "[Bug]: "
 body:
   - type: markdown
     attributes:
       value: |
         ## Support
         Find out more about your support options and getting help at: https://fluxcd.io/support/
+
   - type: textarea
     validations:
       required: true
     attributes:
       label: Describe the bug
       description: A clear description of what the bug is.
+
   - type: textarea
     validations:
       required: true
@@ -25,17 +27,20 @@ body:
         1. Configure the following provider versions
         2. Run command '...'
         3. See error
+
   - type: textarea
     validations:
       required: true
     attributes:
       label: Expected behavior
       description: A brief description of what you expected to happen.
+
   - type: textarea
     attributes:
       label: Screenshots and recordings
       description: |
         If applicable, add screenshots to help explain your problem. You can also record an asciinema session: https://asciinema.org/
+
   - type: textarea
     validations:
       required: true
@@ -46,6 +51,7 @@ body:
         Terraform v1.7.0
         on darwin_arm64
         + provider registry.terraform.io/digitalocean/digitalocean v2.36.0
+
   - type: textarea
     validations:
       required: true
@@ -82,12 +88,14 @@ body:
             token                  = data.aws_eks_cluster_auth.cluster.token
           }
         }
+
   - type: textarea
     validations:
       required: true
     attributes:
       label: flux_bootstrap_git resource
       description: The full configuration of the flux_bootstrap_git resource that you are using.
+
   - type: input
     validations:
       required: true
@@ -95,10 +103,12 @@ body:
       label: Flux version
       description: The version set in the flux_bootstrap_git resource.
       placeholder: e.g. v2.2.3
+
   - type: textarea
     attributes:
       label: Additional context
       description: Add any other context about the problem here. This can be logs (e.g. output from `terraform apply`), environment specific caveats, etc.
+
   - type: checkboxes
     id: terms
     attributes:
@@ -107,3 +117,22 @@ body:
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true
+
+  - type: dropdown
+    id: will_contribute
+    attributes:
+      label: Would you like to implement a fix?
+      description: |
+        If you plan to implement a fix for this, check this box to let the maintainers and community know (you can update this later if you change your mind). If this would be your first contribution, refer to the [contribution guide](https://github.com/fluxcd/terraform-provider-flux/blob/main/CONTRIBUTING.md) for tips on getting started.
+      options:
+        - "No"
+        - "Yes"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Community Note
+        Please vote on this issue by adding a 👍 reaction to the original issue to help the community and maintainers prioritise this request
+        If you are interested in working on this issue or have submitted a pull request, please leave a comment
