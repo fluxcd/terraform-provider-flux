@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  TERRAFORM_VERSION: 1.7.5
+
 jobs:
   # Ensure project builds before running testing matrix
   build:
@@ -126,7 +129,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
         with:
-          terraform_version: '1.7.5'
+          terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
       - name: Apply Terraform
         run: |
@@ -191,7 +194,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
         with:
-          terraform_version: '1.7.5'
+          terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
       - name: Apply Terraform
         run: |
@@ -208,6 +211,69 @@ jobs:
       - name: Destroy Terraform
         run: |
           cd examples/helm-install
+          terraform destroy -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: Delete repository
+        if: ${{ always() }}
+        continue-on-error: true
+        run: |
+          curl \
+            -X DELETE \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            --fail --silent \
+            https://api.github.com/repos/fluxcd-testing/${{ steps.vars.outputs.test_repo_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+  e2e-flux-bootstrap-with-github-pat:
+    runs-on: ubuntu-latest
+    needs: build
+    if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && github.actor != 'dependabot[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Setup Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+          cache-dependency-path: |
+            **/go.sum
+            **/go.mod
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@534684601ec8888beb0cc4f51117b59e97606c4d # v2.2.3
+      - name: Set outputs
+        id: vars
+        run: |
+          REPOSITORY_NAME=${{ github.event.repository.name }}
+          BRANCH_NAME=${GITHUB_REF##*/}
+          COMMIT_SHA=$(git rev-parse HEAD)
+          PSEUDO_RAND_SUFFIX=$(echo "${BRANCH_NAME}-${COMMIT_SHA}" | shasum | awk '{print $1}')
+          TEST_REPO_NAME="${REPOSITORY_NAME}-${PSEUDO_RAND_SUFFIX}-using-pat"
+          echo "test_repo_name=$TEST_REPO_NAME" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
+        with:
+          terraform_version: "${{env.TERRAFORM_VERSION}}"
+          terraform_wrapper: false
+      - name: Apply Terraform
+        run: |
+          make build
+          make terraformrc
+          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
+          cd examples/github-via-pat
+          terraform init
+          terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: Health check Flux
+        run: flux check
+      - name: Destroy Terraform
+        run: |
+          cd examples/github-via-pat
           terraform destroy -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}

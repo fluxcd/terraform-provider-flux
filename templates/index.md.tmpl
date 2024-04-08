@@ -15,15 +15,14 @@ The provider needs to be configured with Kubernetes credentials to be used.
 
 The following examples are available to help you use the provider:
 
-- [Configuration using a Github repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh)
-- [Configuration using a Github repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh-with-gpg)
-- [Configuration using a Github repository via SSH with flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-customizations)
-- [Configuration using a Github repository via SSH and GPG with inline flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-inline-customizations)
-- [Configuration using a Gitlab repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh)
-- [Configuration using a Gitlab repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh-with-gpg)
-- [Configuration using a Helm Release and not the flux_bootstrap_git resource](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/helm-install) **
-
-** This is the recommended approach if you do not want to perform initial flux bootstrapping.
+- [Bootstrapping a cluster using a GitHub repository and a personal access token (PAT)](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-pat)
+- [Bootstrapping a cluster using a GitHub repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh)
+- [Bootstrapping a cluster using a GitHub repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh-with-gpg)
+- [Bootstrapping a cluster using a GitHub repository via SSH with flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-customizations)
+- [Bootstrapping a cluster using a GitHub repository via SSH and GPG with inline flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-inline-customizations)
+- [Bootstrapping a cluster using a Gitlab repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh)
+- [Bootstrapping a cluster using a Gitlab repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh-with-gpg)
+- [Bootstrapping a cluster using a Helm Release](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/helm-install)
 
 ## Provider Configuration
 
