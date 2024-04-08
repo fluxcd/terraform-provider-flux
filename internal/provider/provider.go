@@ -160,47 +160,48 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 						Description: "Path to the kube config file. Can be set with KUBE_CONFIG_PATH.",
 					},
 					"config_context": schema.StringAttribute{
-						Optional: true,
+						Optional:    true,
+						Description: "Context to choose from the config file.",
 					},
 					"config_context_auth_info": schema.StringAttribute{
 						Optional:    true,
-						Description: "",
+						Description: "Authentication info context of the kube config (name of the kubeconfig user, `--user` flag in `kubectl`).",
 					},
 					"config_context_cluster": schema.StringAttribute{
 						Optional:    true,
-						Description: "",
+						Description: "Cluster context of the kube config (name of the kubeconfig cluster, `--cluster` flag in `kubectl`).",
 					},
 					"token": schema.StringAttribute{
 						Optional:    true,
-						Description: "Token to authenticate an service account",
+						Description: "Token to authenticate an service account.",
 					},
 					"proxy_url": schema.StringAttribute{
 						Optional:    true,
-						Description: "URL to the proxy to be used for all API requests",
+						Description: "URL to the proxy to be used for all API requests.",
 					},
 					"exec": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
 							"api_version": schema.StringAttribute{
-								Description: "Kubernetes client authentication API Version",
+								Description: "Kubernetes client authentication API Version.",
 								Required:    true,
 							},
 							"command": schema.StringAttribute{
-								Description: "Client authentication exec command",
+								Description: "Client authentication exec command.",
 								Required:    true,
 							},
 							"env": schema.MapAttribute{
 								ElementType: types.StringType,
-								Description: "Client authentication exec environment variables",
+								Description: "Client authentication exec environment variables.",
 								Optional:    true,
 							},
 							"args": schema.ListAttribute{
 								ElementType: types.StringType,
-								Description: "Client authentication exec command arguments",
+								Description: "Client authentication exec command arguments.",
 								Optional:    true,
 							},
 						},
 						Optional:    true,
-						Description: "Kubernetes client authentication exec plugin configuration",
+						Description: "Kubernetes client authentication exec plugin configuration.",
 					},
 				},
 				Optional: true,
