@@ -1,0 +1,53 @@
+name: "Report a documentation error"
+description: "Choose this option if you've found an error in the provider documentation."
+title: "[Docs]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Thank you for raising a documentation issue!
+        This form is meant to alert the maintainers to an issue with the provider documentation found on the [Terraform Registry](https://registry.terraform.io/providers/fluxcd/flux/latest) (such as resource and data source documentation, guides and examples).
+
+  - type: input
+    id: registry_link
+    attributes:
+      label: Documentation Link
+      description: Please provide a link to the affected page on the Terraform Registry.
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please leave a brief description of the documentation issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: |
+        Where possible, please supply links to vendor documentation, other GitHub issues (open or closed) or pull requests that give additional context.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: will_contribute
+    attributes:
+      label: Would you like to implement a fix?
+      description: |
+        If you plan to implement a fix for this, check this box to let the maintainers and community know (you can update this later if you change your mind). If this would be your first contribution, refer to the [contribution guide](https://github.com/fluxcd/terraform-provider-flux/blob/main/CONTRIBUTING.md) for tips on getting started.
+      options:
+        - "No"
+        - "Yes"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Community Note
+        Please vote on this issue by adding a 👍 reaction to the original issue to help the community and maintainers prioritise this request
+        If you are interested in working on this issue or have submitted a pull request, please leave a comment
