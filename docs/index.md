@@ -18,6 +18,7 @@ The following examples are available to help you use the provider:
 - [Bootstrapping a cluster using a GitHub repository and a personal access token (PAT)](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-pat)
 - [Bootstrapping a cluster using a GitHub repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh)
 - [Bootstrapping a cluster using a GitHub repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh-with-gpg)
+- [Bootstrapping a cluster using a GitHub repository self-managing the SSH keypair secret)](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-self-managed-ssh-keypair)
 - [Bootstrapping a cluster using a GitHub repository via SSH with flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-customizations)
 - [Bootstrapping a cluster using a GitHub repository via SSH and GPG with inline flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-inline-customizations)
 - [Bootstrapping a cluster using a Gitlab repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh)
