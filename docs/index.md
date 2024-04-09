@@ -176,17 +176,17 @@ Optional:
 - `client_certificate` (String) PEM-encoded client certificate for TLS authentication.
 - `client_key` (String) PEM-encoded client certificate key for TLS authentication.
 - `cluster_ca_certificate` (String) PEM-encoded root certificates bundle for TLS authentication.
-- `config_context` (String)
-- `config_context_auth_info` (String)
-- `config_context_cluster` (String)
+- `config_context` (String) Context to choose from the config file.
+- `config_context_auth_info` (String) Authentication info context of the kube config (name of the kubeconfig user, `--user` flag in `kubectl`).
+- `config_context_cluster` (String) Cluster context of the kube config (name of the kubeconfig cluster, `--cluster` flag in `kubectl`).
 - `config_path` (String) Path to the kube config file. Can be set with KUBE_CONFIG_PATH.
 - `config_paths` (Set of String) A list of paths to kube config files. Can be set with KUBE_CONFIG_PATHS environment variable.
-- `exec` (Attributes) Kubernetes client authentication exec plugin configuration (see [below for nested schema](#nestedatt--kubernetes--exec))
+- `exec` (Attributes) Kubernetes client authentication exec plugin configuration. (see [below for nested schema](#nestedatt--kubernetes--exec))
 - `host` (String) The hostname (in form of URI) of Kubernetes master.
 - `insecure` (Boolean) Whether server should be accessed without verifying the TLS certificate.
 - `password` (String) The password to use for HTTP basic authentication when accessing the Kubernetes master endpoint.
-- `proxy_url` (String) URL to the proxy to be used for all API requests
-- `token` (String) Token to authenticate an service account
+- `proxy_url` (String) URL to the proxy to be used for all API requests.
+- `token` (String) Token to authenticate an service account.
 - `username` (String) The username to use for HTTP basic authentication when accessing the Kubernetes master endpoint.
 
 <a id="nestedatt--kubernetes--exec"></a>
@@ -194,10 +194,10 @@ Optional:
 
 Required:
 
-- `api_version` (String) Kubernetes client authentication API Version
-- `command` (String) Client authentication exec command
+- `api_version` (String) Kubernetes client authentication API Version.
+- `command` (String) Client authentication exec command.
 
 Optional:
 
-- `args` (List of String) Client authentication exec command arguments
-- `env` (Map of String) Client authentication exec environment variables
+- `args` (List of String) Client authentication exec command arguments.
+- `env` (Map of String) Client authentication exec environment variables.
