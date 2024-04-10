@@ -88,27 +88,28 @@ const (
 )
 
 type bootstrapGitResourceData struct {
-	ID                    types.String         `tfsdk:"id"`
-	Version               types.String         `tfsdk:"version"`
-	Path                  types.String         `tfsdk:"path"`
 	ClusterDomain         types.String         `tfsdk:"cluster_domain"`
 	Components            types.Set            `tfsdk:"components"`
 	ComponentsExtra       types.Set            `tfsdk:"components_extra"`
+	DeleteGitManifests    types.Bool           `tfsdk:"delete_git_manifests"`
+	DisableSecretCreation types.Bool           `tfsdk:"disable_secret_creation"`
+	ID                    types.String         `tfsdk:"id"`
 	ImagePullSecret       types.String         `tfsdk:"image_pull_secret"`
+	Interval              customtypes.Duration `tfsdk:"interval"`
+	KustomizationOverride types.String         `tfsdk:"kustomization_override"`
 	LogLevel              types.String         `tfsdk:"log_level"`
+	ManifestsPath         types.String         `tfsdk:"manifests_path"`
 	Namespace             types.String         `tfsdk:"namespace"`
 	NetworkPolicy         types.Bool           `tfsdk:"network_policy"`
-	Registry              customtypes.URL      `tfsdk:"registry"`
-	TolerationKeys        types.Set            `tfsdk:"toleration_keys"`
-	WatchAllNamespaces    types.Bool           `tfsdk:"watch_all_namespaces"`
-	Interval              customtypes.Duration `tfsdk:"interval"`
-	SecretName            types.String         `tfsdk:"secret_name"`
-	DisableSecretCreation types.Bool           `tfsdk:"disable_secret_creation"`
+	Path                  types.String         `tfsdk:"path"`
 	RecurseSubmodules     types.Bool           `tfsdk:"recurse_submodules"`
-	KustomizationOverride types.String         `tfsdk:"kustomization_override"`
+	Registry              customtypes.URL      `tfsdk:"registry"`
 	RepositoryFiles       types.Map            `tfsdk:"repository_files"`
+	SecretName            types.String         `tfsdk:"secret_name"`
 	Timeouts              timeouts.Value       `tfsdk:"timeouts"`
-	ManifestsPath         types.String         `tfsdk:"manifests_path"`
+	TolerationKeys        types.Set            `tfsdk:"toleration_keys"`
+	Version               types.String         `tfsdk:"version"`
+	WatchAllNamespaces    types.Bool           `tfsdk:"watch_all_namespaces"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -193,6 +194,10 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 					setvalidator.SizeAtMost(2),
 					setvalidator.ValueStringsAre(stringvalidator.OneOf("image-reflector-controller", "image-automation-controller")),
 				},
+			},
+			"delete_git_manifests": schema.BoolAttribute{
+				Description: "Delete manifests from git repository. Defaults to `true`.",
+				Optional:    true,
 			},
 			"image_pull_secret": schema.StringAttribute{
 				Description: "Kubernetes secret name used for pulling the toolkit images from a private registry.",
@@ -651,6 +656,12 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+
+		if !(data.DeleteGitManifests.IsNull() || data.DeleteGitManifests.ValueBool()) {
+			tflog.Debug(ctx, "Skipping git repository removal", map[string]interface{}{})
+			return nil
+		}
+
 		gitClient, err := r.prd.GetGitClient(ctx)
 		if err != nil {
 			return retry.NonRetryableError(err)
