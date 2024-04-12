@@ -34,6 +34,7 @@ The following examples are available to help you use the provider:
 - `disable_secret_creation` (Boolean) Use the existing secret for flux controller and don't create one from bootstrap
 - `image_pull_secret` (String) Kubernetes secret name used for pulling the toolkit images from a private registry.
 - `interval` (String) Interval at which to reconcile from bootstrap repository. Defaults to `1m0s`.
+- `keep_namespace` (Boolean) Keep the namespace after uninstalling Flux components. Defaults to `false`.
 - `kustomization_override` (String) Kustomization to override configuration set by default.
 - `log_level` (String) Log level for toolkit components. Defaults to `info`.
 - `manifests_path` (String) The install manifests are built from a GitHub release or kustomize overlay if using a local path. Defaults to `https://github.com/fluxcd/flux2/releases`.
