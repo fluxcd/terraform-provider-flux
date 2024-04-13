@@ -411,7 +411,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 		resp.Diagnostics.AddError("Could not get bootstrap options", err.Error())
 		return
 	}
-	b, err := bootstrap.NewPlainGitProvider(gitClient, kubeClient, bootstrapOpts...)
+	bootstrapProvider, err := bootstrap.NewPlainGitProvider(gitClient, kubeClient, bootstrapOpts...)
 	if err != nil {
 		resp.Diagnostics.AddError("Could not create bootstrap provider", err.Error())
 		return
@@ -439,7 +439,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	manifestsBase := ""
-	err = bootstrap.Run(ctx, b, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, timeout)
+	err = bootstrap.Run(ctx, bootstrapProvider, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, timeout)
 	if err != nil {
 		resp.Diagnostics.AddError("Bootstrap run error", err.Error())
 		return
@@ -449,13 +449,13 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	repositoryFiles := map[string]string{}
 	files := []string{install.MakeDefaultOptions().ManifestFile, sync.MakeDefaultOptions().ManifestFile, konfig.DefaultKustomizationFileName()}
 	for _, f := range files {
-		path := filepath.Join(data.Path.ValueString(), data.Namespace.ValueString(), f)
-		b, err := os.ReadFile(filepath.Join(gitClient.Path(), path))
+		filePath := filepath.Join(data.Path.ValueString(), data.Namespace.ValueString(), f)
+		b, err := os.ReadFile(filepath.Join(gitClient.Path(), filePath))
 		if err != nil {
 			resp.Diagnostics.AddError("Could not read repository state", err.Error())
 			return
 		}
-		repositoryFiles[path] = string(b)
+		repositoryFiles[filePath] = string(b)
 	}
 	mapValue, diags := types.MapValueFrom(ctx, types.StringType, repositoryFiles)
 	resp.Diagnostics.Append(diags...)
@@ -524,7 +524,6 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 	resp.Diagnostics.Append(diags...)
 }
 
-// TODO: Verify Flux components after updating Git.
 func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.prd == nil {
 		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
@@ -545,6 +544,46 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	kubeClient, err := r.prd.GetKubernetesClient()
+	if err != nil {
+		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
+		return
+	}
+
+	gitClient, err := r.prd.GetGitClient(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("Git Client", err.Error())
+		return
+	}
+	defer os.RemoveAll(gitClient.Path())
+
+	installOpts := getInstallOptions(data)
+	syncOpts := getSyncOptions(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
+	var secretOpts sourcesecret.Options
+	if data.DisableSecretCreation.ValueBool() {
+		secretOpts = sourcesecret.Options{
+			Name:      data.SecretName.ValueString(),
+			Namespace: data.Namespace.ValueString(),
+		}
+	} else {
+		secretOpts, err = r.prd.GetSecretOptions(data.SecretName.ValueString(), data.Namespace.ValueString(), data.Path.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Could not get secret options", err.Error())
+			return
+		}
+	}
+
+	bootstrapOpts, err := r.prd.GetBootstrapOptions()
+	if err != nil {
+		resp.Diagnostics.AddError("Could not get bootstrap options", err.Error())
+		return
+	}
+	bootstrapProvider, err := bootstrap.NewPlainGitProvider(gitClient, kubeClient, bootstrapOpts...)
+	if err != nil {
+		resp.Diagnostics.AddError("Could not create bootstrap provider", err.Error())
+		return
+	}
+
 	previousRepositoryFiles := types.MapNull(types.StringType)
 	diags = req.State.GetAttribute(ctx, path.Root("repository_files"), &previousRepositoryFiles)
 	resp.Diagnostics.Append(diags...)
@@ -558,29 +597,23 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	err := retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		gitClient, err := r.prd.GetGitClient(ctx)
-		if err != nil {
-			return retry.NonRetryableError(err)
-		}
-		defer os.RemoveAll(gitClient.Path())
-
+	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		// Files should be removed if they are present in the state but not the plan.
 		for k := range previousRepositoryFiles.Elements() {
 			_, ok := data.RepositoryFiles.Elements()[k]
 			if ok {
 				continue
 			}
-			path := filepath.Join(gitClient.Path(), k)
-			_, err := os.Stat(path)
+			filePath := filepath.Join(gitClient.Path(), k)
+			_, err := os.Stat(filePath)
 			if errors.Is(err, os.ErrNotExist) {
-				tflog.Debug(ctx, "Skipping removing no longer tracked file as it does not exist", map[string]interface{}{"path": path})
+				tflog.Debug(ctx, "Skipping removing no longer tracked file as it does not exist", map[string]interface{}{"path": filePath})
 				continue
 			}
 			if err != nil {
 				retry.NonRetryableError(fmt.Errorf("could not stat no longer tracked file: %w", err))
 			}
-			err = os.Remove(path)
+			err = os.Remove(filePath)
 			if err != nil {
 				return retry.NonRetryableError(fmt.Errorf("could not remove no longer tracked file: %w", err))
 			}
@@ -591,7 +624,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		for k, v := range repositoryFiles {
 			files[k] = strings.NewReader(v)
 		}
-		commit, signer, err := r.prd.CreateCommit("Update Flux")
+		commit, signer, err := r.prd.CreateCommit("Update Flux manifests")
 		if err != nil {
 			return retry.NonRetryableError(fmt.Errorf("unable to create commit: %w", err))
 		}
@@ -611,6 +644,13 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Could not update Flux", err.Error())
+	}
+
+	manifestsBase := ""
+	err = bootstrap.Run(ctx, bootstrapProvider, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, timeout)
+	if err != nil {
+		resp.Diagnostics.AddError("Bootstrap run error", err.Error())
+		return
 	}
 
 	diags = resp.State.Set(ctx, &data)
