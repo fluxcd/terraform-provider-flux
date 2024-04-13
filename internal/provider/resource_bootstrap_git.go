@@ -96,6 +96,7 @@ type bootstrapGitResourceData struct {
 	ID                    types.String         `tfsdk:"id"`
 	ImagePullSecret       types.String         `tfsdk:"image_pull_secret"`
 	Interval              customtypes.Duration `tfsdk:"interval"`
+	KeepNamespace         types.Bool           `tfsdk:"keep_namespace"`
 	KustomizationOverride types.String         `tfsdk:"kustomization_override"`
 	LogLevel              types.String         `tfsdk:"log_level"`
 	ManifestsPath         types.String         `tfsdk:"manifests_path"`
@@ -156,18 +157,6 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Commits Flux components to a Git repository and configures a Kubernetes cluster to synchronize with the same Git repository.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed: true,
-			},
-			"version": schema.StringAttribute{
-				Description: fmt.Sprintf("Flux version. Defaults to `%s`.", utils.DefaultFluxVersion),
-				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(utils.DefaultFluxVersion),
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("(latest|^v.*)"), "must either be latest or start with 'v'"),
-				},
-			},
 			"cluster_domain": schema.StringAttribute{
 				Description: fmt.Sprintf("The internal cluster domain. Defaults to `%s`", defaultOpts.ClusterDomain),
 				Optional:    true,
@@ -198,6 +187,15 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 			"delete_git_manifests": schema.BoolAttribute{
 				Description: "Delete manifests from git repository. Defaults to `true`.",
 				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(true),
+			},
+			"disable_secret_creation": schema.BoolAttribute{
+				Description: "Use the existing secret for flux controller and don't create one from bootstrap",
+				Optional:    true,
+			},
+			"id": schema.StringAttribute{
+				Computed: true,
 			},
 			"image_pull_secret": schema.StringAttribute{
 				Description: "Kubernetes secret name used for pulling the toolkit images from a private registry.",
@@ -207,6 +205,24 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 					stringvalidator.LengthAtMost(253),
 				},
 			},
+			"interval": schema.StringAttribute{
+				CustomType:  customtypes.DurationType{},
+				Description: fmt.Sprintf("Interval at which to reconcile from bootstrap repository. Defaults to `%s`.", time.Minute.String()),
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(time.Minute.String()),
+			},
+			"keep_namespace": schema.BoolAttribute{
+				Description: "Keep the namespace after uninstalling Flux components. Defaults to `false`.",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
+			},
+			"kustomization_override": schema.StringAttribute{
+				Description: "Kustomization to override configuration set by default.",
+				Optional:    true,
+				Validators:  []validator.String{validators.KustomizationOverride()},
+			},
 			"log_level": schema.StringAttribute{
 				Description: fmt.Sprintf("Log level for toolkit components. Defaults to `%s`.", defaultOpts.LogLevel),
 				Optional:    true,
@@ -215,6 +231,10 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Validators: []validator.String{
 					stringvalidator.OneOf("info", "debug", "error"),
 				},
+			},
+			"manifests_path": schema.StringAttribute{
+				Description: fmt.Sprintf("The install manifests are built from a GitHub release or kustomize overlay if using a local path. Defaults to `%s`.", defaultOpts.BaseURL),
+				Optional:    true,
 			},
 			"namespace": schema.StringAttribute{
 				Description: fmt.Sprintf("The namespace scope for install manifests. Defaults to `%s`. It will be created if it does not exist.", defaultOpts.Namespace),
@@ -235,37 +255,6 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Computed:    true,
 				Default:     booldefault.StaticBool(defaultOpts.NetworkPolicy),
 			},
-			"registry": schema.StringAttribute{
-				CustomType:  customtypes.URLType{},
-				Description: fmt.Sprintf("Container registry where the toolkit images are published. Defaults to `%s`.", defaultOpts.Registry),
-				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(defaultOpts.Registry),
-			},
-			"toleration_keys": schema.SetAttribute{
-				ElementType: types.StringType,
-				Description: "List of toleration keys used to schedule the components pods onto nodes with matching taints.",
-				Optional:    true,
-				Validators: []validator.Set{
-					setvalidator.ValueStringsAre(
-						stringvalidator.RegexMatches(regexp.MustCompile(tolerationKeyRegex), tolerationKeyError),
-						stringvalidator.LengthAtMost(253),
-					),
-				},
-			},
-			"watch_all_namespaces": schema.BoolAttribute{
-				Description: fmt.Sprintf("If true watch for custom resources in all namespaces. Defaults to `%v`.", defaultOpts.WatchAllNamespaces),
-				Optional:    true,
-				Computed:    true,
-				Default:     booldefault.StaticBool(defaultOpts.WatchAllNamespaces),
-			},
-			"interval": schema.StringAttribute{
-				CustomType:  customtypes.DurationType{},
-				Description: fmt.Sprintf("Interval at which to reconcile from bootstrap repository. Defaults to `%s`.", time.Minute.String()),
-				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(time.Minute.String()),
-			},
 			"path": schema.StringAttribute{
 				Description: "Path relative to the repository root, when specified the cluster sync will be scoped to this path.",
 				Optional:    true,
@@ -273,6 +262,18 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 			"recurse_submodules": schema.BoolAttribute{
 				Description: "Configures the GitRepository source to initialize and include Git submodules in the artifact it produces.",
 				Optional:    true,
+			},
+			"registry": schema.StringAttribute{
+				CustomType:  customtypes.URLType{},
+				Description: fmt.Sprintf("Container registry where the toolkit images are published. Defaults to `%s`.", defaultOpts.Registry),
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(defaultOpts.Registry),
+			},
+			"repository_files": schema.MapAttribute{
+				ElementType: types.StringType,
+				Description: "Git repository files created and managed by the provider.",
+				Computed:    true,
 			},
 			"secret_name": schema.StringAttribute{
 				Description: fmt.Sprintf("Name of the secret the sync credentials can be found in or stored to. Defaults to `%s`.", defaultOpts.Namespace),
@@ -287,24 +288,32 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 					stringvalidator.LengthAtMost(253),
 				},
 			},
-			"disable_secret_creation": schema.BoolAttribute{
-				Description: "Use the existing secret for flux controller and don't create one from bootstrap",
-				Optional:    true,
-			},
-			"kustomization_override": schema.StringAttribute{
-				Description: "Kustomization to override configuration set by default.",
-				Optional:    true,
-				Validators:  []validator.String{validators.KustomizationOverride()},
-			},
-			"repository_files": schema.MapAttribute{
-				ElementType: types.StringType,
-				Description: "Git repository files created and managed by the provider.",
-				Computed:    true,
-			},
 			"timeouts": timeouts.AttributesAll(ctx),
-			"manifests_path": schema.StringAttribute{
-				Description: fmt.Sprintf("The install manifests are built from a GitHub release or kustomize overlay if using a local path. Defaults to `%s`.", defaultOpts.BaseURL),
+			"toleration_keys": schema.SetAttribute{
+				ElementType: types.StringType,
+				Description: "List of toleration keys used to schedule the components pods onto nodes with matching taints.",
 				Optional:    true,
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.RegexMatches(regexp.MustCompile(tolerationKeyRegex), tolerationKeyError),
+						stringvalidator.LengthAtMost(253),
+					),
+				},
+			},
+			"version": schema.StringAttribute{
+				Description: fmt.Sprintf("Flux version. Defaults to `%s`.", utils.DefaultFluxVersion),
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(utils.DefaultFluxVersion),
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(regexp.MustCompile("(latest|^v.*)"), "must either be latest or start with 'v'"),
+				},
+			},
+			"watch_all_namespaces": schema.BoolAttribute{
+				Description: fmt.Sprintf("If true watch for custom resources in all namespaces. Defaults to `%v`.", defaultOpts.WatchAllNamespaces),
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(defaultOpts.WatchAllNamespaces),
 			},
 		},
 	}
@@ -631,37 +640,43 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 	kubeClient, err := r.prd.GetKubernetesClient()
 	if err != nil {
 		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
+		tflog.Error(ctx, "Unable to get Kubernetes client", map[string]interface{}{})
 		return
 	}
-	// TODO: Uninstall fails when flux-system namespace does not exist
+
 	err = uninstall.Components(ctx, log.NopLogger{}, kubeClient, data.Namespace.ValueString(), false)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to remove Flux components", err.Error())
-		return
+		tflog.Debug(ctx, "Unable to remove Flux components", map[string]interface{}{})
 	}
 	err = uninstall.Finalizers(ctx, log.NopLogger{}, kubeClient, false)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to remove finalizers", err.Error())
-		return
+		tflog.Debug(ctx, "Unable to remove finalizers", map[string]interface{}{})
 	}
 	err = uninstall.CustomResourceDefinitions(ctx, log.NopLogger{}, kubeClient, false)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to remove CRDs", err.Error())
-		return
+		tflog.Debug(ctx, "Unable to remove CRDs", map[string]interface{}{})
 	}
-	err = uninstall.Namespace(ctx, log.NopLogger{}, kubeClient, data.Namespace.ValueString(), false)
-	if err != nil {
-		resp.Diagnostics.AddError("Unable to remove namespace", err.Error())
+
+	// Only remove namespace if not keeping it.
+	if data.KeepNamespace.ValueBool() {
+		tflog.Debug(ctx, fmt.Sprintf("The keep_namespace variable was set to true. Skipping removal of %s namespace.", data.Namespace.ValueString()), map[string]interface{}{})
+	} else {
+		err = uninstall.Namespace(ctx, log.NopLogger{}, kubeClient, data.Namespace.ValueString(), false)
+		if err != nil {
+			resp.Diagnostics.AddError(fmt.Sprintf("Unable to remove %s namespace.", data.Namespace.ValueString()), err.Error())
+			tflog.Debug(ctx, fmt.Sprintf("Unable to remove %s namespace.", data.Namespace.ValueString()), map[string]interface{}{})
+		}
+	}
+
+	if !(data.DeleteGitManifests.IsNull() || data.DeleteGitManifests.ValueBool()) {
+		tflog.Debug(ctx, "Skipping git repository removal", map[string]interface{}{})
 		return
 	}
 
 	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-
-		if !(data.DeleteGitManifests.IsNull() || data.DeleteGitManifests.ValueBool()) {
-			tflog.Debug(ctx, "Skipping git repository removal", map[string]interface{}{})
-			return nil
-		}
-
 		gitClient, err := r.prd.GetGitClient(ctx)
 		if err != nil {
 			return retry.NonRetryableError(err)
@@ -677,7 +692,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 			}
 			err := os.Remove(path)
 			if err != nil {
-				return retry.NonRetryableError(fmt.Errorf("Could not remove file from git repository: %w", err))
+				return retry.NonRetryableError(fmt.Errorf("could not remove file from git repository: %w", err))
 			}
 		}
 		// TODO: If no files are removed we should not commit anything.
@@ -685,11 +700,13 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		if err != nil {
 			return retry.NonRetryableError(fmt.Errorf("unable to create commit: %w", err))
 		}
+
 		// TODO: If all files are removed from the repository delete will fail. This needs a test and to be fixed.
 		_, err = gitClient.Commit(commit, signer)
 		if err != nil {
 			return retry.NonRetryableError(fmt.Errorf("unable to commit removed file(s): %w", err))
 		}
+
 		err = gitClient.Push(ctx, repository.PushConfig{})
 		if err != nil {
 			return retry.RetryableError(fmt.Errorf("unable to push removed file(s): %w", err))
@@ -697,7 +714,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		return nil
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Could not delete Flux", err.Error())
+		resp.Diagnostics.AddError("Could not delete Flux configuration from Git repository.", err.Error())
 	}
 }
 
@@ -727,6 +744,10 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 
 	// Set values that cant be null.
 	data.TolerationKeys = types.SetNull(types.StringType)
+
+	// Stub keep namespace and delete git manifests to their defaults.
+	data.KeepNamespace = types.BoolValue(false)
+	data.DeleteGitManifests = types.BoolValue(true)
 
 	// Get Network NetworkPolicy.
 	networkPolicy := networkingv1.NetworkPolicy{
