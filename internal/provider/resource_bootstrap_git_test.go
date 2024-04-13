@@ -217,12 +217,10 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
-			// Change path and expect files to be moved
+			// Change branch and expect files to be moved
 			{
-				Config: bootstrapGitCustomPath(env, "custom-path"),
+				Config: bootstrapGitCustomBranch(env, "custom-branch"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.custom-path/flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.custom-path/flux-system/gotk-components.yaml"),
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.custom-path/flux-system/gotk-sync.yaml"),
 				),
 			},
@@ -497,7 +495,7 @@ EOF
 	`, env.kubeCfgPath, env.sshClone, env.privateKey)
 }
 
-func bootstrapGitCustomPath(env environment, path string) string {
+func bootstrapGitCustomBranch(env environment, branch string) string {
 	return fmt.Sprintf(`
     provider "flux" {
 	  kubernetes = {
@@ -505,6 +503,7 @@ func bootstrapGitCustomPath(env environment, path string) string {
 	  }
 	  git = {
         url = "%s"
+        branch = "%s"
         http = {
           username = "%s"
           password = "%s"
@@ -514,9 +513,8 @@ func bootstrapGitCustomPath(env environment, path string) string {
     }
 
     resource "flux_bootstrap_git" "this" {
-      path = "%s"
     }
-	`, env.kubeCfgPath, env.httpClone, env.username, env.password, path)
+	`, env.kubeCfgPath, env.httpClone, branch, env.username, env.password)
 }
 
 func bootstrapGitVersion(env environment, version string) string {

@@ -6,7 +6,8 @@ provider "flux" {
     cluster_ca_certificate = kind_cluster.this.cluster_ca_certificate
   }
   git = {
-    url = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
+    url    = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
+    branch = "${var.git_branch}"
     ssh = {
       username    = "git"
       private_key = tls_private_key.flux.private_key_pem

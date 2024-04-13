@@ -157,17 +157,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
       - name: Health check Flux
         run: flux check
-      - name: No-op apply Terraform
+      - name: Change branch with Terraform
         run: |
           export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
-          terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+          terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "git_branch=test-branch" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: Check Flux branch
+        run: flux export source git flux-system | grep test-branch
       - name: Destroy Terraform
         run: |
           cd examples/github-via-ssh
-          terraform destroy -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+          terraform destroy -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "git_branch=test-branch" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
       - name: Delete repository

@@ -16,3 +16,9 @@ variable "github_repository" {
   type        = string
   default     = ""
 }
+
+variable "git_branch" {
+  description = "Git repository branch"
+  type        = string
+  default     = "main"
+}
