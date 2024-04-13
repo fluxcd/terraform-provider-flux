@@ -155,6 +155,8 @@ jobs:
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: Health check Flux
+        run: flux check
       - name: No-op apply Terraform
         run: |
           export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"

@@ -49,6 +49,7 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apitypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/kustomize/api/konfig"
 
@@ -519,6 +520,24 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 	data.RepositoryFiles = mapValue
+
+	kubeClient, err := r.prd.GetKubernetesClient()
+	if err != nil {
+		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
+		return
+	}
+
+	installOpts := getInstallOptions(data)
+
+	// Check if the Flux sync exists.
+	namespacedName := apitypes.NamespacedName{
+		Namespace: installOpts.Namespace,
+		Name:      installOpts.Namespace,
+	}
+	var k kustomizev1.Kustomization
+	if err := kubeClient.Get(ctx, namespacedName, &k); err != nil {
+		data.ID = types.StringNull()
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
