@@ -125,7 +125,7 @@ provider "flux" {
 
 ### Optional
 
-- `git` (Attributes) Configuration block with settings for Git. (see [below for nested schema](#nestedatt--git))
+- `git` (Attributes) Configuration block with settings for Kubernetes. (see [below for nested schema](#nestedatt--git))
 - `kubernetes` (Attributes) Configuration block with settings for Kubernetes. (see [below for nested schema](#nestedatt--kubernetes))
 
 <a id="nestedatt--git"></a>
