@@ -22,7 +22,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fluxcd/flux2/v2/pkg/manifestgen"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -31,8 +30,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	customtypes "github.com/fluxcd/terraform-provider-flux/internal/framework/types"
 	"github.com/fluxcd/terraform-provider-flux/internal/framework/validators"
@@ -378,22 +375,6 @@ func (p *fluxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	prd, err := NewProviderResourceData(ctx, data)
 	if err != nil {
 		resp.Diagnostics.AddError("Could not create provider resource data", err.Error())
-		return
-	}
-
-	// ====================================================================
-	// Validate Kubernetes API connectivity and kubeconfig permissions
-	// ====================================================================
-	kubeClient, err := prd.GetKubernetesClient()
-	if err != nil {
-		resp.Diagnostics.AddError("Could not create Kubernetes client", err.Error())
-		return
-	}
-
-	var list apiextensionsv1.CustomResourceDefinitionList
-	selector := client.MatchingLabels{manifestgen.PartOfLabelKey: manifestgen.PartOfLabelValue}
-	if err := kubeClient.List(ctx, &list, client.InNamespace(""), selector); err != nil {
-		resp.Diagnostics.AddError("Kubernetes connectivity failed", err.Error())
 		return
 	}
 
