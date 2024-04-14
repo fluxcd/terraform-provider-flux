@@ -207,18 +207,18 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 				Optional: true,
 			},
 			"git": schema.SingleNestedAttribute{
-				Description: "Configuration block with settings for Kubernetes.",
+				Description: "Configuration block with settings for Git.",
 				Attributes: map[string]schema.Attribute{
 					"url": schema.StringAttribute{
 						CustomType:  customtypes.URLType{},
-						Description: "Url of git repository to bootstrap from.",
+						Description: "Url of Git repository to bootstrap from.",
 						Required:    true,
 						Validators: []validator.String{
 							validators.URLScheme("http", "https", "ssh"),
 						},
 					},
 					"branch": schema.StringAttribute{
-						Description: fmt.Sprintf("Branch in repository to reconcile from. Defaults to `%s`.", defaultBranch),
+						Description: fmt.Sprintf("Branch of the repository to reconcile from. Defaults to `%s`.", defaultBranch),
 						Optional:    true,
 					},
 					"author_name": schema.StringAttribute{
@@ -239,7 +239,7 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 						Sensitive:   true,
 					},
 					"gpg_key_id": schema.StringAttribute{
-						Description: "Key id for selecting a particular key.",
+						Description: "Key id for selecting a particular GPG key.",
 						Optional:    true,
 					},
 					"commit_message_appendix": schema.StringAttribute{
@@ -253,7 +253,7 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 								Optional:    true,
 							},
 							"password": schema.StringAttribute{
-								Description: "Password for private key.",
+								Description: "Password of the SSH private key.",
 								Optional:    true,
 								Sensitive:   true,
 							},

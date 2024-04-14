@@ -125,7 +125,7 @@ provider "flux" {
 
 ### Optional
 
-- `git` (Attributes) Configuration block with settings for Kubernetes. (see [below for nested schema](#nestedatt--git))
+- `git` (Attributes) Configuration block with settings for Git. (see [below for nested schema](#nestedatt--git))
 - `kubernetes` (Attributes) Configuration block with settings for Kubernetes. (see [below for nested schema](#nestedatt--kubernetes))
 
 <a id="nestedatt--git"></a>
@@ -133,15 +133,15 @@ provider "flux" {
 
 Required:
 
-- `url` (String) Url of git repository to bootstrap from.
+- `url` (String) Url of Git repository to bootstrap from.
 
 Optional:
 
 - `author_email` (String) Author email for Git commits.
 - `author_name` (String) Author name for Git commits. Defaults to `Flux`.
-- `branch` (String) Branch in repository to reconcile from. Defaults to `main`.
+- `branch` (String) Branch of the repository to reconcile from. Defaults to `main`.
 - `commit_message_appendix` (String) String to add to the commit messages.
-- `gpg_key_id` (String) Key id for selecting a particular key.
+- `gpg_key_id` (String) Key id for selecting a particular GPG key.
 - `gpg_key_ring` (String) Path to the GPG key ring for signing commits.
 - `gpg_passphrase` (String, Sensitive) Passphrase for decrypting GPG private key.
 - `http` (Attributes) (see [below for nested schema](#nestedatt--git--http))
@@ -163,7 +163,7 @@ Optional:
 
 Optional:
 
-- `password` (String, Sensitive) Password for private key.
+- `password` (String, Sensitive) Password of the SSH private key.
 - `private_key` (String, Sensitive) Private key used for authenticating to the Git SSH server.
 - `username` (String) Username for Git SSH server.
 

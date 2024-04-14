@@ -22,6 +22,12 @@ test: tidy fmt vet
 testacc: tidy fmt vet
 	TF_ACC=1 go test ./... -v -count $(TEST_COUNT) -parallel $(ACCTEST_PARALLELISM) -timeout $(ACCTEST_TIMEOUT)
 
+# Run acceptance tests on macOS with the gitea-flux instance
+# Requires the following entry in /etc/hosts:
+# 127.0.0.1 gitea-flux
+testmacos: tidy fmt vet
+	TF_ACC=1 GITEA_HOSTNAME=gitea-flux go test ./... -v -parallel 1 -run TestAccBootstrapGit_Drift
+
 build:
 	CGO_ENABLED=0 go build -o ./bin/terraform-provider-flux main.go
 

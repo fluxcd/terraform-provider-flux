@@ -71,8 +71,7 @@ func (prd *providerResourceData) GetKubernetesClient() (client.WithWatch, error)
 	return kubeClient, nil
 }
 
-func (prd *providerResourceData) GetGitClient(ctx context.Context) (*gogit.Client, error) {
-	// Git configuration
+func (prd *providerResourceData) GetGitClient(tmpDir string) (*gogit.Client, error) {
 	authOpts, err := getAuthOpts(prd.git)
 	if err != nil {
 		return nil, err
@@ -82,11 +81,20 @@ func (prd *providerResourceData) GetGitClient(ctx context.Context) (*gogit.Clien
 		clientOpts = append(clientOpts, gogit.WithInsecureCredentialsOverHTTP())
 	}
 
+	gitClient, err := gogit.NewClient(tmpDir, authOpts, clientOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("could not create git client: %w", err)
+	}
+
+	return gitClient, nil
+}
+
+func (prd *providerResourceData) CloneRepository(ctx context.Context) (*gogit.Client, error) {
 	tmpDir, err := manifestgen.MkdirTempAbs("", "flux-bootstrap-")
 	if err != nil {
 		return nil, fmt.Errorf("could not create temporary working directory for git repository: %w", err)
 	}
-	gitClient, err := gogit.NewClient(tmpDir, authOpts, clientOpts...)
+	gitClient, err := prd.GetGitClient(tmpDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create git client: %w", err)
 	}
@@ -100,6 +108,25 @@ func (prd *providerResourceData) GetGitClient(ctx context.Context) (*gogit.Clien
 		return nil, fmt.Errorf("could not clone git repository: %w", err)
 	}
 	return gitClient, nil
+}
+
+func (prd *providerResourceData) GetBootstrapProvider(tmpDir string) (*bootstrap.PlainGitBootstrapper, error) {
+	gitClient, err := prd.GetGitClient(tmpDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create git client: %w", err)
+	}
+
+	kubeClient, err := prd.GetKubernetesClient()
+	if err != nil {
+		return nil, fmt.Errorf("could not get Kubernetes client: %w", err)
+	}
+
+	bootstrapOpts, err := prd.GetBootstrapOptions()
+	if err != nil {
+		return nil, fmt.Errorf("could not get bootstrap options: %w", err)
+	}
+
+	return bootstrap.NewPlainGitProvider(gitClient, kubeClient, bootstrapOpts...)
 }
 
 func (prd *providerResourceData) GetBootstrapOptions() ([]bootstrap.GitOption, error) {

@@ -40,6 +40,7 @@ import (
 	"github.com/fluxcd/pkg/git/gogit"
 	"github.com/fluxcd/pkg/git/repository"
 	"github.com/fluxcd/pkg/ssh"
+	sourcev1 "github.com/fluxcd/source-controller/api/v1"
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -49,6 +50,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	crclient "sigs.k8s.io/controller-runtime/pkg/client"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/kind/pkg/cluster"
 
@@ -185,7 +187,7 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Basic installation of Flux.
+			// Default installation of Flux.
 			{
 				Config: bootstrapGitHTTP(env),
 				Check: resource.ComposeTestCheckFunc(
@@ -194,7 +196,7 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
-			// Remove file and expect Terraform to detect drift.
+			// Remove file in Git and expect Terraform to correct drift.
 			{
 				PreConfig: func() {
 					gitClient := getTestGitClient(t, env.username, env.password)
@@ -216,6 +218,43 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
 				),
+			},
+			// Remove GitRepository in-cluster and expect Terraform to correct drift.
+			{
+				PreConfig: func() {
+					cfg, err := clientcmd.BuildConfigFromFlags("", env.kubeCfgPath)
+					if err != nil {
+						t.Fatalf("Can not initialize kubeconfig: %s", err)
+					}
+					kubeClient, err := crclient.NewWithWatch(cfg, crclient.Options{Scheme: utils.NewScheme()})
+					if err != nil {
+						t.Fatalf("Can not initialize kube client: %s", err)
+					}
+					rootSource := &sourcev1.GitRepository{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "flux-system",
+							Namespace: "flux-system",
+						},
+					}
+					if err := kubeClient.Delete(context.Background(), rootSource); err != nil {
+						t.Fatalf("Can not delete source: %s", err)
+					}
+
+				},
+				Config: bootstrapGitSSH(env),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+				),
+			},
+			// Expect no-op when Git and in-cluster state are in sync.
+			{
+				Config:            bootstrapGitSSH(env),
+				ResourceName:      "flux_bootstrap_git.this",
+				ImportState:       true,
+				ImportStateId:     "flux-system",
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -300,7 +339,6 @@ patches:
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
-					//resource.TestCheckResourceAttr("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml", kustomizationOverride),
 					func(state *terraform.State) error {
 						cfg, err := clientcmd.BuildConfigFromFlags("", env.kubeCfgPath)
 						if err != nil {
@@ -317,7 +355,7 @@ patches:
 						for _, deployment := range deploymentList.Items {
 							v, ok := deployment.Spec.Template.Annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
 							if !ok {
-								return fmt.Errorf("expected annotation not set in Deployment %s", deployment.Name)
+								return fmt.Errorf("expected annotation to be set in Deployment %s", deployment.Name)
 							}
 							if v != "true" {
 								return fmt.Errorf("expected annotation value to be true but was %s", v)
@@ -607,7 +645,10 @@ func setupEnvironment(t *testing.T) environment {
 	httpPort := rand.Intn(65535-1024) + 1024
 	sshPort := httpPort + 10
 	randSuffix := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	giteaName := fmt.Sprintf("gitea-%s", randSuffix)
+	giteaName := os.Getenv("GITEA_HOSTNAME")
+	if giteaName == "" {
+		giteaName = fmt.Sprintf("gitea-%s", randSuffix)
+	}
 	username := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	password := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	tmpDir := t.TempDir()
