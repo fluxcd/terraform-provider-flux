@@ -99,7 +99,7 @@ kind: Kustomization
 resources:
   - gotk-components.yaml`
 	env := environment{
-		httpClone: "https://gitub.com",
+		httpClone: "https://git.example",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -115,7 +115,7 @@ resources:
 
 func TestAccBootstrapGit_TolerationKeys(t *testing.T) {
 	env := environment{
-		httpClone: "https://gitub.com",
+		httpClone: "https://git.example",
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -215,15 +215,6 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
-				),
-			},
-			// Change path and expect files to be moved
-			{
-				Config: bootstrapGitCustomPath(env, "custom-path"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.custom-path/flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.custom-path/flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.custom-path/flux-system/gotk-sync.yaml"),
 				),
 			},
 		},
@@ -495,28 +486,6 @@ EOF
 		toleration_keys = ["FooBar", "test"]
 	}
 	`, env.kubeCfgPath, env.sshClone, env.privateKey)
-}
-
-func bootstrapGitCustomPath(env environment, path string) string {
-	return fmt.Sprintf(`
-    provider "flux" {
-	  kubernetes = {
-        config_path = "%s"
-	  }
-	  git = {
-        url = "%s"
-        http = {
-          username = "%s"
-          password = "%s"
-          allow_insecure_http = true
-        }
-	  }
-    }
-
-    resource "flux_bootstrap_git" "this" {
-      path = "%s"
-    }
-	`, env.kubeCfgPath, env.httpClone, env.username, env.password, path)
 }
 
 func bootstrapGitVersion(env environment, version string) string {

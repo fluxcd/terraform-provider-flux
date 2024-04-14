@@ -86,12 +86,12 @@ func (prd *providerResourceData) GetGitClient(ctx context.Context) (*gogit.Clien
 	if err != nil {
 		return nil, fmt.Errorf("could not create temporary working directory for git repository: %w", err)
 	}
-	client, err := gogit.NewClient(tmpDir, authOpts, clientOpts...)
+	gitClient, err := gogit.NewClient(tmpDir, authOpts, clientOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("could not create git client: %w", err)
 	}
 	// TODO: Need to conditionally clone here. If repository is empty this will fail.
-	_, err = client.Clone(ctx, prd.GetRepositoryURL().String(), repository.CloneConfig{
+	_, err = gitClient.Clone(ctx, prd.GetRepositoryURL().String(), repository.CloneConfig{
 		CheckoutStrategy: repository.CheckoutStrategy{
 			Branch: prd.git.Branch.ValueString(),
 		},
@@ -99,7 +99,7 @@ func (prd *providerResourceData) GetGitClient(ctx context.Context) (*gogit.Clien
 	if err != nil {
 		return nil, fmt.Errorf("could not clone git repository: %w", err)
 	}
-	return client, nil
+	return gitClient, nil
 }
 
 func (prd *providerResourceData) GetBootstrapOptions() ([]bootstrap.GitOption, error) {

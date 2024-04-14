@@ -30,6 +30,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fluxcd/flux2/v2/pkg/manifestgen"
+	"github.com/fluxcd/pkg/runtime/conditions"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -47,8 +49,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	appsv1 "k8s.io/api/apps/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apitypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/kustomize/api/konfig"
 
@@ -256,7 +260,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Default:     booldefault.StaticBool(defaultOpts.NetworkPolicy),
 			},
 			"path": schema.StringAttribute{
-				Description: "Path relative to the repository root, when specified the cluster sync will be scoped to this path.",
+				Description: "Path relative to the repository root, when specified the cluster sync will be scoped to this path (immutable).",
 				Optional:    true,
 			},
 			"recurse_submodules": schema.BoolAttribute{
@@ -356,7 +360,6 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 	resp.Diagnostics.Append(diags...)
 }
 
-// TODO: If kustomization file exists and not all resource files exist bootstrap will fail. This is because kustomize build is run.
 func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.prd == nil {
 		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
@@ -411,7 +414,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 		resp.Diagnostics.AddError("Could not get bootstrap options", err.Error())
 		return
 	}
-	b, err := bootstrap.NewPlainGitProvider(gitClient, kubeClient, bootstrapOpts...)
+	bootstrapProvider, err := bootstrap.NewPlainGitProvider(gitClient, kubeClient, bootstrapOpts...)
 	if err != nil {
 		resp.Diagnostics.AddError("Could not create bootstrap provider", err.Error())
 		return
@@ -439,7 +442,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	manifestsBase := ""
-	err = bootstrap.Run(ctx, b, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, timeout)
+	err = bootstrap.Run(ctx, bootstrapProvider, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, timeout)
 	if err != nil {
 		resp.Diagnostics.AddError("Bootstrap run error", err.Error())
 		return
@@ -449,13 +452,13 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	repositoryFiles := map[string]string{}
 	files := []string{install.MakeDefaultOptions().ManifestFile, sync.MakeDefaultOptions().ManifestFile, konfig.DefaultKustomizationFileName()}
 	for _, f := range files {
-		path := filepath.Join(data.Path.ValueString(), data.Namespace.ValueString(), f)
-		b, err := os.ReadFile(filepath.Join(gitClient.Path(), path))
+		filePath := filepath.Join(data.Path.ValueString(), data.Namespace.ValueString(), f)
+		b, err := os.ReadFile(filepath.Join(gitClient.Path(), filePath))
 		if err != nil {
 			resp.Diagnostics.AddError("Could not read repository state", err.Error())
 			return
 		}
-		repositoryFiles[path] = string(b)
+		repositoryFiles[filePath] = string(b)
 	}
 	mapValue, diags := types.MapValueFrom(ctx, types.StringType, repositoryFiles)
 	resp.Diagnostics.Append(diags...)
@@ -469,8 +472,6 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	resp.Diagnostics.Append(diags...)
 }
 
-// TODO: Consider if more value reading should be done here to detect drift. Similar to how import works.
-// TODO: Resources in the cluster should be verified to exist. If not resource id should be set to nil. This is to detect changing clusters.
 func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.prd == nil {
 		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
@@ -498,15 +499,15 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	defer os.RemoveAll(gitClient.Path())
 
-	// Sync git repository with Terraform state.
+	// Detect drift for the Flux manifests stored in Git.
 	repositoryFiles := map[string]string{}
 	for k := range data.RepositoryFiles.Elements() {
-		path := filepath.Join(gitClient.Path(), k)
-		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			tflog.Debug(ctx, "Skip reading file that no longer exists in git repository", map[string]interface{}{"path": path})
+		filePath := filepath.Join(gitClient.Path(), k)
+		if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
+			tflog.Debug(ctx, "Skip reading file that no longer exists in git repository", map[string]interface{}{"path": filePath})
 			continue
 		}
-		b, err := os.ReadFile(path)
+		b, err := os.ReadFile(filePath)
 		if err != nil {
 			resp.Diagnostics.AddError("Unable to read file in git repository", err.Error())
 			return
@@ -520,11 +521,27 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	data.RepositoryFiles = mapValue
 
+	kubeClient, err := r.prd.GetKubernetesClient()
+	if err != nil {
+		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
+		return
+	}
+
+	// Check cluster access and kubeconfig permissions
+	if err := isKubernetesReady(ctx, kubeClient); err != nil {
+		resp.Diagnostics.AddError("Kubernetes cluster", err.Error())
+		return
+	}
+
+	// TODO:Figure out how to detect drift for the Flux installation in the cluster.
+	//if !isFluxReady(ctx, kubeClient, data) {
+	//	data.ID = types.StringNull()
+	//}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-// TODO: Verify Flux components after updating Git.
 func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.prd == nil {
 		resp.Diagnostics.AddError(missingConfiguration, bootstrapGitResourceMissingConfigError)
@@ -545,6 +562,46 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	kubeClient, err := r.prd.GetKubernetesClient()
+	if err != nil {
+		resp.Diagnostics.AddError("Kubernetes Client", err.Error())
+		return
+	}
+
+	gitClient, err := r.prd.GetGitClient(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("Git Client", err.Error())
+		return
+	}
+	defer os.RemoveAll(gitClient.Path())
+
+	installOpts := getInstallOptions(data)
+	syncOpts := getSyncOptions(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
+	var secretOpts sourcesecret.Options
+	if data.DisableSecretCreation.ValueBool() {
+		secretOpts = sourcesecret.Options{
+			Name:      data.SecretName.ValueString(),
+			Namespace: data.Namespace.ValueString(),
+		}
+	} else {
+		secretOpts, err = r.prd.GetSecretOptions(data.SecretName.ValueString(), data.Namespace.ValueString(), data.Path.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Could not get secret options", err.Error())
+			return
+		}
+	}
+
+	bootstrapOpts, err := r.prd.GetBootstrapOptions()
+	if err != nil {
+		resp.Diagnostics.AddError("Could not get bootstrap options", err.Error())
+		return
+	}
+	bootstrapProvider, err := bootstrap.NewPlainGitProvider(gitClient, kubeClient, bootstrapOpts...)
+	if err != nil {
+		resp.Diagnostics.AddError("Could not create bootstrap provider", err.Error())
+		return
+	}
+
 	previousRepositoryFiles := types.MapNull(types.StringType)
 	diags = req.State.GetAttribute(ctx, path.Root("repository_files"), &previousRepositoryFiles)
 	resp.Diagnostics.Append(diags...)
@@ -558,29 +615,24 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	err := retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		gitClient, err := r.prd.GetGitClient(ctx)
-		if err != nil {
-			return retry.NonRetryableError(err)
-		}
-		defer os.RemoveAll(gitClient.Path())
-
+	// Sync Git repository with Terraform state.
+	err = retry.RetryContext(ctx, timeout, func() *retry.RetryError {
 		// Files should be removed if they are present in the state but not the plan.
 		for k := range previousRepositoryFiles.Elements() {
 			_, ok := data.RepositoryFiles.Elements()[k]
 			if ok {
 				continue
 			}
-			path := filepath.Join(gitClient.Path(), k)
-			_, err := os.Stat(path)
+			filePath := filepath.Join(gitClient.Path(), k)
+			_, err := os.Stat(filePath)
 			if errors.Is(err, os.ErrNotExist) {
-				tflog.Debug(ctx, "Skipping removing no longer tracked file as it does not exist", map[string]interface{}{"path": path})
+				tflog.Debug(ctx, "Skipping removing no longer tracked file as it does not exist", map[string]interface{}{"path": filePath})
 				continue
 			}
 			if err != nil {
 				retry.NonRetryableError(fmt.Errorf("could not stat no longer tracked file: %w", err))
 			}
-			err = os.Remove(path)
+			err = os.Remove(filePath)
 			if err != nil {
 				return retry.NonRetryableError(fmt.Errorf("could not remove no longer tracked file: %w", err))
 			}
@@ -591,7 +643,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		for k, v := range repositoryFiles {
 			files[k] = strings.NewReader(v)
 		}
-		commit, signer, err := r.prd.CreateCommit("Update Flux")
+		commit, signer, err := r.prd.CreateCommit("Update Flux manifests")
 		if err != nil {
 			return retry.NonRetryableError(fmt.Errorf("unable to create commit: %w", err))
 		}
@@ -611,6 +663,14 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Could not update Flux", err.Error())
+	}
+
+	// Sync Flux installation with Git state.
+	manifestsBase := ""
+	err = bootstrap.Run(ctx, bootstrapProvider, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, timeout)
+	if err != nil {
+		resp.Diagnostics.AddError("Bootstrap run error", err.Error())
+		return
 	}
 
 	diags = resp.State.Set(ctx, &data)
@@ -1045,4 +1105,27 @@ func getExpectedRepositoryFiles(data bootstrapGitResourceData, url *url.URL, bra
 	repositoryFiles[syncManifests.Path] = syncManifests.Content
 	repositoryFiles[filepath.Join(data.Path.ValueString(), data.Namespace.ValueString(), konfig.DefaultKustomizationFileName())] = getKustomizationFile(data)
 	return repositoryFiles, nil
+}
+
+func isKubernetesReady(ctx context.Context, kubeClient client.Client) error {
+	var list apiextensionsv1.CustomResourceDefinitionList
+	selector := client.MatchingLabels{manifestgen.PartOfLabelKey: manifestgen.PartOfLabelValue}
+	if err := kubeClient.List(ctx, &list, client.InNamespace(""), selector); err != nil {
+		return err
+	}
+	return nil
+}
+
+//nolint:all
+func isFluxReady(ctx context.Context, kubeClient client.Client, data bootstrapGitResourceData) bool {
+	syncName := apitypes.NamespacedName{
+		Namespace: data.Namespace.ValueString(),
+		Name:      data.Namespace.ValueString(),
+	}
+	var rootSync *kustomizev1.Kustomization
+	if err := kubeClient.Get(ctx, syncName, rootSync); err != nil {
+		return false
+	}
+
+	return conditions.IsReady(rootSync)
 }
