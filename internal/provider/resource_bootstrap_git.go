@@ -201,6 +201,9 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 			},
 			"id": schema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"image_pull_secret": schema.StringAttribute{
 				Description: "Kubernetes secret name used for pulling the toolkit images from a private registry.",
@@ -356,9 +359,6 @@ func (r bootstrapGitResource) ModifyPlan(ctx context.Context, req resource.Modif
 	data.RepositoryFiles = mapValue
 
 	diags = resp.Plan.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-	// This has to be set here, probably a bug in the SDK.
-	diags = resp.Plan.SetAttribute(ctx, path.Root("id"), data.Namespace)
 	resp.Diagnostics.Append(diags...)
 }
 
