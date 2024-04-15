@@ -23,6 +23,7 @@ require (
 	github.com/fluxcd/image-reflector-controller/api v0.31.2
 	github.com/fluxcd/kustomize-controller/api v1.2.2
 	github.com/fluxcd/notification-controller/api v1.2.4
+	github.com/fluxcd/pkg/apis/meta v1.4.0
 	github.com/fluxcd/pkg/git v0.18.0
 	github.com/fluxcd/pkg/git/gogit v0.18.0
 	github.com/fluxcd/pkg/runtime v0.45.0
@@ -84,7 +85,6 @@ require (
 	github.com/fluxcd/go-git-providers v0.20.0 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.2.0 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v1.3.0 // indirect
-	github.com/fluxcd/pkg/apis/meta v1.4.0 // indirect
 	github.com/fluxcd/pkg/kustomize v1.6.0 // indirect
 	github.com/fluxcd/pkg/tar v0.4.0 // indirect
 	github.com/fluxcd/pkg/version v0.3.0 // indirect
