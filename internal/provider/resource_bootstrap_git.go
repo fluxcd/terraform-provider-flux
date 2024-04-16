@@ -98,6 +98,7 @@ type bootstrapGitResourceData struct {
 	ComponentsExtra       types.Set            `tfsdk:"components_extra"`
 	DeleteGitManifests    types.Bool           `tfsdk:"delete_git_manifests"`
 	DisableSecretCreation types.Bool           `tfsdk:"disable_secret_creation"`
+	EmbeddedManifests     types.Bool           `tfsdk:"embedded_manifests"`
 	ID                    types.String         `tfsdk:"id"`
 	ImagePullSecret       types.String         `tfsdk:"image_pull_secret"`
 	Interval              customtypes.Duration `tfsdk:"interval"`
@@ -199,6 +200,10 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: "Use the existing secret for flux controller and don't create one from bootstrap",
 				Optional:    true,
 			},
+			"embedded_manifests": schema.BoolAttribute{
+				Description: "When enabled, the Flux manifests will be extracted from the provider binary instead of being downloaded from GitHub.com.",
+				Optional:    true,
+			},
 			"id": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
@@ -241,8 +246,9 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"manifests_path": schema.StringAttribute{
-				Description: fmt.Sprintf("The install manifests are built from a GitHub release or kustomize overlay if using a local path. Defaults to `%s`.", defaultOpts.BaseURL),
-				Optional:    true,
+				Description:        fmt.Sprintf("The install manifests are built from a GitHub release or kustomize overlay if using a local path. Defaults to `%s`.", defaultOpts.BaseURL),
+				Optional:           true,
+				DeprecationMessage: "This attribute is deprecated. Use the `embedded_manifests` attribute when running bootstrap on air-gapped environments.",
 			},
 			"namespace": schema.StringAttribute{
 				Description: fmt.Sprintf("The namespace scope for install manifests. Defaults to `%s`. It will be created if it does not exist.", defaultOpts.Namespace),
@@ -309,7 +315,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"version": schema.StringAttribute{
-				Description: fmt.Sprintf("Flux version. Defaults to `%s`.", utils.DefaultFluxVersion),
+				Description: fmt.Sprintf("Flux version. Defaults to `%s`. Has no effect when `embedded_manifests` is enabled.", utils.DefaultFluxVersion),
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString(utils.DefaultFluxVersion),
@@ -446,6 +452,9 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	manifestsBase := ""
+	if data.EmbeddedManifests.ValueBool() {
+		manifestsBase = EmbeddedManifests
+	}
 	err = bootstrap.Run(ctx, bootstrapProvider, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, timeout)
 	if err != nil {
 		resp.Diagnostics.AddError("Bootstrap run error", err.Error())
@@ -679,6 +688,9 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		}
 
 		manifestsBase := ""
+		if data.EmbeddedManifests.ValueBool() {
+			manifestsBase = EmbeddedManifests
+		}
 		err = bootstrap.Run(ctx, bootstrapProvider, manifestsBase, installOpts, secretOpts, syncOpts, 2*time.Second, timeout)
 		if err != nil {
 			resp.Diagnostics.AddError("Bootstrap run error", err.Error())
@@ -1116,18 +1128,27 @@ func getSyncOptions(data bootstrapGitResourceData, url *url.URL, branch string) 
 func getExpectedRepositoryFiles(data bootstrapGitResourceData, url *url.URL, branch string) (map[string]string, error) {
 	repositoryFiles := map[string]string{}
 	installOpts := getInstallOptions(data)
-	installManifests, err := install.Generate(installOpts, "")
+	manifestsBase := ""
+	if data.EmbeddedManifests.ValueBool() {
+		manifestsBase = EmbeddedManifests
+	}
+
+	installManifests, err := install.Generate(installOpts, manifestsBase)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate install manifests: %w", err)
 	}
+
 	repositoryFiles[installManifests.Path] = installManifests.Content
+
 	syncOpts := getSyncOptions(data, url, branch)
 	syncManifests, err := sync.Generate(syncOpts)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate sync manifests: %w", err)
 	}
+
 	repositoryFiles[syncManifests.Path] = syncManifests.Content
 	repositoryFiles[filepath.Join(data.Path.ValueString(), data.Namespace.ValueString(), konfig.DefaultKustomizationFileName())] = getKustomizationFile(data)
+
 	return repositoryFiles, nil
 }
 
