@@ -90,11 +90,8 @@ jobs:
         with:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
-      - run: go mod download
-      - env:
-          TF_ACC: "1"
-        run: go test -v -cover ./internal/provider/
-        timeout-minutes: 10
+      - name: Run tests
+        run: make testacc
   e2e-flux-bootstrap-with-github:
     runs-on: ubuntu-latest
     needs: build
@@ -126,10 +123,12 @@ jobs:
         with:
           terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
-      - name: Apply Terraform
+      - name: Build provider
         run: |
           make build
           make terraformrc
+      - name: Apply Terraform
+        run: |
           export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
           terraform init
@@ -216,10 +215,12 @@ jobs:
         with:
           terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
-      - name: Apply Terraform
+      - name: Build provider
         run: |
           make build
           make terraformrc
+      - name: Apply Terraform
+        run: |
           export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/helm-install
           terraform init
@@ -279,10 +280,12 @@ jobs:
         with:
           terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
-      - name: Apply Terraform
+      - name: Build provider
         run: |
           make build
           make terraformrc
+      - name: Apply Terraform
+        run: |
           export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-pat
           terraform init
