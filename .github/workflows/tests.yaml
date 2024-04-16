@@ -21,12 +21,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      - run: go mod download
-      - run: go build -v .
-      - name: Run linters
-        uses: golangci/golangci-lint-action@3cfe3a4abbb849e10058ce4af15d205b6da42804 # v4.0.0
-        with:
-          version: latest
+      - run: make build
   generate:
     runs-on: ubuntu-latest
     steps:
@@ -145,6 +140,31 @@ jobs:
         run: |
           flux check
           flux get all
+      - name: No-op apply Terraform
+        run: |
+          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
+          cd examples/github-via-ssh
+          terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: Teardown Flux
+        run: |
+          flux uninstall -s --keep-namespace
+          kubectl delete ns flux-system
+      - name: Restore Flux with Terraform
+        run: |
+          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
+          cd examples/github-via-ssh
+          terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
+      - name: No-op apply Terraform
+        run: |
+          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
+          cd examples/github-via-ssh
+          terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
       - name: Destroy Terraform
         run: |
           cd examples/github-via-ssh

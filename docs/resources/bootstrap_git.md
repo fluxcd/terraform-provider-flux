@@ -40,7 +40,7 @@ The following examples are available to help you use the provider:
 - `manifests_path` (String) The install manifests are built from a GitHub release or kustomize overlay if using a local path. Defaults to `https://github.com/fluxcd/flux2/releases`.
 - `namespace` (String) The namespace scope for install manifests. Defaults to `flux-system`. It will be created if it does not exist.
 - `network_policy` (Boolean) Deny ingress access to the toolkit controllers from other namespaces using network policies. Defaults to `true`.
-- `path` (String) Path relative to the repository root, when specified the cluster sync will be scoped to this path.
+- `path` (String) Path relative to the repository root, when specified the cluster sync will be scoped to this path (immutable).
 - `recurse_submodules` (Boolean) Configures the GitRepository source to initialize and include Git submodules in the artifact it produces.
 - `registry` (String) Container registry where the toolkit images are published. Defaults to `ghcr.io/fluxcd`.
 - `secret_name` (String) Name of the secret the sync credentials can be found in or stored to. Defaults to `flux-system`.

@@ -23,6 +23,7 @@ require (
 	github.com/fluxcd/image-reflector-controller/api v0.31.2
 	github.com/fluxcd/kustomize-controller/api v1.2.2
 	github.com/fluxcd/notification-controller/api v1.2.4
+	github.com/fluxcd/pkg/apis/meta v1.4.0
 	github.com/fluxcd/pkg/git v0.18.0
 	github.com/fluxcd/pkg/git/gogit v0.18.0
 	github.com/fluxcd/pkg/runtime v0.45.0
@@ -84,7 +85,6 @@ require (
 	github.com/fluxcd/go-git-providers v0.20.0 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.2.0 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v1.3.0 // indirect
-	github.com/fluxcd/pkg/apis/meta v1.4.0 // indirect
 	github.com/fluxcd/pkg/kustomize v1.6.0 // indirect
 	github.com/fluxcd/pkg/tar v0.4.0 // indirect
 	github.com/fluxcd/pkg/version v0.3.0 // indirect
@@ -154,6 +154,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/oklog/run v1.1.0 // indirect
+	github.com/onsi/gomega v1.32.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc3 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
