@@ -40,6 +40,8 @@ const (
 	defaultAuthor = "Flux"
 )
 
+var EmbeddedManifests string
+
 type Ssh struct {
 	Username   types.String `tfsdk:"username"`
 	Password   types.String `tfsdk:"password"`

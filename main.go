@@ -18,9 +18,15 @@ package main
 
 import (
 	"context"
+	"embed"
 	"flag"
+	"fmt"
+	"io/fs"
 	"log"
+	"os"
+	"path"
 
+	"github.com/fluxcd/flux2/v2/pkg/manifestgen"
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
@@ -32,17 +38,53 @@ var (
 	version string = "dev"
 )
 
+//go:embed manifests/*.yaml
+var embeddedManifests embed.FS
+
 func main() {
 	ctrllog.SetLogger(logr.New(ctrllog.NullLogSink{}))
 	debugFlag := flag.Bool("debug", false, "Start provider in debug mode.")
 	flag.Parse()
 
+	// extract the embedded Flux manifests to tmp directory
+	tmpBaseDir, err := writeEmbeddedManifests()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer os.RemoveAll(tmpBaseDir)
+	provider.EmbeddedManifests = tmpBaseDir
+
 	opts := providerserver.ServeOpts{
 		Address: "registry.terraform.io/fluxcd/flux",
 		Debug:   *debugFlag,
 	}
-	err := providerserver.Serve(context.Background(), provider.New(version), opts)
+	err = providerserver.Serve(context.Background(), provider.New(version), opts)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+}
+
+func writeEmbeddedManifests() (string, error) {
+	tmpBaseDir, err := manifestgen.MkdirTempAbs("", "flux-manifests-")
+	if err != nil {
+		return "", err
+	}
+
+	manifests, err := fs.ReadDir(embeddedManifests, "manifests")
+	if err != nil {
+		return tmpBaseDir, err
+	}
+	for _, manifest := range manifests {
+		data, err := fs.ReadFile(embeddedManifests, path.Join("manifests", manifest.Name()))
+		if err != nil {
+			return tmpBaseDir, fmt.Errorf("reading file failed: %w", err)
+		}
+
+		err = os.WriteFile(path.Join(tmpBaseDir, manifest.Name()), data, 0666)
+		if err != nil {
+			return tmpBaseDir, fmt.Errorf("writing file failed: %w", err)
+		}
+	}
+
+	return tmpBaseDir, nil
 }

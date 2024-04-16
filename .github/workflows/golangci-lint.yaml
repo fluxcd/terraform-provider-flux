@@ -16,6 +16,8 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      - name: Download Flux manifests
+        run: make manifests
       - name: Run tidy
         run: make tidy
       - name: Check if working tree is dirty

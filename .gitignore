@@ -36,3 +36,8 @@ cover.out
 
 # ignore .terraformrc for dev overrides
 .terraformrc
+
+# ignore embedded manifests
+manifests/
+manifests.tar.gz
+.manifests.done
