@@ -32,7 +32,7 @@ The following examples are available to help you use the provider:
 - `components_extra` (Set of String) List of extra components to include in the install manifests.
 - `delete_git_manifests` (Boolean) Delete manifests from git repository. Defaults to `true`.
 - `disable_secret_creation` (Boolean) Use the existing secret for flux controller and don't create one from bootstrap
-- `embedded_manifests` (Boolean) When enabled, the Flux manifests will be extracted from the provider binary instead of being downloaded from GitHub.com.
+- `embedded_manifests` (Boolean) When enabled, the Flux manifests will be extracted from the provider binary instead of being downloaded from GitHub.com. Defaults to `false`.
 - `image_pull_secret` (String) Kubernetes secret name used for pulling the toolkit images from a private registry.
 - `interval` (String) Interval at which to reconcile from bootstrap repository. Defaults to `1m0s`.
 - `keep_namespace` (Boolean) Keep the namespace after uninstalling Flux components. Defaults to `false`.

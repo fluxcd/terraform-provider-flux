@@ -201,7 +201,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Optional:    true,
 			},
 			"embedded_manifests": schema.BoolAttribute{
-				Description: "When enabled, the Flux manifests will be extracted from the provider binary instead of being downloaded from GitHub.com.",
+				Description: "When enabled, the Flux manifests will be extracted from the provider binary instead of being downloaded from GitHub.com. Defaults to `false`.",
 				Optional:    true,
 			},
 			"id": schema.StringAttribute{

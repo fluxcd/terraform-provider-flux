@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -45,6 +46,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -177,6 +179,34 @@ func TestAccBootstrapGit_SSH(t *testing.T) {
 				ImportState:       true,
 				ImportStateId:     "flux-system",
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccBootstrapGit_AirGapped(t *testing.T) {
+	env := setupEnvironment(t)
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					tmpBase := t.TempDir()
+					tmpBase, err := filepath.EvalSymlinks(tmpBase)
+					require.NoError(t, err)
+
+					_, b, _, _ := runtime.Caller(0)
+					manifestsBase := filepath.Join(filepath.Dir(b), "../..", "manifests")
+					err = cp.Copy(manifestsBase, tmpBase)
+					require.NoError(t, err)
+					EmbeddedManifests = tmpBase
+				},
+				Config: bootstrapAirGapped(env),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+				),
 			},
 		},
 	})
@@ -522,6 +552,30 @@ EOF
 
     resource "flux_bootstrap_git" "this" {
 		toleration_keys = ["FooBar", "test"]
+	}
+	`, env.kubeCfgPath, env.sshClone, env.privateKey)
+}
+
+func bootstrapAirGapped(env environment) string {
+	return fmt.Sprintf(`
+    provider "flux" {
+	  kubernetes = {
+        config_path = "%s"
+	  }
+	  git = {
+        url = "%s"
+        ssh = {
+          username = "git"
+          private_key = <<EOF
+%s
+EOF
+        }
+	  }
+    }
+
+    resource "flux_bootstrap_git" "this" {
+		embedded_manifests = true
+		version = "v0.0.0"
 	}
 	`, env.kubeCfgPath, env.sshClone, env.privateKey)
 }
