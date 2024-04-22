@@ -36,7 +36,7 @@ resource "kind_cluster" "this" {
 resource "gitlab_project" "this" {
   name                   = var.gitlab_project
   description            = "flux-bootstrap"
-  visibility_level       = "public"
+  visibility_level       = "private"
   initialize_with_readme = true # This is extremely important as Flux expects an initialised repository
 }
 
@@ -63,5 +63,6 @@ resource "gitlab_deploy_key" "this" {
 resource "flux_bootstrap_git" "this" {
   depends_on = [gitlab_deploy_key.this]
 
-  path = "clusters/my-cluster"
+  embedded_manifests = true
+  path               = "clusters/my-cluster"
 }

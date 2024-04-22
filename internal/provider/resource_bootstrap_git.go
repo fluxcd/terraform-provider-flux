@@ -203,6 +203,8 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 			"embedded_manifests": schema.BoolAttribute{
 				Description: "When enabled, the Flux manifests will be extracted from the provider binary instead of being downloaded from GitHub.com. Defaults to `false`.",
 				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
 			},
 			"id": schema.StringAttribute{
 				Computed: true,
@@ -842,8 +844,9 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 	data.TolerationKeys = types.SetNull(types.StringType)
 
 	// Stub keep namespace and delete git manifests to their defaults.
-	data.KeepNamespace = types.BoolValue(false)
 	data.DeleteGitManifests = types.BoolValue(true)
+	data.EmbeddedManifests = types.BoolValue(false)
+	data.KeepNamespace = types.BoolValue(false)
 
 	// Get Network NetworkPolicy.
 	networkPolicy := networkingv1.NetworkPolicy{

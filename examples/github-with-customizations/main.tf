@@ -36,7 +36,7 @@ resource "kind_cluster" "this" {
 resource "github_repository" "this" {
   name        = var.github_repository
   description = var.github_repository
-  visibility  = "public"
+  visibility  = "private"
   auto_init   = true # This is extremely important as flux_bootstrap_git will not work without a repository that has been initialised
 }
 
@@ -63,10 +63,11 @@ resource "github_repository_deploy_key" "this" {
 resource "flux_bootstrap_git" "this" {
   depends_on = [github_repository_deploy_key.this]
 
-  path = "clusters/my-cluster"
   components_extra = [
     "image-reflector-controller",
     "image-automation-controller"
   ]
+  embedded_manifests     = true
   kustomization_override = file("${path.root}/resources/flux-kustomization-patch.yaml")
+  path                   = "clusters/my-cluster"
 }
