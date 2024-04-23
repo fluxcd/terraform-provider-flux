@@ -127,9 +127,10 @@ jobs:
         run: |
           make build
           make terraformrc
+          trc="${PWD}/.terraformrc"
+          echo "TF_CLI_CONFIG_FILE=${trc}" >> "$GITHUB_ENV"
       - name: Apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
           terraform init
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
@@ -141,7 +142,6 @@ jobs:
           flux get all
       - name: No-op apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
@@ -152,14 +152,12 @@ jobs:
           kubectl delete ns flux-system
       - name: Restore Flux with Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
       - name: No-op apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
@@ -174,12 +172,7 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         run: |
-          curl \
-            -X DELETE \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            --fail --silent \
-            https://api.github.com/repos/fluxcd-testing/${{ steps.vars.outputs.test_repo_name }}
+          gh repo delete fluxcd-testing/${{ steps.vars.outputs.test_repo_name }} --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
   e2e-helm-install-with-github:
@@ -215,13 +208,8 @@ jobs:
         with:
           terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
-      - name: Build provider
-        run: |
-          make build
-          make terraformrc
       - name: Apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/helm-install
           terraform init
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
@@ -239,12 +227,7 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         run: |
-          curl \
-            -X DELETE \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            --fail --silent \
-            https://api.github.com/repos/fluxcd-testing/${{ steps.vars.outputs.test_repo_name }}
+          gh repo delete fluxcd-testing/${{ steps.vars.outputs.test_repo_name }} --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
   e2e-flux-bootstrap-with-github-pat:
@@ -284,9 +267,10 @@ jobs:
         run: |
           make build
           make terraformrc
+          trc="${PWD}/.terraformrc"
+          echo "TF_CLI_CONFIG_FILE=${trc}" >> "$GITHUB_ENV"
       - name: Apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-pat
           terraform init
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
@@ -304,11 +288,6 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         run: |
-          curl \
-            -X DELETE \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            --fail --silent \
-            https://api.github.com/repos/fluxcd-testing/${{ steps.vars.outputs.test_repo_name }}
+          gh repo delete fluxcd-testing/${{ steps.vars.outputs.test_repo_name }} --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
