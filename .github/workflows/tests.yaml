@@ -12,18 +12,8 @@ env:
 jobs:
   # Ensure project builds before running testing matrix
   build:
-    name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-      - run: make build
-  generate:
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
@@ -34,34 +24,17 @@ jobs:
         with:
           terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
-      - run: go generate ./...
-      - name: git diff
-        run: |
-          git diff --compact-summary --exit-code || \
-            (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
-
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Setup Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-          cache-dependency-path: |
-            **/go.sum
-            **/go.mod
       - name: Install tools
         run: make tools
+      - name: Build
+        run: make build
       - name: Generate docs
         run: make docs
       - name: Check if working tree is dirty
         run: |
           if [[ $(git diff --stat) != '' ]]; then
             git diff
-            echo 'run make docs and commit changes'
+            echo "run 'make build docs' and commit changes"
             exit 1
           fi
 
