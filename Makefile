@@ -41,7 +41,7 @@ testacc: $(EMBEDDED_MANIFESTS_TARGET) tidy fmt vet
 # Requires the following entry in /etc/hosts:
 # 127.0.0.1 gitea-flux
 testmacos: $(EMBEDDED_MANIFESTS_TARGET) tidy fmt vet
-	TF_ACC=1 GITEA_HOSTNAME=gitea-flux go test ./... -v -parallel 1 -run TestAccBootstrapGit_Drift
+	export GITEA_HOSTNAME=gitea-flux && TF_ACC=1 go test ./... -v -parallel 1 -run TestAccBootstrapGit_Drift
 
 build: $(EMBEDDED_MANIFESTS_TARGET)
 	CGO_ENABLED=0 go build -o ./bin/terraform-provider-flux main.go

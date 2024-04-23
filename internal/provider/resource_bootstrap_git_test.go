@@ -699,6 +699,7 @@ func setupEnvironment(t *testing.T) environment {
 	httpPort := rand.Intn(65535-1024) + 1024
 	sshPort := httpPort + 10
 	randSuffix := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	giteaName := os.Getenv("GITEA_HOSTNAME")
 	if giteaName == "" {
 		giteaName = fmt.Sprintf("gitea-%s", randSuffix)
