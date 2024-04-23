@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  TERRAFORM_VERSION: 1.7.5
+  TERRAFORM_VERSION: 1.8.*
 
 jobs:
   # Ensure project builds before running testing matrix
@@ -30,11 +30,9 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      # Temporarily download Terraform 1.8 prerelease for function documentation support.
-      # When Terraform 1.8.0 final is released, this can be removed.
       - uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
         with:
-          terraform_version: '1.8.0-alpha20240216'
+          terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
       - run: go generate ./...
       - name: git diff
@@ -77,9 +75,8 @@ jobs:
       fail-fast: false
       matrix:
         terraform:
-          - '1.5.*'
-          - '1.6.*'
           - '1.7.*'
+          - '1.8.*'
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
