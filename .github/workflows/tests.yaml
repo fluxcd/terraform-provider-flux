@@ -7,12 +7,11 @@ on:
     branches: [ main ]
 
 env:
-  TERRAFORM_VERSION: 1.7.5
+  TERRAFORM_VERSION: 1.8.*
 
 jobs:
   # Ensure project builds before running testing matrix
   build:
-    name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -21,49 +20,21 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      - run: make build
-  generate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-      # Temporarily download Terraform 1.8 prerelease for function documentation support.
-      # When Terraform 1.8.0 final is released, this can be removed.
       - uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
         with:
-          terraform_version: '1.8.0-alpha20240216'
+          terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
-      - run: go generate ./...
-      - name: git diff
-        run: |
-          git diff --compact-summary --exit-code || \
-            (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
-
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Setup Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-          cache-dependency-path: |
-            **/go.sum
-            **/go.mod
       - name: Install tools
         run: make tools
+      - name: Build
+        run: make build
       - name: Generate docs
         run: make docs
       - name: Check if working tree is dirty
         run: |
           if [[ $(git diff --stat) != '' ]]; then
             git diff
-            echo 'run make docs and commit changes'
+            echo "run 'make build docs' and commit changes"
             exit 1
           fi
 
@@ -77,9 +48,8 @@ jobs:
       fail-fast: false
       matrix:
         terraform:
-          - '1.5.*'
-          - '1.6.*'
           - '1.7.*'
+          - '1.8.*'
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
@@ -127,9 +97,10 @@ jobs:
         run: |
           make build
           make terraformrc
+          trc="${PWD}/.terraformrc"
+          echo "TF_CLI_CONFIG_FILE=${trc}" >> "$GITHUB_ENV"
       - name: Apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
           terraform init
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
@@ -141,7 +112,6 @@ jobs:
           flux get all
       - name: No-op apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
@@ -152,14 +122,12 @@ jobs:
           kubectl delete ns flux-system
       - name: Restore Flux with Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
       - name: No-op apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-ssh
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
         env:
@@ -174,12 +142,7 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         run: |
-          curl \
-            -X DELETE \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            --fail --silent \
-            https://api.github.com/repos/fluxcd-testing/${{ steps.vars.outputs.test_repo_name }}
+          gh repo delete fluxcd-testing/${{ steps.vars.outputs.test_repo_name }} --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
   e2e-helm-install-with-github:
@@ -215,13 +178,8 @@ jobs:
         with:
           terraform_version: "${{env.TERRAFORM_VERSION}}"
           terraform_wrapper: false
-      - name: Build provider
-        run: |
-          make build
-          make terraformrc
       - name: Apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/helm-install
           terraform init
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
@@ -239,12 +197,7 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         run: |
-          curl \
-            -X DELETE \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            --fail --silent \
-            https://api.github.com/repos/fluxcd-testing/${{ steps.vars.outputs.test_repo_name }}
+          gh repo delete fluxcd-testing/${{ steps.vars.outputs.test_repo_name }} --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}
   e2e-flux-bootstrap-with-github-pat:
@@ -284,9 +237,10 @@ jobs:
         run: |
           make build
           make terraformrc
+          trc="${PWD}/.terraformrc"
+          echo "TF_CLI_CONFIG_FILE=${trc}" >> "$GITHUB_ENV"
       - name: Apply Terraform
         run: |
-          export TF_CLI_CONFIG_FILE="${PWD}/.terraformrc"
           cd examples/github-via-pat
           terraform init
           terraform apply -auto-approve -var "github_token=${GITHUB_TOKEN}" -var "github_org=fluxcd-testing" -var "github_repository=${{ steps.vars.outputs.test_repo_name }}"
@@ -304,11 +258,6 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         run: |
-          curl \
-            -X DELETE \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            --fail --silent \
-            https://api.github.com/repos/fluxcd-testing/${{ steps.vars.outputs.test_repo_name }}
+          gh repo delete fluxcd-testing/${{ steps.vars.outputs.test_repo_name }} --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITPROVIDER_BOT_TOKEN }}

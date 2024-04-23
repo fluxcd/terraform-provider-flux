@@ -48,6 +48,7 @@ build: $(EMBEDDED_MANIFESTS_TARGET)
 
 .PHONY: docs
 docs: $(EMBEDDED_MANIFESTS_TARGET) tools
+	go generate ./...
 	tfplugindocs generate --ignore-deprecated true
 
 tools:
