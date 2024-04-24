@@ -18,8 +18,10 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version-file: 'go.mod'
-          cache: true
+          go-version: 1.22.x
+          cache-dependency-path: |
+            **/go.sum
+            **/go.mod
       - uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
         with:
           terraform_version: "${{env.TERRAFORM_VERSION}}"
@@ -54,8 +56,7 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version-file: 'go.mod'
-          cache: true
+          go-version: 1.22.x
       - uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
         with:
           terraform_version: ${{ matrix.terraform }}
@@ -72,8 +73,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version-file: 'go.mod'
-          cache: true
+          go-version: 1.22.x
           cache-dependency-path: |
             **/go.sum
             **/go.mod
@@ -155,8 +155,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version-file: 'go.mod'
-          cache: true
+          go-version: 1.22.x
           cache-dependency-path: |
             **/go.sum
             **/go.mod
@@ -210,8 +209,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version-file: 'go.mod'
-          cache: true
+          go-version: 1.22.x
           cache-dependency-path: |
             **/go.sum
             **/go.mod
