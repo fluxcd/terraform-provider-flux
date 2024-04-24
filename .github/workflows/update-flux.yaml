@@ -1,0 +1,98 @@
+name: update-flux
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  update-flux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Setup Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: 1.22.x
+          cache-dependency-path: |
+            **/go.sum
+            **/go.mod
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update component versions
+        id: update
+        run: |
+
+          latest_release=$(flux version --client | awk '{print $2}')
+
+          # Check if the tag was fetched successfully
+          if [ "$latest_release" == "null" ] || [ -z "$latest_release" ]; then
+            printf "Failed to fetch the latest release.\n"
+            exit 1
+          else
+            printf "The latest release of Flux2 is: %s.\n" "${latest_release}"
+          fi
+
+          # Obtain the current version of Flux2 leveraged in this repository
+          # shellcheck disable=SC2046
+          current_version=$(grep 'DefaultFluxVersion' internal/utils/flux.go | awk '{ print $5 }' | tr -d '"')
+          printf "The current version of Flux2 in this repository is: %s.\n" "$current_version"
+
+          # If the latest release and the current version are the same, exit
+          if [ "${latest_release}" == "${current_version}" ]; then
+            printf "The current version of Flux2 in this repository is up to date. Exiting....\n"
+            exit 0
+          fi
+
+          # Replace the current version with the latest release
+          sed -i "s/${current_version}/${latest_release}/g" internal/utils/flux.go
+          printf "The version of Flux2 has been updated to %s.\n" "${latest_release}"
+
+          # Run go mod tidy to update the go.mod file
+          go mod edit -require github.com/fluxcd/flux2/v2@"${latest_release}"
+          go mod tidy -compat=1.22
+
+          # Run the build and generate the documentation
+          printf "Running the build and generating the documentation...\n"
+          make build
+          make docs
+
+          git diff
+
+          PR_TITLE="Update Flux to ${latest_release}"
+          PR_BODY=$(mktemp)
+          echo "- github.com/fluxcd/flux2 to ${latest_release}" >> $PR_BODY
+          echo "  https://github.com/fluxcd/flux2/releases/${latest_release}" >> $PR_BODY
+
+          # NB: this may look strange but it is the way it should be done to
+          # maintain our precious newlines
+          # Ref: https://github.com/github/docs/issues/21529
+          echo 'pr_body<<EOF' >> $GITHUB_OUTPUT
+          cat $PR_BODY >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+          echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@9153d834b60caba6d51c9b9510b087acf9f33f83 # v6.0.4
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          commit-message: |
+            ${{ steps.update.outputs.pr_title }}
+
+            ${{ steps.update.outputs.pr_body }}
+          committer: GitHub <noreply@github.com>
+          author: fluxcdbot <fluxcdbot@users.noreply.github.com>
+          signoff: true
+          title: ${{ steps.update.outputs.pr_title }}
+          body: |
+            ${{ steps.update.outputs.pr_body }}
+          branch: update-components
+          labels: |
+            area/build
+          reviewers: ${{ secrets.ASSIGNEES }}
+      - name: Check output
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
