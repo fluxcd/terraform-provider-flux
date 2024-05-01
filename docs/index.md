@@ -163,6 +163,7 @@ Optional:
 
 Optional:
 
+- `hostkey_algos` (List of String) The list of hostkey algorithms to use for ssh connections, arranged from most preferred to the least.
 - `password` (String, Sensitive) Password of the SSH private key.
 - `private_key` (String, Sensitive) Private key used for authenticating to the Git SSH server.
 - `username` (String) Username for Git SSH server.

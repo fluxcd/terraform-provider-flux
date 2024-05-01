@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/fluxcd/pkg/git"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -43,9 +44,10 @@ const (
 var EmbeddedManifests string
 
 type Ssh struct {
-	Username   types.String `tfsdk:"username"`
-	Password   types.String `tfsdk:"password"`
-	PrivateKey types.String `tfsdk:"private_key"`
+	Username     types.String `tfsdk:"username"`
+	Password     types.String `tfsdk:"password"`
+	PrivateKey   types.String `tfsdk:"private_key"`
+	HostKeyAlgos types.List   `tfsdk:"hostkey_algos"`
 }
 
 type Http struct {
@@ -264,6 +266,11 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 								Optional:    true,
 								Sensitive:   true,
 							},
+							"hostkey_algos": schema.ListAttribute{
+								ElementType: types.StringType,
+								Description: "The list of hostkey algorithms to use for ssh connections, arranged from most preferred to the least.",
+								Optional:    true,
+							},
 						},
 						Optional: true,
 					},
@@ -371,6 +378,14 @@ func (p *fluxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 				paths = append(paths, types.StringValue(p))
 			}
 			data.Kubernetes.ConfigPaths = types.SetValueMust(types.StringType, paths)
+		}
+	}
+
+	if data.Git.Ssh != nil && !data.Git.Ssh.HostKeyAlgos.IsNull() && len(data.Git.Ssh.HostKeyAlgos.Elements()) > 0 {
+		elements := make([]types.String, 0, len(data.Git.Ssh.HostKeyAlgos.Elements()))
+		data.Git.Ssh.HostKeyAlgos.ElementsAs(ctx, &elements, false)
+		for _, algo := range elements {
+			git.HostKeyAlgos = append(git.HostKeyAlgos, algo.ValueString())
 		}
 	}
 
