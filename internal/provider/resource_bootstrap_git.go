@@ -556,7 +556,10 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 		if err != nil {
 			warnDetails = err.Error()
 		}
-		resp.Diagnostics.AddWarning("Flux controllers are not healthy and will be redeployed", warnDetails)
+		resp.Diagnostics.AddWarning(
+			fmt.Sprintf("Flux resources GitRepository and Kustomization in %s namespace are not ready and Flux will be redeployed", data.Namespace.ValueString()),
+			warnDetails,
+		)
 	}
 
 	mapValue, diags := types.MapValueFrom(ctx, types.StringType, repositoryFiles)
@@ -1168,9 +1171,10 @@ func isKubernetesReady(ctx context.Context, kubeClient client.Client) error {
 
 // isFluxReady checks if the Flux sync objects are present and ready.
 func isFluxReady(ctx context.Context, kubeClient client.Client, data bootstrapGitResourceData) (bool, error) {
+	ns := data.Namespace.ValueString()
 	syncName := apitypes.NamespacedName{
-		Namespace: data.Namespace.ValueString(),
-		Name:      data.Namespace.ValueString(),
+		Namespace: ns,
+		Name:      ns,
 	}
 
 	rootSource := &sourcev1.GitRepository{}
@@ -1178,7 +1182,7 @@ func isFluxReady(ctx context.Context, kubeClient client.Client, data bootstrapGi
 		return false, err
 	}
 	if conditions.IsFalse(rootSource, meta.ReadyCondition) {
-		return false, errors.New(conditions.GetMessage(rootSource, meta.ReadyCondition))
+		return false, fmt.Errorf("GitRepository/%s: %s", ns, conditions.GetMessage(rootSource, meta.ReadyCondition))
 	}
 
 	rootSync := &kustomizev1.Kustomization{}
@@ -1187,7 +1191,7 @@ func isFluxReady(ctx context.Context, kubeClient client.Client, data bootstrapGi
 	}
 	if conditions.IsFalse(rootSync, meta.ReadyCondition) {
 		conditions.GetMessage(rootSync, meta.ReadyCondition)
-		return false, errors.New(conditions.GetMessage(rootSync, meta.ReadyCondition))
+		return false, fmt.Errorf("Kustomization/%s: %s", ns, conditions.GetMessage(rootSync, meta.ReadyCondition))
 	}
 
 	return true, nil
