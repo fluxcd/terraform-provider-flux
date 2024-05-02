@@ -543,6 +543,7 @@ func bootstrapGitSSH(env environment) string {
         url = "%s"
         ssh = {
           username = "git"
+          hostkey_algos = ["rsa-sha2-512", "rsa-sha2-256"]
           private_key = <<EOF
 %s
 EOF
