@@ -1,8 +1,15 @@
 name: golangci
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**/*.go'
+      - '**/go.mod'
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+    paths:
+      - '**/*.go'
+      - '**/go.mod'
 
 permissions:
   contents: read
