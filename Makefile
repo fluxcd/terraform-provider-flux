@@ -60,3 +60,6 @@ lint:
 
 terraformrc:
 	cat .terraformrc.tmpl | envsubst > .terraformrc
+
+tofurc:
+	cat .terraformrc.tmpl | envsubst > .tofurc
