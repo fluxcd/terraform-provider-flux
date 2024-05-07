@@ -32,6 +32,7 @@ The following guides are available to help you use the provider:
 ## Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) 1.5.x or newer
+- [OpenTofu](https://opentofu.org/) v1.7.x or newer
 - [Go](https://golang.org/doc/install) 1.22 (to build the provider plugin)
 
 ## Contributing to the provider
