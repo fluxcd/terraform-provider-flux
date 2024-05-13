@@ -2,6 +2,61 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.3.0
+
+**Release date:** 2024-05-13
+
+This release includes flux2 [v2.3.0](https://github.com/fluxcd/flux2/releases/tag/v2.3.0).
+
+The provider has undergone a major refactoring and now supports air-gapped bootstrap,
+drift detection and correction for Flux components, and the ability to upgrade and
+restore the Flux controllers in-cluster.
+
+New configuration options in `flux_bootstrap_git`:
+
+- `delete_git_manifests` (Boolean) Delete manifests from git repository. Defaults to `true`.
+- `embedded_manifests` (Boolean) When enabled, the Flux manifests will be extracted from the provider binary instead of being downloaded from GitHub.com. Defaults to `false`.
+- `registry_credentials` (String) Container registry credentials in the format `user:password`.
+
+Starting with this release, the provider is fully compatible with OpenTofu.
+
+The [provider documentation](https://github.com/fluxcd/terraform-provider-flux?tab=readme-ov-file#guides)
+has been updated with examples and detailed usage instructions.
+
+The deprecated resources `flux_install` and `flux_sync` have been removed.
+
+Improvements:
+- Update Flux to v2.3.0
+  [#689](https://github.com/fluxcd/terraform-provider-flux/pull/689)
+- Add registry credential support to bootstrap resource
+  [#688](https://github.com/fluxcd/terraform-provider-flux/pull/688)
+- Improve readiness diagnotics messages
+  [#680](https://github.com/fluxcd/terraform-provider-flux/pull/680)
+- Add `hostkey_algos` to the `git.ssh` schema
+  [#679](https://github.com/fluxcd/terraform-provider-flux/pull/679)
+- Update terraform plugin framework to v1.8.0
+  [#674](https://github.com/fluxcd/terraform-provider-flux/pull/674)
+- Update dependencies to Kubernetes 1.30
+  [#673](https://github.com/fluxcd/terraform-provider-flux/pull/673)
+- Update flux update GH action to regen docs
+  [#671](https://github.com/fluxcd/terraform-provider-flux/pull/671)
+- Set `embedded_manifest` to true and repo visibility to private
+  [#666](https://github.com/fluxcd/terraform-provider-flux/pull/666)
+- Implement drift detection and correction for cluster state
+  [#661](https://github.com/fluxcd/terraform-provider-flux/pull/661)
+- Provide an option not to delete the namespace Flux is installed into
+  [#657](https://github.com/fluxcd/terraform-provider-flux/pull/657)
+- Add optional git manifest delete
+  [#650](https://github.com/fluxcd/terraform-provider-flux/pull/650)
+- Using the flux2-sync helm chart in the examples
+  [#636](https://github.com/fluxcd/terraform-provider-flux/pull/636)
+- Removing flux_install and flux_sync data sources
+  [#630](https://github.com/fluxcd/terraform-provider-flux/pull/630)
+- Updating examples to include repository creation
+  [#621](https://github.com/fluxcd/terraform-provider-flux/pull/621)
+- Updated examples, simplified documentation and adding pre-commit to CI
+  [#616](https://github.com/fluxcd/terraform-provider-flux/pull/616)
+
 ## 1.2.3
 
 **Release date:** 2024-02-05
