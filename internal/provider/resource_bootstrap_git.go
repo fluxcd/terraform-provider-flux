@@ -18,6 +18,7 @@ package provider
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -49,11 +50,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apitypes "k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/json"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/kustomize/api/konfig"
 
@@ -77,7 +80,6 @@ import (
 
 const (
 	defaultCreateTimeout = 15 * time.Minute
-	defaultReadTimeout   = 5 * time.Minute
 	defaultUpdateTimeout = 15 * time.Minute
 	defaultDeleteTimeout = 5 * time.Minute
 
@@ -111,6 +113,7 @@ type bootstrapGitResourceData struct {
 	Path                  types.String         `tfsdk:"path"`
 	RecurseSubmodules     types.Bool           `tfsdk:"recurse_submodules"`
 	Registry              customtypes.URL      `tfsdk:"registry"`
+	RegistryCredentials   types.String         `tfsdk:"registry_credentials"`
 	RepositoryFiles       types.Map            `tfsdk:"repository_files"`
 	SecretName            types.String         `tfsdk:"secret_name"`
 	Timeouts              timeouts.Value       `tfsdk:"timeouts"`
@@ -286,6 +289,10 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Computed:    true,
 				Default:     stringdefault.StaticString(defaultOpts.Registry),
 			},
+			"registry_credentials": schema.StringAttribute{
+				Description: "Container registry credentials in the format 'user:password'",
+				Optional:    true,
+			},
 			"repository_files": schema.MapAttribute{
 				ElementType: types.StringType,
 				Description: "Git repository files created and managed by the provider.",
@@ -332,6 +339,37 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Default:     booldefault.StaticBool(defaultOpts.WatchAllNamespaces),
 			},
 		},
+	}
+}
+
+// TODO: Move all resource attribute validation here.
+func (r *bootstrapGitResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data bootstrapGitResourceData
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if data.RegistryCredentials.ValueString() != "" && data.ImagePullSecret.ValueString() == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("registry_credentials"),
+			"Missing image_pull_secret configuration",
+			"The image_pull_secret attribute must be configured when registry_credential is set.",
+		)
+	}
+
+	if data.RegistryCredentials.ValueString() != "" && len(strings.Split(data.RegistryCredentials.ValueString(), ":")) != 2 {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("registry_credentials"),
+			"Invalid registry_credential format",
+			"Expected 'user:password' format.",
+		)
+	}
+
+	// If registry_credential is not configured, return without warning.
+	if data.RegistryCredentials.IsNull() || data.RegistryCredentials.ValueString() == "" {
+		return
 	}
 }
 
@@ -925,6 +963,14 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		data.ImagePullSecret = types.StringValue(kustomizeDeployment.Spec.Template.Spec.ImagePullSecrets[0].Name)
 	}
 
+	if data.ImagePullSecret != types.StringNull() {
+		username, password, err := getRegistryCredentials(ctx, kubeClient, data)
+		if err != nil {
+			resp.Diagnostics.AddError("Could not get registry credentials", err.Error())
+			return
+		}
+		data.RegistryCredentials = types.StringValue(fmt.Sprintf("%s:%s", username, password))
+	}
 	// Get if watching all namespace.
 	value, err := utils.GetArgValue(managerContainer, "--watch-all-namespaces")
 	if err != nil {
@@ -1098,35 +1144,36 @@ func getInstallOptions(data bootstrapGitResourceData) install.Options {
 
 	installOptions := install.Options{
 		BaseURL:                baseURL,
-		Version:                data.Version.ValueString(),
-		Namespace:              data.Namespace.ValueString(),
-		Components:             components,
-		Registry:               data.Registry.ValueURL().String(),
-		ImagePullSecret:        data.ImagePullSecret.ValueString(),
-		WatchAllNamespaces:     data.WatchAllNamespaces.ValueBool(),
-		NetworkPolicy:          data.NetworkPolicy.ValueBool(),
-		LogLevel:               data.LogLevel.ValueString(),
-		NotificationController: install.MakeDefaultOptions().NotificationController,
-		ManifestFile:           install.MakeDefaultOptions().ManifestFile,
-		Timeout:                install.MakeDefaultOptions().Timeout,
-		TargetPath:             data.Path.ValueString(),
 		ClusterDomain:          data.ClusterDomain.ValueString(),
+		Components:             components,
+		ImagePullSecret:        data.ImagePullSecret.ValueString(),
+		LogLevel:               data.LogLevel.ValueString(),
+		ManifestFile:           install.MakeDefaultOptions().ManifestFile,
+		Namespace:              data.Namespace.ValueString(),
+		NetworkPolicy:          data.NetworkPolicy.ValueBool(),
+		NotificationController: install.MakeDefaultOptions().NotificationController,
+		Registry:               data.Registry.ValueURL().String(),
+		RegistryCredential:     data.RegistryCredentials.ValueString(),
+		TargetPath:             data.Path.ValueString(),
+		Timeout:                install.MakeDefaultOptions().Timeout,
 		TolerationKeys:         tolerationKeys,
+		Version:                data.Version.ValueString(),
+		WatchAllNamespaces:     data.WatchAllNamespaces.ValueBool(),
 	}
 	return installOptions
 }
 
 func getSyncOptions(data bootstrapGitResourceData, url *url.URL, branch string) sync.Options {
 	syncOpts := sync.Options{
+		Branch:            branch,
 		Interval:          data.Interval.ValueDuration(),
+		ManifestFile:      sync.MakeDefaultOptions().ManifestFile,
 		Name:              data.Namespace.ValueString(),
 		Namespace:         data.Namespace.ValueString(),
-		URL:               url.String(),
-		Branch:            branch,
+		RecurseSubmodules: data.RecurseSubmodules.ValueBool(),
 		Secret:            data.SecretName.ValueString(),
 		TargetPath:        data.Path.ValueString(),
-		ManifestFile:      sync.MakeDefaultOptions().ManifestFile,
-		RecurseSubmodules: data.RecurseSubmodules.ValueBool(),
+		URL:               url.String(),
 	}
 	return syncOpts
 }
@@ -1195,4 +1242,66 @@ func isFluxReady(ctx context.Context, kubeClient client.Client, data bootstrapGi
 	}
 
 	return true, nil
+}
+
+func getRegistryCredentials(ctx context.Context, kubeClient client.Client, data bootstrapGitResourceData) (string, string, error) {
+	imagePullSecret := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      data.ImagePullSecret.ValueString(),
+			Namespace: data.Namespace.ValueString(),
+		},
+	}
+
+	if err := kubeClient.Get(ctx, client.ObjectKeyFromObject(&imagePullSecret), &imagePullSecret); err != nil {
+		return "", "", fmt.Errorf("unable to get Secret %s/%s: %w", imagePullSecret.Namespace, imagePullSecret.Name, err)
+	}
+
+	// Parse the .dockerconfigjson data
+	dockerConfigData, ok := imagePullSecret.Data[".dockerconfigjson"]
+	if !ok {
+		return "", "", fmt.Errorf("unable to get .dockerconfigjson key in Secret %s/%s", imagePullSecret.Namespace, imagePullSecret.Name)
+	}
+
+	var dockerConfig map[string]interface{}
+	if err := json.Unmarshal(dockerConfigData, &dockerConfig); err != nil {
+		return "", "", fmt.Errorf("unable to unmarshal .dockerconfigjson key in Secret %s/%s: %w", imagePullSecret.Namespace, imagePullSecret.Name, err)
+	}
+
+	// Assuming the format and key existences in the JSON
+	auths, ok := dockerConfig["auths"].(map[string]interface{})
+	if !ok {
+		return "", "", fmt.Errorf("unable to get auths key in Secret %s/%s", imagePullSecret.Namespace, imagePullSecret.Name)
+	}
+
+	// Extract credentials (assume one set of credentials)
+	for _, auth := range auths {
+		entry, ok := auth.(map[string]interface{})
+		if !ok {
+			return "", "", fmt.Errorf("unable to get auth key in Secret %s/%s", imagePullSecret.Namespace, imagePullSecret.Name)
+		}
+		authEntry, ok := entry["auth"].(string)
+		if !ok {
+			return "", "", fmt.Errorf("unable to get auth key in Secret %s/%s", imagePullSecret.Namespace, imagePullSecret.Name)
+		}
+
+		if authEntry == "" {
+			return "", "", fmt.Errorf("auth key in Secret %s/%s is empty", imagePullSecret.Namespace, imagePullSecret.Name)
+		}
+
+		decoded, err := base64.StdEncoding.DecodeString(authEntry)
+		if err != nil {
+			return "", "", fmt.Errorf("unable to decode auth key in Secret %s/%s: %w", imagePullSecret.Namespace, imagePullSecret.Name, err)
+		}
+
+		parts := string(decoded)
+		split := strings.Split(parts, ":") // Split string into username and password based on colon
+		if len(split) != 2 {
+			return "", "", fmt.Errorf("unable to split auth key in Secret %s/%s", imagePullSecret.Namespace, imagePullSecret.Name)
+		}
+		username := split[0]
+		password := split[1]
+		return username, password, nil
+	}
+
+	return "", "", fmt.Errorf("no credentials found in Secret %s/%s", imagePullSecret.Namespace, imagePullSecret.Name)
 }

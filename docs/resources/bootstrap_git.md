@@ -44,6 +44,7 @@ The following examples are available to help you use the provider:
 - `path` (String) Path relative to the repository root, when specified the cluster sync will be scoped to this path (immutable).
 - `recurse_submodules` (Boolean) Configures the GitRepository source to initialize and include Git submodules in the artifact it produces.
 - `registry` (String) Container registry where the toolkit images are published. Defaults to `ghcr.io/fluxcd`.
+- `registry_credentials` (String) Container registry credentials in the format 'user:password'
 - `secret_name` (String) Name of the secret the sync credentials can be found in or stored to. Defaults to `flux-system`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `toleration_keys` (Set of String) List of toleration keys used to schedule the components pods onto nodes with matching taints.
