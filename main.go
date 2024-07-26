@@ -29,6 +29,7 @@ import (
 	"github.com/fluxcd/flux2/v2/pkg/manifestgen"
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/fluxcd/terraform-provider-flux/internal/provider"
