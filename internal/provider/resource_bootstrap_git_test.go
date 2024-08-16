@@ -30,9 +30,10 @@ import (
 	"time"
 
 	"code.gitea.io/sdk/gitea"
-	dockertypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/fluxcd/flux2/v2/pkg/manifestgen"
@@ -722,7 +723,7 @@ func setupEnvironment(t *testing.T) environment {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	require.NoError(t, err)
 	defer cli.Close()
-	reader, err := cli.ImagePull(context.TODO(), giteaImageName, dockertypes.ImagePullOptions{})
+	reader, err := cli.ImagePull(context.TODO(), giteaImageName, image.PullOptions{})
 	require.NoError(t, err)
 	defer reader.Close()
 	_, err = io.Copy(io.Discard, reader)
@@ -749,10 +750,10 @@ func setupEnvironment(t *testing.T) environment {
 	}
 	resp, err := cli.ContainerCreate(context.TODO(), containerCfg, hostCfg, nil, nil, giteaName)
 	require.NoError(t, err)
-	err = cli.ContainerStart(context.TODO(), resp.ID, dockertypes.ContainerStartOptions{})
+	err = cli.ContainerStart(context.TODO(), resp.ID, container.StartOptions{})
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		err := cli.ContainerRemove(context.TODO(), resp.ID, dockertypes.ContainerRemoveOptions{Force: true})
+		err := cli.ContainerRemove(context.TODO(), resp.ID, container.RemoveOptions{Force: true})
 		if err != nil {
 			return
 		}
@@ -769,7 +770,7 @@ func setupEnvironment(t *testing.T) environment {
 			return
 		}
 	})
-	networks, err := cli.NetworkList(context.TODO(), dockertypes.NetworkListOptions{Filters: filters.NewArgs(filters.Arg("name", "kind"))})
+	networks, err := cli.NetworkList(context.TODO(), network.ListOptions{Filters: filters.NewArgs(filters.Arg("name", "kind"))})
 	require.NoError(t, err)
 	require.Len(t, networks, 1)
 	err = cli.NetworkConnect(context.TODO(), networks[0].ID, resp.ID, nil)
@@ -778,13 +779,13 @@ func setupEnvironment(t *testing.T) environment {
 	// Create admin user in gitea.
 	// TODO: Need a better solution than just sleeping.
 	time.Sleep(1 * time.Second)
-	execCfg := dockertypes.ExecConfig{
+	execCfg := container.ExecOptions{
 		User: "git",
 		Cmd:  []string{"gitea", "admin", "user", "create", "--username", "gitea_admin", "--password", "foobar", "--email", "admin@example.com", "--admin"},
 	}
 	exec, err := cli.ContainerExecCreate(context.TODO(), resp.ID, execCfg)
 	require.NoError(t, err)
-	err = cli.ContainerExecStart(context.TODO(), exec.ID, dockertypes.ExecStartCheck{})
+	err = cli.ContainerExecStart(context.TODO(), exec.ID, container.ExecStartOptions{})
 	require.NoError(t, err)
 	time.Sleep(1 * time.Second)
 
