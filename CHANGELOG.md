@@ -2,6 +2,34 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.4.0
+
+**Release date:** 2024-09-30
+
+This release includes flux2 [v2.4.0](https://github.com/fluxcd/flux2/releases/tag/v2.4.0).
+
+The client-go auth plugins are now imported, which allows using auth providers
+like OIDC, GCP, Azure, etc., for connecting to the cluster.
+
+In addition, the Kubernetes dependencies have been updated to v1.31.1 and the
+provider is now built with Go 1.23.
+
+Improvements:
+- Build with Go 1.23
+  [#710](https://github.com/fluxcd/terraform-provider-flux/pull/710)
+- Import client-go auth plugin to fix oidc auth issue
+  [#702](https://github.com/fluxcd/terraform-provider-flux/pull/702)
+- Various dependency updates
+  [#691](https://github.com/fluxcd/terraform-provider-flux/pull/691)
+  [#698](https://github.com/fluxcd/terraform-provider-flux/pull/698)
+  [#699](https://github.com/fluxcd/terraform-provider-flux/pull/699)
+  [#701](https://github.com/fluxcd/terraform-provider-flux/pull/701)
+  [#707](https://github.com/fluxcd/terraform-provider-flux/pull/707)
+  [#711](https://github.com/fluxcd/terraform-provider-flux/pull/711)
+  [#715](https://github.com/fluxcd/terraform-provider-flux/pull/715)
+  [#718](https://github.com/fluxcd/terraform-provider-flux/pull/718)
+  [#719](https://github.com/fluxcd/terraform-provider-flux/pull/719)
+
 ## 1.3.0
 
 **Release date:** 2024-05-13
