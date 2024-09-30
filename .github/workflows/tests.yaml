@@ -79,7 +79,7 @@ jobs:
             **/go.sum
             **/go.mod
       - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@896e0fa46d5107a05e953dd0a5261d78a145ec8c # v2.3.0
+        uses: fluxcd/flux2/action@5350425cdcd5fa015337e09fa502153c0275bd4b # v2.4.0
       - name: Set outputs
         id: vars
         run: |
@@ -161,7 +161,7 @@ jobs:
             **/go.sum
             **/go.mod
       - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@896e0fa46d5107a05e953dd0a5261d78a145ec8c # v2.3.0
+        uses: fluxcd/flux2/action@5350425cdcd5fa015337e09fa502153c0275bd4b # v2.4.0
       - name: Set outputs
         id: vars
         run: |
@@ -215,7 +215,7 @@ jobs:
             **/go.sum
             **/go.mod
       - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@896e0fa46d5107a05e953dd0a5261d78a145ec8c # v2.3.0
+        uses: fluxcd/flux2/action@5350425cdcd5fa015337e09fa502153c0275bd4b # v2.4.0
       - name: Set outputs
         id: vars
         run: |
