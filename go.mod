@@ -1,8 +1,6 @@
 module github.com/fluxcd/terraform-provider-flux
 
-go 1.22.4
-
-toolchain go1.23.1
+go 1.22.5
 
 // Pin kustomize to v5.4.3
 replace (
