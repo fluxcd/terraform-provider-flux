@@ -45,7 +45,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Setup Go
-        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
         with:
           go-version: 1.23.x
           cache-dependency-path: |
@@ -67,7 +67,7 @@ jobs:
           cp ./bin/$TF_PLUGIN_BINARY_NAME $TF_PLUGIN_BINARY_PATH
       - name: Terraform min/max versions
         id: minMax
-        uses: clowdhaus/terraform-min-max@v1.3.1
+        uses: clowdhaus/terraform-min-max@v1.3.2
         with:
           directory: ${{ matrix.directory }}
       - name: Pre-commit Terraform ${{ steps.minMax.outputs.minVersion }}
