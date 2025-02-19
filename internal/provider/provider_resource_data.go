@@ -335,21 +335,16 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 			loader.Precedence = expandedPaths
 		}
 
-		ctxSuffix := "; default context"
 		if kubernetes.ConfigContext.ValueString() != "" || kubernetes.ConfigContextAuthInfo.ValueString() != "" || kubernetes.ConfigContextCluster.ValueString() != "" {
-			ctxSuffix = "; overridden context"
 			if kubernetes.ConfigContext.ValueString() != "" {
 				overrides.CurrentContext = kubernetes.ConfigContext.ValueString()
-				ctxSuffix += fmt.Sprintf("; config ctx: %s", overrides.CurrentContext)
 			}
 			overrides.Context = clientcmdapi.Context{}
 			if kubernetes.ConfigContextAuthInfo.ValueString() != "" {
 				overrides.Context.AuthInfo = kubernetes.ConfigContextAuthInfo.ValueString()
-				ctxSuffix += fmt.Sprintf("; auth_info: %s", overrides.Context.AuthInfo)
 			}
 			if kubernetes.ConfigContextCluster.ValueString() != "" {
 				overrides.Context.Cluster = kubernetes.ConfigContextCluster.ValueString()
-				ctxSuffix += fmt.Sprintf("; cluster: %s", overrides.Context.Cluster)
 			}
 		}
 	}

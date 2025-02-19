@@ -441,7 +441,7 @@ func (r *bootstrapGitResource) Create(ctx context.Context, req resource.CreateRe
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
 	}
-	defer os.RemoveAll(gitClient.Path())
+	defer func() { _ = os.RemoveAll(gitClient.Path()) }()
 
 	installOpts := getInstallOptions(data)
 	syncOpts := getSyncOptions(data, r.prd.GetRepositoryURL(), r.prd.git.Branch.ValueString())
@@ -553,7 +553,7 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 		resp.Diagnostics.AddError("Git Client", err.Error())
 		return
 	}
-	defer os.RemoveAll(gitClient.Path())
+	defer func() { _ = os.RemoveAll(gitClient.Path()) }()
 
 	// Detect drift for the Flux manifests stored in Git.
 	repositoryFiles := map[string]string{}
@@ -651,7 +651,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		if err != nil {
 			return retry.NonRetryableError(err)
 		}
-		defer os.RemoveAll(gitClient.Path())
+		defer func() { _ = os.RemoveAll(gitClient.Path()) }()
 
 		// Files should be removed if they are present in the state but not the plan.
 		for k := range previousRepositoryFiles.Elements() {
@@ -722,7 +722,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 		if err != nil {
 			resp.Diagnostics.AddError("could not create temporary working directory for git repository", err.Error())
 		}
-		defer os.RemoveAll(tmpDir)
+		defer func() { _ = os.RemoveAll(tmpDir) }()
 
 		bootstrapProvider, err := r.prd.GetBootstrapProvider(tmpDir)
 		if err != nil {
@@ -810,7 +810,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		if err != nil {
 			return retry.NonRetryableError(err)
 		}
-		defer os.RemoveAll(gitClient.Path())
+		defer func() { _ = os.RemoveAll(gitClient.Path()) }()
 
 		// Remove all tracked files from git.
 		for k := range data.RepositoryFiles.Elements() {

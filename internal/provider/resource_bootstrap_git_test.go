@@ -237,7 +237,7 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 						},
 					})
 					require.NoError(t, err)
-					os.Remove(filepath.Join(gitClient.Path(), "flux-system/kustomization.yaml"))
+					_ = os.Remove(filepath.Join(gitClient.Path(), "flux-system/kustomization.yaml"))
 					_, err = gitClient.Commit(git.Commit{})
 					require.NoError(t, err)
 					err = gitClient.Push(context.TODO(), repository.PushConfig{})
@@ -715,17 +715,17 @@ func setupEnvironment(t *testing.T) environment {
 	hostAliases := os.Getenv(hostaliasesEnvKey)
 	f, err := os.OpenFile(hostAliases, os.O_CREATE|os.O_WRONLY|os.O_APPEND, os.ModePerm)
 	require.NoError(t, err)
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	_, err = f.WriteString(fmt.Sprintf("%s localhost\n", giteaName))
 	require.NoError(t, err)
 
 	// Run Gitea server.
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	require.NoError(t, err)
-	defer cli.Close()
+	defer func() { _ = cli.Close() }()
 	reader, err := cli.ImagePull(context.TODO(), giteaImageName, image.PullOptions{})
 	require.NoError(t, err)
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 	_, err = io.Copy(io.Discard, reader)
 	if err != nil {
 		return environment{}
@@ -858,7 +858,7 @@ func getTestGitClient(t *testing.T, username, password string) *gogit.Client {
 	gitClient, err := gogit.NewClient(tmpDir, &authOpts, gogit.WithDiskStorage(), gogit.WithInsecureCredentialsOverHTTP())
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		os.RemoveAll(gitClient.Path())
+		_ = os.RemoveAll(gitClient.Path())
 	})
 	return gitClient
 }

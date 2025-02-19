@@ -39,6 +39,7 @@ import (
 const (
 	defaultBranch = "main"
 	defaultAuthor = "Flux"
+	httpScheme    = "http"
 )
 
 var EmbeddedManifests string
@@ -218,7 +219,7 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 						Description: "Url of Git repository to bootstrap from.",
 						Required:    true,
 						Validators: []validator.String{
-							validators.URLScheme("http", "https", "ssh"),
+							validators.URLScheme(httpScheme, "https", "ssh"),
 						},
 					},
 					"branch": schema.StringAttribute{
@@ -319,7 +320,7 @@ func (p *fluxProvider) ValidateConfig(ctx context.Context, req provider.Validate
 			)
 		}
 
-		if (data.Git.Url.ValueURL().Scheme == "http" || data.Git.Url.ValueURL().Scheme == "https") && data.Git.Ssh != nil {
+		if (data.Git.Url.ValueURL().Scheme == httpScheme || data.Git.Url.ValueURL().Scheme == "https") && data.Git.Ssh != nil {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("git.ssh"),
 				"Unexpected Attribute Configuration",
@@ -327,7 +328,7 @@ func (p *fluxProvider) ValidateConfig(ctx context.Context, req provider.Validate
 			)
 		}
 
-		if data.Git.Url.ValueURL().Scheme == "http" && !data.Git.Http.InsecureHttpAllowed.ValueBool() {
+		if data.Git.Url.ValueURL().Scheme == httpScheme && !data.Git.Http.InsecureHttpAllowed.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("git.allow_insecure_http"),
 				"Scheme Validation Error",
