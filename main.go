@@ -52,7 +52,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	defer os.RemoveAll(tmpBaseDir)
+	defer func() { _ = os.RemoveAll(tmpBaseDir) }()
 	provider.EmbeddedManifests = tmpBaseDir
 
 	opts := providerserver.ServeOpts{
