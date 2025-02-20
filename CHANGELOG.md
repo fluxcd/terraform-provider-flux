@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.5.0
+
+**Release date:** 2025-02-20
+
+This release includes flux2 [v2.5.0](https://github.com/fluxcd/flux2/releases/tag/v2.5.0).
+
+In addition, the Kubernetes dependencies have been updated to v1.32.1.
+
+Improvements:
+- Various dependency updates
+  [#724](https://github.com/fluxcd/terraform-provider-flux/pull/724)
+  [#725](https://github.com/fluxcd/terraform-provider-flux/pull/725)
+  [#726](https://github.com/fluxcd/terraform-provider-flux/pull/726)
+  [#727](https://github.com/fluxcd/terraform-provider-flux/pull/727)
+  [#729](https://github.com/fluxcd/terraform-provider-flux/pull/729)
+  [#739](https://github.com/fluxcd/terraform-provider-flux/pull/739)
+  [#741](https://github.com/fluxcd/terraform-provider-flux/pull/741)
+  [#742](https://github.com/fluxcd/terraform-provider-flux/pull/742)
+
 ## 1.4.0
 
 **Release date:** 2024-09-30
