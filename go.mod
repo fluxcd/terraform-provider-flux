@@ -17,11 +17,11 @@ require (
 	github.com/docker/docker v27.5.1+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/fluxcd/cli-utils v0.36.0-flux.12
-	github.com/fluxcd/flux2/v2 v2.5.0
+	github.com/fluxcd/flux2/v2 v2.5.1
 	github.com/fluxcd/helm-controller/api v1.2.0
 	github.com/fluxcd/image-automation-controller/api v0.40.0
 	github.com/fluxcd/image-reflector-controller/api v0.34.0
-	github.com/fluxcd/kustomize-controller/api v1.5.0
+	github.com/fluxcd/kustomize-controller/api v1.5.1
 	github.com/fluxcd/notification-controller/api v1.5.0
 	github.com/fluxcd/pkg/apis/meta v1.10.0
 	github.com/fluxcd/pkg/git v0.24.0
@@ -43,12 +43,12 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.14.1
 	github.com/stretchr/testify v1.10.0
-	k8s.io/api v0.32.1
-	k8s.io/apiextensions-apiserver v0.32.1
-	k8s.io/apimachinery v0.32.1
+	k8s.io/api v0.32.2
+	k8s.io/apiextensions-apiserver v0.32.2
+	k8s.io/apimachinery v0.32.2
 	k8s.io/cli-runtime v0.32.1
-	k8s.io/client-go v0.32.1
-	sigs.k8s.io/controller-runtime v0.20.1
+	k8s.io/client-go v0.32.2
+	sigs.k8s.io/controller-runtime v0.20.2
 	sigs.k8s.io/kind v0.25.0
 	sigs.k8s.io/kustomize/api v0.19.0
 	sigs.k8s.io/yaml v1.4.0
@@ -213,10 +213,10 @@ require (
 	go.opentelemetry.io/otel v1.34.0 // indirect
 	go.opentelemetry.io/otel/metric v1.34.0 // indirect
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/oauth2 v0.25.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
@@ -234,7 +234,7 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/component-base v0.32.1 // indirect
+	k8s.io/component-base v0.32.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20241212222426-2c72e554b1e7 // indirect
 	k8s.io/kubectl v0.32.1 // indirect
