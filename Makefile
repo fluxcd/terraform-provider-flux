@@ -23,7 +23,7 @@ $(EMBEDDED_MANIFESTS_TARGET): $(call rwildcard,manifests/,*.yaml)
 manifests: $(EMBEDDED_MANIFESTS_TARGET)
 
 tidy:
-	rm -f go.sum; go mod tidy -compat=1.22
+	rm -f go.sum; go mod tidy -compat=1.24
 
 fmt:
 	go fmt ./...
