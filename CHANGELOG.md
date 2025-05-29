@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.6.0
+
+**Release date:** 2025-02-29
+
+This release includes flux2 [v2.6.0](https://github.com/fluxcd/flux2/releases/tag/v2.6.0).
+
+In addition, the Kubernetes dependencies have been updated to v1.33.0
+and the provider is now built with Go 1.24.
+
+Improvements:
+- Update to Kubernetes 1.33.0 and Go 1.24.0
+  [#757](https://github.com/fluxcd/terraform-provider-flux/pull/757)
+- Update Flux to v2.6.0
+  [#760](https://github.com/fluxcd/terraform-provider-flux/pull/760)
+
 ## 1.5.1
 
 **Release date:** 2025-02-25
