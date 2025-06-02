@@ -716,7 +716,7 @@ func setupEnvironment(t *testing.T) environment {
 	f, err := os.OpenFile(hostAliases, os.O_CREATE|os.O_WRONLY|os.O_APPEND, os.ModePerm)
 	require.NoError(t, err)
 	defer func() { _ = f.Close() }()
-	_, err = f.WriteString(fmt.Sprintf("%s localhost\n", giteaName))
+	_, err = f.WriteString(fmt.Sprintf("%s localhost\n", giteaName)) //nolint:all
 	require.NoError(t, err)
 
 	// Run Gitea server.
