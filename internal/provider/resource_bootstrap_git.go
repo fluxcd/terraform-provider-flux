@@ -800,7 +800,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		}
 	}
 
-	if !(data.DeleteGitManifests.IsNull() || data.DeleteGitManifests.ValueBool()) {
+	if !(data.DeleteGitManifests.IsNull() || data.DeleteGitManifests.ValueBool()) { //nolint:all
 		tflog.Debug(ctx, "Skipping git repository removal", map[string]interface{}{})
 		return
 	}
@@ -1238,7 +1238,7 @@ func isFluxReady(ctx context.Context, kubeClient client.Client, data bootstrapGi
 	}
 	if conditions.IsFalse(rootSync, meta.ReadyCondition) {
 		conditions.GetMessage(rootSync, meta.ReadyCondition)
-		return false, fmt.Errorf("Kustomization/%s: %s", ns, conditions.GetMessage(rootSync, meta.ReadyCondition))
+		return false, fmt.Errorf("Kustomization/%s: %s", ns, conditions.GetMessage(rootSync, meta.ReadyCondition)) //nolint:all
 	}
 
 	return true, nil
