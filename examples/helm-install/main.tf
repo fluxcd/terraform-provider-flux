@@ -114,25 +114,24 @@ resource "helm_release" "flux2_sync" {
   name      = "flux-system"
   namespace = "flux-system"
 
-  set {
-    name  = "gitRepository.spec.url"
-    value = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
-  }
-
-  set {
-    name  = "gitRepository.spec.ref.branch"
-    value = "main"
-  }
-
-  set {
-    name  = "gitRepository.spec.secretRef.name"
-    value = kubernetes_secret.ssh_keypair.metadata[0].name
-  }
-
-  set {
-    name  = "gitRepository.spec.interval"
-    value = "1m"
-  }
+  set = [
+    {
+      name  = "gitRepository.spec.url"
+      value = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
+    },
+    {
+      name  = "gitRepository.spec.ref.branch"
+      value = "main"
+    },
+    {
+      name  = "gitRepository.spec.secretRef.name"
+      value = kubernetes_secret.ssh_keypair.metadata[0].name
+    },
+    {
+      name  = "gitRepository.spec.interval"
+      value = "1m"
+    }
+  ]
 
   depends_on = [helm_release.flux2]
 }
