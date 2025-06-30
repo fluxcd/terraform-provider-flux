@@ -4,7 +4,7 @@ provider "github" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = kind_cluster.this.endpoint
     client_certificate     = kind_cluster.this.client_certificate
     client_key             = kind_cluster.this.client_key
