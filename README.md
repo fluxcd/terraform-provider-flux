@@ -23,8 +23,8 @@ The following guides are available to help you use the provider:
 - [Bootstrapping a cluster using a GitHub repository self-managing the SSH keypair secret)](examples/github-self-managed-ssh-keypair)
 - [Bootstrapping a cluster using a GitHub repository via SSH with flux customizations](examples/github-with-customizations)
 - [Bootstrapping a cluster using a GitHub repository via SSH and GPG with inline flux customizations](examples/github-with-inline-customizations)
-- [Bootstrapping a cluster using a Gitlab repository via SSH](examples/gitlab-via-ssh)
-- [Bootstrapping a cluster using a Gitlab repository via SSH and GPG](examples/gitlab-via-ssh-with-gpg)
+- [Bootstrapping a cluster using a GitLab repository via SSH](examples/gitlab-via-ssh)
+- [Bootstrapping a cluster using a GitLab repository via SSH and GPG](examples/gitlab-via-ssh-with-gpg)
 - [Bootstrapping a cluster using a Forgejo repository via SSH](examples/forgejo-via-ssh)
 - [Bootstrapping a cluster using a Helm Release and not the flux_bootstrap_git resource](examples/helm-install) **
 
