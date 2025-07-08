@@ -101,8 +101,8 @@ github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/fluxcd/cli-utils v0.36.0-flux.13 h1:2X5yjz/rk9mg7+bMFBDZKGKzeZpAmY2s6iwbNZz7OzM=
 github.com/fluxcd/cli-utils v0.36.0-flux.13/go.mod h1:b2iSoIeDTtjfCB0IKtGgqlhhvWa1oux3e90CjOf81oA=
-github.com/fluxcd/flux2/v2 v2.6.3 h1:pi2S2BJFfg3lURQ/q7WuOHaLhdPX3NhY0Pi66O4Epks=
-github.com/fluxcd/flux2/v2 v2.6.3/go.mod h1:H638p5YbIetl64wnpybeWf+NT3S273byQ9uHeNg1bnk=
+github.com/fluxcd/flux2/v2 v2.6.4 h1:RHv3fZclZRMh9Szok4tmN2/aLOOkkKcr7S8//BfF4zg=
+github.com/fluxcd/flux2/v2 v2.6.4/go.mod h1:9S1t2KYOH7km9JJgnIvH+OJCCYPJpx7O/+ZQkEUjrj4=
 github.com/fluxcd/gitkit v0.6.0 h1:iNg5LTx6ePo+Pl0ZwqHTAkhbUHxGVSY3YCxCdw7VIFg=
 github.com/fluxcd/gitkit v0.6.0/go.mod h1:svOHuKi0fO9HoawdK4HfHAJJseZDHHjk7I3ihnCIqNo=
 github.com/fluxcd/go-git-providers v0.23.0 h1:7IkXIOzdMQZO98daCyFWORMMceA/eIDnq63qIXC04NM=
@@ -113,8 +113,8 @@ github.com/fluxcd/image-automation-controller/api v0.41.2 h1:miYjID4Mg51xcObVLQP
 github.com/fluxcd/image-automation-controller/api v0.41.2/go.mod h1:TaCaXnDu0a6uWyF41WkyskH0gg6dFyniftvdCELcEKU=
 github.com/fluxcd/image-reflector-controller/api v0.35.2 h1:EzjtUpyx8kbTFx7ugdi5LRMaCpQW4kX/vjFCIPpPD38=
 github.com/fluxcd/image-reflector-controller/api v0.35.2/go.mod h1:mjpokoQhFs2RxfFjY4rHpn3ZAUvee8TiELyROFN4wiA=
-github.com/fluxcd/kustomize-controller/api v1.6.0 h1:8p230vpJy7giisoBNuI3CX99O+XKKVLLxXuJmv3sOHQ=
-github.com/fluxcd/kustomize-controller/api v1.6.0/go.mod h1:b0i/KVz28tV8iuqlNHx7MW6ZtTcIbBELGLoKdaK+X8M=
+github.com/fluxcd/kustomize-controller/api v1.6.1 h1:8AOD+BWQwCLT+u5jgtGryZWkCeslgr+cnQAfUzgWmGk=
+github.com/fluxcd/kustomize-controller/api v1.6.1/go.mod h1:b0i/KVz28tV8iuqlNHx7MW6ZtTcIbBELGLoKdaK+X8M=
 github.com/fluxcd/notification-controller/api v1.6.0 h1:t0k662zxnUZlnDvFrk4DBDl6iivFmJxbwuRdyhH9Ot4=
 github.com/fluxcd/notification-controller/api v1.6.0/go.mod h1:b1gwfsygqnasQVdn/iMCFDI81LeOeY/ibLul+Z6W8U0=
 github.com/fluxcd/pkg/apis/acl v0.7.0 h1:dMhZJH+g6ZRPjs4zVOAN9vHBd1DcavFgcIFkg5ooOE0=
