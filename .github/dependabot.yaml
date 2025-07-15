@@ -13,4 +13,4 @@ updates:
           - "*"
     schedule:
       # By default, this will be on a monday.
-      interval: "weekly"
+      interval: "monthly"
