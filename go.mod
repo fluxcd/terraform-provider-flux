@@ -30,6 +30,7 @@ require (
 	github.com/fluxcd/pkg/ssa v0.58.0
 	github.com/fluxcd/pkg/ssh v0.21.0
 	github.com/fluxcd/source-controller/api v1.7.0
+	github.com/fluxcd/source-watcher/api/v2 v2.0.1
 	github.com/go-logr/logr v1.4.3
 	github.com/google/go-containerregistry v0.20.6
 	github.com/hashicorp/terraform-plugin-docs v0.20.1
@@ -95,7 +96,6 @@ require (
 	github.com/fluxcd/pkg/kustomize v1.22.0 // indirect
 	github.com/fluxcd/pkg/tar v0.14.0 // indirect
 	github.com/fluxcd/pkg/version v0.10.0 // indirect
-	github.com/fluxcd/source-watcher/api/v2 v2.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect

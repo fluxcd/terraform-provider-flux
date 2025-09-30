@@ -297,7 +297,7 @@ func TestAccBootstrapGit_Upgrade(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: bootstrapGitVersion(env, "v2.0.0"),
+				Config: bootstrapGitVersion(env, "v2.7.0"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
 					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
