@@ -2,9 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.7.1
+
+**Release date:** 2025-09-30
+
+This release fixes the provider support the new source-watcher component
+introduced in Flux v2.7.0.
+
+Fixes:
+- Add source-watcher as valid extra component
+  [#780](https://github.com/fluxcd/terraform-provider-flux/pull/780)
+
 ## 1.7.0
 
-**Release date:** 2025-05-30
+**Release date:** 2025-09-30
 
 ⚠️ The Flux APIs v1beta1 and v2beta1 (deprecated in 2023) have reached end-of-life
 and have been removed from the CRDs. Before upgrading, you must run the `flux migrate`
