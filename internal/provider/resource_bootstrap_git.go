@@ -189,8 +189,8 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: "List of extra components to include in the install manifests.",
 				Optional:    true,
 				Validators: []validator.Set{
-					setvalidator.SizeAtMost(2),
-					setvalidator.ValueStringsAre(stringvalidator.OneOf("image-reflector-controller", "image-automation-controller")),
+					setvalidator.SizeAtMost(3),
+					setvalidator.ValueStringsAre(stringvalidator.OneOf("image-reflector-controller", "image-automation-controller", "source-watcher")),
 				},
 			},
 			"delete_git_manifests": schema.BoolAttribute{
