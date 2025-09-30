@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.7.0
+
+**Release date:** 2025-05-30
+
+⚠️ The Flux APIs v1beta1 and v2beta1 (deprecated in 2023) have reached end-of-life
+and have been removed from the CRDs. Before upgrading, you must run the `flux migrate`
+command on clusters. For more details, please refer to the
+[Flux v2.7 upgrade guide](https://fluxcd.io/blog/2025/09/flux-v2.7.0/#upgrade-procedure).
+
+This release includes flux2 [v2.7.0](https://github.com/fluxcd/flux2/releases/tag/v2.7.0).
+
+In addition, the Kubernetes dependencies have been updated to v1.34.0
+and the provider is now built with Go 1.25.
+
+Improvements:
+- Update to Kubernetes v1.34.0 and Go 1.25.0
+  [#775](https://github.com/fluxcd/terraform-provider-flux/pull/775)
+- Update Flux to v2.7.0
+  [#778](https://github.com/fluxcd/terraform-provider-flux/pull/778)
+- Update otel packages to v1.38.0
+  [#777](https://github.com/fluxcd/terraform-provider-flux/pull/777)
+- Update dependabot config
+  [#773](https://github.com/fluxcd/terraform-provider-flux/pull/773)
+
 ## 1.6.4
 
 **Release date:** 2025-07-08
