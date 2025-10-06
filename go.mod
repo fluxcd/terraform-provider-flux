@@ -17,19 +17,19 @@ require (
 	github.com/docker/docker v28.3.3+incompatible
 	github.com/docker/go-connections v0.6.0
 	github.com/fluxcd/cli-utils v0.36.0-flux.15
-	github.com/fluxcd/flux2/v2 v2.7.0
-	github.com/fluxcd/helm-controller/api v1.4.0
+	github.com/fluxcd/flux2/v2 v2.7.1
+	github.com/fluxcd/helm-controller/api v1.4.1
 	github.com/fluxcd/image-automation-controller/api v1.0.1
 	github.com/fluxcd/image-reflector-controller/api v1.0.1
 	github.com/fluxcd/kustomize-controller/api v1.7.0
-	github.com/fluxcd/notification-controller/api v1.7.1
+	github.com/fluxcd/notification-controller/api v1.7.2
 	github.com/fluxcd/pkg/apis/meta v1.21.0
 	github.com/fluxcd/pkg/git v0.36.0
 	github.com/fluxcd/pkg/git/gogit v0.40.0
 	github.com/fluxcd/pkg/runtime v0.86.0
-	github.com/fluxcd/pkg/ssa v0.58.0
+	github.com/fluxcd/pkg/ssa v0.59.0
 	github.com/fluxcd/pkg/ssh v0.21.0
-	github.com/fluxcd/source-controller/api v1.7.0
+	github.com/fluxcd/source-controller/api v1.7.1
 	github.com/fluxcd/source-watcher/api/v2 v2.0.1
 	github.com/go-logr/logr v1.4.3
 	github.com/google/go-containerregistry v0.20.6
