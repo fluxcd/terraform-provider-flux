@@ -67,6 +67,7 @@ type Git struct {
 	GpgPassphrase         types.String    `tfsdk:"gpg_passphrase"`
 	GpgKeyID              types.String    `tfsdk:"gpg_key_id"`
 	CommitMessageAppendix types.String    `tfsdk:"commit_message_appendix"`
+	ShallowClone          types.Bool      `tfsdk:"shallow_clone"`
 	Ssh                   *Ssh            `tfsdk:"ssh"`
 	Http                  *Http           `tfsdk:"http"`
 }
@@ -249,6 +250,10 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 					},
 					"commit_message_appendix": schema.StringAttribute{
 						Description: "String to add to the commit messages.",
+						Optional:    true,
+					},
+					"shallow_clone": schema.BoolAttribute{
+						Description: "Indicates if the repository should be shallow cloned when updating.",
 						Optional:    true,
 					},
 					"ssh": schema.SingleNestedAttribute{
