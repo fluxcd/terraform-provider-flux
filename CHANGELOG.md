@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.8.0
+
+**Release date:** 2026-02-24
+
+⚠️ The Flux APIs v1beta2 and v2beta2 (deprecated in 2024) have reached end-of-life
+and have been removed from the CRDs. Before upgrading, you must run the `flux migrate`
+command on clusters. For more details, please refer to the
+[Flux v2.7+ upgrade guide](https://github.com/fluxcd/flux2/discussions/5572).
+
+This release includes flux2 [v2.8.0](https://github.com/fluxcd/flux2/releases/tag/v2.8.0).
+
+In addition, the Kubernetes dependencies have been updated to v1.35.0
+and the provider is now built with Go 1.26.
+
+Improvements:
+- Update Flux to v2.8.0, Kubernetes to v1.35.0 and Go to 1.26.0
+  [#798](https://github.com/fluxcd/terraform-provider-flux/pull/798)
+
 ## 1.7.6
 
 **Release date:** 2025-11-27
