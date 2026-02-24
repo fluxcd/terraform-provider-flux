@@ -22,10 +22,9 @@ jobs:
         uses: fluxcd/flux2/action@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Update component versions
-        id: update
+      - name: Check for new Flux version
+        id: version
         run: |
-
           latest_release=$(flux version --client | awk '{print $2}')
 
           # Check if the tag was fetched successfully
@@ -44,28 +43,62 @@ jobs:
           # If the latest release and the current version are the same, exit
           if [ "${latest_release}" == "${current_version}" ]; then
             printf "The current version of Flux2 in this repository is up to date. Exiting....\n"
+            echo "up_to_date=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
+          echo "up_to_date=false" >> $GITHUB_OUTPUT
+          echo "latest_release=$latest_release" >> $GITHUB_OUTPUT
+          echo "current_version=$current_version" >> $GITHUB_OUTPUT
+      - name: Update component versions
+        id: update
+        if: steps.version.outputs.up_to_date == 'false'
+        env:
+          LATEST_RELEASE: ${{ steps.version.outputs.latest_release }}
+          CURRENT_VERSION: ${{ steps.version.outputs.current_version }}
+        run: |
+          build_errors=""
+
           # Replace the current version with the latest release
-          sed -i "s/${current_version}/${latest_release}/g" internal/utils/flux.go
-          printf "The version of Flux2 has been updated to %s.\n" "${latest_release}"
+          sed -i "s/${CURRENT_VERSION}/${LATEST_RELEASE}/g" internal/utils/flux.go
+          printf "The version of Flux2 has been updated to %s.\n" "${LATEST_RELEASE}"
 
           # Run go mod tidy to update the go.mod file
-          go mod edit -require github.com/fluxcd/flux2/v2@"${latest_release}"
-          go mod tidy -compat=1.22
+          go mod edit -require github.com/fluxcd/flux2/v2@"${LATEST_RELEASE}"
+          if ! go mod tidy -compat=1.22 2>&1; then
+            build_errors="go mod tidy failed"
+            printf "::warning::go mod tidy failed\n"
+          fi
 
           # Run the build and generate the documentation
-          printf "Running the build and generating the documentation...\n"
-          make build
-          make docs
+          if [ -z "$build_errors" ]; then
+            printf "Running the build and generating the documentation...\n"
+            if ! make build 2>&1; then
+              build_errors="make build failed"
+              printf "::warning::make build failed\n"
+            fi
+          fi
+
+          if [ -z "$build_errors" ]; then
+            if ! make docs 2>&1; then
+              build_errors="make docs failed"
+              printf "::warning::make docs failed\n"
+            fi
+          fi
 
           git diff
 
-          PR_TITLE="Update Flux to ${latest_release}"
+          PR_TITLE="Update Flux to ${LATEST_RELEASE}"
           PR_BODY=$(mktemp)
-          echo "- github.com/fluxcd/flux2 to ${latest_release}" >> $PR_BODY
-          echo "  https://github.com/fluxcd/flux2/releases/${latest_release}" >> $PR_BODY
+          echo "- github.com/fluxcd/flux2 to ${LATEST_RELEASE}" >> $PR_BODY
+          echo "  https://github.com/fluxcd/flux2/releases/${LATEST_RELEASE}" >> $PR_BODY
+
+          if [ -n "$build_errors" ]; then
+            echo "" >> $PR_BODY
+            echo "**:warning: Build error: ${build_errors}**" >> $PR_BODY
+            echo "This PR requires manual intervention to fix the build." >> $PR_BODY
+            echo "build_failed=true" >> $GITHUB_OUTPUT
+          fi
 
           # NB: this may look strange but it is the way it should be done to
           # maintain our precious newlines
@@ -76,6 +109,7 @@ jobs:
           echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
       - name: Create Pull Request
         id: cpr
+        if: steps.version.outputs.up_to_date == 'false'
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -94,5 +128,13 @@ jobs:
             area/build
           reviewers: ${{ secrets.ASSIGNEES }}
       - name: Check output
+        if: steps.version.outputs.up_to_date == 'false'
+        env:
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+          BUILD_FAILED: ${{ steps.update.outputs.build_failed }}
         run: |
-          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request Number - ${PR_NUMBER}"
+          if [ "${BUILD_FAILED}" == "true" ]; then
+            echo "::warning::PR was created but the build has errors that need manual fixing."
+            exit 1
+          fi
