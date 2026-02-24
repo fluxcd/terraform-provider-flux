@@ -17,7 +17,7 @@ require (
 	github.com/docker/docker v28.3.3+incompatible
 	github.com/docker/go-connections v0.6.0
 	github.com/fluxcd/cli-utils v0.36.0-flux.15
-	github.com/fluxcd/flux2/v2 v2.7.5
+	github.com/fluxcd/flux2/v2 v2.8.0
 	github.com/fluxcd/helm-controller/api v1.4.5
 	github.com/fluxcd/image-automation-controller/api v1.0.4
 	github.com/fluxcd/image-reflector-controller/api v1.0.4
