@@ -1125,7 +1125,7 @@ resources:
 }
 
 func getInstallOptions(data bootstrapGitResourceData) install.Options {
-	components := []string{}
+	components := []string{} //nolint:prealloc // ElementsAs replaces the slice, so preallocation is ineffective
 	data.Components.ElementsAs(context.Background(), &components, false)
 	sort.Strings(components)
 	componentsExtra := []string{}
