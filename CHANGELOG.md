@@ -70,10 +70,10 @@ command on clusters. For more details, please refer to the
 This release includes flux2 [v2.7.0](https://github.com/fluxcd/flux2/releases/tag/v2.7.0).
 
 In addition, the Kubernetes dependencies have been updated to v1.34.0
-and the provider is now built with Go 1.25.
+and the provider is now built with Go 1.26.
 
 Improvements:
-- Update to Kubernetes v1.34.0 and Go 1.25.0
+- Update to Kubernetes v1.34.0 and Go 1.26.0
   [#775](https://github.com/fluxcd/terraform-provider-flux/pull/775)
 - Update Flux to v2.7.0
   [#778](https://github.com/fluxcd/terraform-provider-flux/pull/778)
