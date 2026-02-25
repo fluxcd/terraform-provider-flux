@@ -103,6 +103,7 @@ func (prd *providerResourceData) CloneRepository(ctx context.Context) (*gogit.Cl
 		CheckoutStrategy: repository.CheckoutStrategy{
 			Branch: prd.git.Branch.ValueString(),
 		},
+		ShallowClone: prd.git.ShallowClone.ValueBool(),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not clone git repository: %w", err)
