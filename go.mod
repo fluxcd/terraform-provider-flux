@@ -16,17 +16,17 @@ require (
 	github.com/ProtonMail/go-crypto v1.3.0
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-connections v0.6.0
-	github.com/fluxcd/cli-utils v0.37.1-flux.1
-	github.com/fluxcd/flux2/v2 v2.8.0
-	github.com/fluxcd/helm-controller/api v1.5.0
+	github.com/fluxcd/cli-utils v0.37.2-flux.1
+	github.com/fluxcd/flux2/v2 v2.8.1
+	github.com/fluxcd/helm-controller/api v1.5.1
 	github.com/fluxcd/image-automation-controller/api v1.1.0
 	github.com/fluxcd/image-reflector-controller/api v1.1.0
-	github.com/fluxcd/kustomize-controller/api v1.8.0
-	github.com/fluxcd/notification-controller/api v1.8.0
+	github.com/fluxcd/kustomize-controller/api v1.8.1
+	github.com/fluxcd/notification-controller/api v1.8.1
 	github.com/fluxcd/pkg/apis/meta v1.25.0
 	github.com/fluxcd/pkg/git v0.43.0
-	github.com/fluxcd/pkg/runtime v0.100.2
-	github.com/fluxcd/pkg/ssa v0.67.1
+	github.com/fluxcd/pkg/runtime v0.100.3
+	github.com/fluxcd/pkg/ssa v0.67.2
 	github.com/fluxcd/pkg/ssh v0.24.0
 	github.com/fluxcd/source-controller/api v1.8.0
 	github.com/fluxcd/source-watcher/api/v2 v2.1.0
@@ -223,7 +223,7 @@ require (
 	k8s.io/component-base v0.35.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912 // indirect
-	k8s.io/kubectl v0.35.0 // indirect
+	k8s.io/kubectl v0.35.1 // indirect
 	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.21.1 // indirect
