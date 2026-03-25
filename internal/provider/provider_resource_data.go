@@ -351,6 +351,9 @@ func getClientConfiguration(ctx context.Context, kubernetes *Kubernetes) (client
 
 	// Overriding with static configuration.
 	overrides.ClusterInfo.InsecureSkipTLSVerify = kubernetes.Insecure.ValueBool()
+	if kubernetes.TLSServerName.ValueString() != "" {
+		overrides.ClusterInfo.TLSServerName = kubernetes.TLSServerName.ValueString()
+	}
 	if kubernetes.ClusterCACertificate.ValueString() != "" {
 		overrides.ClusterInfo.CertificateAuthorityData = bytes.NewBufferString(kubernetes.ClusterCACertificate.ValueString()).Bytes()
 	}
