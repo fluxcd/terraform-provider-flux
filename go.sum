@@ -101,8 +101,8 @@ github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/fluxcd/cli-utils v0.37.2-flux.1 h1:tQ588ghtRN+E+kHq415FddfqA9v4brn/1WWgrP6rQR0=
 github.com/fluxcd/cli-utils v0.37.2-flux.1/go.mod h1:LcWSu1NYET8d8U7O326RhEm5JkQXCMK6ITu4G1CT02c=
-github.com/fluxcd/flux2/v2 v2.8.3 h1:obZYHj98hS1w9eo4LWSam4I2p7M7925jpmZqllGqaog=
-github.com/fluxcd/flux2/v2 v2.8.3/go.mod h1:9ZPbVw+/5i7xZt82IYif3VYZ85nI0wSYMOwhq53Rabc=
+github.com/fluxcd/flux2/v2 v2.8.4 h1:UPZbVgzToRAJfxfn0LS+kIXdcXzF1DWKLxoB3gtpAbE=
+github.com/fluxcd/flux2/v2 v2.8.4/go.mod h1:MWWwTcIs9/ovzcW3qmARAXXsKNevXQybSOrB4+l5NRM=
 github.com/fluxcd/gitkit v0.6.0 h1:iNg5LTx6ePo+Pl0ZwqHTAkhbUHxGVSY3YCxCdw7VIFg=
 github.com/fluxcd/gitkit v0.6.0/go.mod h1:svOHuKi0fO9HoawdK4HfHAJJseZDHHjk7I3ihnCIqNo=
 github.com/fluxcd/go-git-providers v0.26.0 h1:0DUsXc1nS9Fe4n8tXSEUCGemWzHShd66gmotayDPekw=
@@ -127,8 +127,8 @@ github.com/fluxcd/pkg/git v0.43.1 h1:lw29P44wueKzQk79KnYyvisfw//cxg0S4cDeTYx+Slo
 github.com/fluxcd/pkg/git v0.43.1/go.mod h1:3R/AjCe7ee7FqWcAG+2IiuJPOCxrGHF4SCGkuvKS6OQ=
 github.com/fluxcd/pkg/gittestserver v0.25.1 h1:40Ridmy1xKxBM9ItDn012R4VKmaoDqzvGaC5g7xv+mw=
 github.com/fluxcd/pkg/gittestserver v0.25.1/go.mod h1:7fybYb0yej1fFNiF1ohs0Jr0XzyaZQ/cRh3AFEoCtuc=
-github.com/fluxcd/pkg/kustomize v1.27.1 h1:BLOBNLb2N5ObttZA8XJhZ2NqNY1ZjBqQtTpNlIx8/L4=
-github.com/fluxcd/pkg/kustomize v1.27.1/go.mod h1:A2RQTe9woDPiwJDWFlkoP4oF9eX9DeXr89FEkKnSObk=
+github.com/fluxcd/pkg/kustomize v1.27.2 h1:rtoccQyY4SnqXY/wtAXWGEXrINT923z4RBsIdISESik=
+github.com/fluxcd/pkg/kustomize v1.27.2/go.mod h1:A2RQTe9woDPiwJDWFlkoP4oF9eX9DeXr89FEkKnSObk=
 github.com/fluxcd/pkg/runtime v0.100.4 h1:rwvbeoeWN0BTJORJBISJJEkWn6DVfmWwynFl2GseWns=
 github.com/fluxcd/pkg/runtime v0.100.4/go.mod h1:M6LjRJ1hIe2s6E2ykFfae1Xy/rLvOFQf2QquMKmN350=
 github.com/fluxcd/pkg/ssa v0.67.3 h1:mjuhH5fNOYstkF6jB7EeaWmfnt5T272Cup8ZD9O8YBQ=
