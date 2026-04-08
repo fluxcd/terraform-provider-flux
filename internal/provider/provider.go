@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/fluxcd/pkg/git"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -83,6 +84,7 @@ type Kubernetes struct {
 	Username              types.String    `tfsdk:"username"`
 	Password              types.String    `tfsdk:"password"`
 	Insecure              types.Bool      `tfsdk:"insecure"`
+	TLSServerName         types.String    `tfsdk:"tls_server_name"`
 	ClientCertificate     types.String    `tfsdk:"client_certificate"`
 	ClientKey             types.String    `tfsdk:"client_key"`
 	ClusterCACertificate  types.String    `tfsdk:"cluster_ca_certificate"`
@@ -129,31 +131,35 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 				Attributes: map[string]schema.Attribute{
 					"host": schema.StringAttribute{
 						Optional:    true,
-						Description: "The hostname (in form of URI) of Kubernetes master.",
+						Description: "The hostname (in form of URI) of Kubernetes master. Can be set with KUBE_HOST.",
 					},
 					"username": schema.StringAttribute{
 						Optional:    true,
-						Description: "The username to use for HTTP basic authentication when accessing the Kubernetes master endpoint.",
+						Description: "The username to use for HTTP basic authentication when accessing the Kubernetes master endpoint. Can be set with KUBE_USER.",
 					},
 					"password": schema.StringAttribute{
 						Optional:    true,
-						Description: "The password to use for HTTP basic authentication when accessing the Kubernetes master endpoint.",
+						Description: "The password to use for HTTP basic authentication when accessing the Kubernetes master endpoint. Can be set with KUBE_PASSWORD.",
 					},
 					"insecure": schema.BoolAttribute{
 						Optional:    true,
-						Description: "Whether server should be accessed without verifying the TLS certificate.",
+						Description: "Whether server should be accessed without verifying the TLS certificate. Can be set with KUBE_INSECURE.",
+					},
+					"tls_server_name": schema.StringAttribute{
+						Optional:    true,
+						Description: "Server name passed to the server for SNI and is used in the client to check server certificates against. Can be set with KUBE_TLS_SERVER_NAME.",
 					},
 					"client_certificate": schema.StringAttribute{
 						Optional:    true,
-						Description: "PEM-encoded client certificate for TLS authentication.",
+						Description: "PEM-encoded client certificate for TLS authentication. Can be set with KUBE_CLIENT_CERT_DATA.",
 					},
 					"client_key": schema.StringAttribute{
 						Optional:    true,
-						Description: "PEM-encoded client certificate key for TLS authentication.",
+						Description: "PEM-encoded client certificate key for TLS authentication. Can be set with KUBE_CLIENT_KEY_DATA.",
 					},
 					"cluster_ca_certificate": schema.StringAttribute{
 						Optional:    true,
-						Description: "PEM-encoded root certificates bundle for TLS authentication.",
+						Description: "PEM-encoded root certificates bundle for TLS authentication. Can be set with KUBE_CLUSTER_CA_CERT_DATA.",
 					},
 					"config_paths": schema.SetAttribute{
 						ElementType: types.StringType,
@@ -166,23 +172,23 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 					},
 					"config_context": schema.StringAttribute{
 						Optional:    true,
-						Description: "Context to choose from the config file.",
+						Description: "Context to choose from the config file. Can be set with KUBE_CTX.",
 					},
 					"config_context_auth_info": schema.StringAttribute{
 						Optional:    true,
-						Description: "Authentication info context of the kube config (name of the kubeconfig user, `--user` flag in `kubectl`).",
+						Description: "Authentication info context of the kube config (name of the kubeconfig user, `--user` flag in `kubectl`). Can be set with KUBE_CTX_AUTH_INFO.",
 					},
 					"config_context_cluster": schema.StringAttribute{
 						Optional:    true,
-						Description: "Cluster context of the kube config (name of the kubeconfig cluster, `--cluster` flag in `kubectl`).",
+						Description: "Cluster context of the kube config (name of the kubeconfig cluster, `--cluster` flag in `kubectl`). Can be set with KUBE_CTX_CLUSTER.",
 					},
 					"token": schema.StringAttribute{
 						Optional:    true,
-						Description: "Token to authenticate an service account.",
+						Description: "Token to authenticate an service account. Can be set with KUBE_TOKEN.",
 					},
 					"proxy_url": schema.StringAttribute{
 						Optional:    true,
-						Description: "URL to the proxy to be used for all API requests.",
+						Description: "URL to the proxy to be used for all API requests. Can be set with KUBE_PROXY_URL.",
 					},
 					"exec": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
@@ -379,6 +385,76 @@ func (p *fluxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 				paths = append(paths, types.StringValue(p))
 			}
 			data.Kubernetes.ConfigPaths = types.SetValueMust(types.StringType, paths)
+		}
+	}
+	if data.Kubernetes.Host.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_HOST"); ok {
+			data.Kubernetes.Host = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.Username.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_USER"); ok {
+			data.Kubernetes.Username = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.Password.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_PASSWORD"); ok {
+			data.Kubernetes.Password = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.Insecure.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_INSECURE"); ok {
+			if kubeInsecure, err := strconv.ParseBool(v); err != nil {
+				data.Kubernetes.Insecure = types.BoolValue(kubeInsecure)
+			} else {
+				resp.Diagnostics.AddError("Invalid KUBE_INSECURE value: %s", v)
+				return
+			}
+		}
+	}
+	if data.Kubernetes.TLSServerName.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_TLS_SERVER_NAME"); ok {
+			data.Kubernetes.TLSServerName = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.ClientCertificate.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_CLIENT_CERT_DATA"); ok {
+			data.Kubernetes.ClientCertificate = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.ClientKey.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_CLIENT_KEY_DATA"); ok {
+			data.Kubernetes.ClientKey = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.ClusterCACertificate.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_CLUSTER_CA_CERT_DATA"); ok {
+			data.Kubernetes.ClusterCACertificate = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.ConfigContext.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_CTX"); ok {
+			data.Kubernetes.ConfigContext = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.ConfigContextAuthInfo.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_CTX_AUTH_INFO"); ok {
+			data.Kubernetes.ConfigContextAuthInfo = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.ConfigContextCluster.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_CTX_CLUSTER"); ok {
+			data.Kubernetes.ConfigContextCluster = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.Token.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_TOKEN"); ok {
+			data.Kubernetes.Token = types.StringValue(v)
+		}
+	}
+	if data.Kubernetes.ProxyURL.IsNull() {
+		if v, ok := os.LookupEnv("KUBE_PROXY_URL"); ok {
+			data.Kubernetes.ProxyURL = types.StringValue(v)
 		}
 	}
 

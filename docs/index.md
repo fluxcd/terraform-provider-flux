@@ -176,21 +176,22 @@ Optional:
 
 Optional:
 
-- `client_certificate` (String) PEM-encoded client certificate for TLS authentication.
-- `client_key` (String) PEM-encoded client certificate key for TLS authentication.
-- `cluster_ca_certificate` (String) PEM-encoded root certificates bundle for TLS authentication.
-- `config_context` (String) Context to choose from the config file.
-- `config_context_auth_info` (String) Authentication info context of the kube config (name of the kubeconfig user, `--user` flag in `kubectl`).
-- `config_context_cluster` (String) Cluster context of the kube config (name of the kubeconfig cluster, `--cluster` flag in `kubectl`).
+- `client_certificate` (String) PEM-encoded client certificate for TLS authentication. Can be set with KUBE_CLIENT_CERT_DATA.
+- `client_key` (String) PEM-encoded client certificate key for TLS authentication. Can be set with KUBE_CLIENT_KEY_DATA.
+- `cluster_ca_certificate` (String) PEM-encoded root certificates bundle for TLS authentication. Can be set with KUBE_CLUSTER_CA_CERT_DATA.
+- `config_context` (String) Context to choose from the config file. Can be set with KUBE_CTX.
+- `config_context_auth_info` (String) Authentication info context of the kube config (name of the kubeconfig user, `--user` flag in `kubectl`). Can be set with KUBE_CTX_AUTH_INFO.
+- `config_context_cluster` (String) Cluster context of the kube config (name of the kubeconfig cluster, `--cluster` flag in `kubectl`). Can be set with KUBE_CTX_CLUSTER.
 - `config_path` (String) Path to the kube config file. Can be set with KUBE_CONFIG_PATH.
 - `config_paths` (Set of String) A list of paths to kube config files. Can be set with KUBE_CONFIG_PATHS environment variable.
 - `exec` (Attributes) Kubernetes client authentication exec plugin configuration. (see [below for nested schema](#nestedatt--kubernetes--exec))
-- `host` (String) The hostname (in form of URI) of Kubernetes master.
-- `insecure` (Boolean) Whether server should be accessed without verifying the TLS certificate.
-- `password` (String) The password to use for HTTP basic authentication when accessing the Kubernetes master endpoint.
-- `proxy_url` (String) URL to the proxy to be used for all API requests.
-- `token` (String) Token to authenticate an service account.
-- `username` (String) The username to use for HTTP basic authentication when accessing the Kubernetes master endpoint.
+- `host` (String) The hostname (in form of URI) of Kubernetes master. Can be set with KUBE_HOST.
+- `insecure` (Boolean) Whether server should be accessed without verifying the TLS certificate. Can be set with KUBE_INSECURE.
+- `password` (String) The password to use for HTTP basic authentication when accessing the Kubernetes master endpoint. Can be set with KUBE_PASSWORD.
+- `proxy_url` (String) URL to the proxy to be used for all API requests. Can be set with KUBE_PROXY_URL.
+- `tls_server_name` (String) Server name passed to the server for SNI and is used in the client to check server certificates against. Can be set with KUBE_TLS_SERVER_NAME.
+- `token` (String) Token to authenticate an service account. Can be set with KUBE_TOKEN.
+- `username` (String) The username to use for HTTP basic authentication when accessing the Kubernetes master endpoint. Can be set with KUBE_USER.
 
 <a id="nestedatt--kubernetes--exec"></a>
 ### Nested Schema for `kubernetes.exec`
