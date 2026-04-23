@@ -146,6 +146,7 @@ Optional:
 - `gpg_key_ring` (String) Path to the GPG key ring for signing commits.
 - `gpg_passphrase` (String, Sensitive) Passphrase for decrypting GPG private key.
 - `http` (Attributes) (see [below for nested schema](#nestedatt--git--http))
+- `shallow_clone` (Boolean) Indicates if the repository should be shallow cloned when updating.
 - `ssh` (Attributes) (see [below for nested schema](#nestedatt--git--ssh))
 
 <a id="nestedatt--git--http"></a>
