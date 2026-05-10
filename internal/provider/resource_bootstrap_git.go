@@ -237,7 +237,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Default:     booldefault.StaticBool(false),
 			},
 			"kustomization_override": schema.StringAttribute{
-				Description: "Kustomization to override configuration set by default.",
+				Description: "Kustomization YAML to override configuration set by default.",
 				Optional:    true,
 				Validators:  []validator.String{validators.KustomizationOverride()},
 			},

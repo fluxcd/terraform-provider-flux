@@ -13,15 +13,32 @@ description: |-
 
 The following examples are available to help you use the provider:
 
+### Git Providers
+
+~> **Important:** The examples in this section only set up Flux itself but provide no way for you to actually use it to deploy your own resources via Git. Refer to the next section for how to get started adding your own resources.
+
+These examples show how to connect Flux to various Git providers using different means of authentication.
+
 - [Bootstrapping a cluster using a GitHub repository and a personal access token (PAT)](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-pat)
 - [Bootstrapping a cluster using a GitHub repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh)
 - [Bootstrapping a cluster using a GitHub repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-via-ssh-with-gpg)
-- [Bootstrapping a cluster using a GitHub repository via SSH with flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-customizations)
-- [Bootstrapping a cluster using a GitHub repository via SSH and GPG with inline flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-inline-customizations)
+- [Bootstrapping a cluster using a GitHub repository self-managing the SSH keypair secret)](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-self-managed-ssh-keypair)
 - [Bootstrapping a cluster using a Gitlab repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh)
 - [Bootstrapping a cluster using a Gitlab repository via SSH and GPG](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/gitlab-via-ssh-with-gpg)
 - [Bootstrapping a cluster using a Forgejo repository via SSH](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/forgejo-via-ssh)
-- [Bootstrapping a cluster using a Helm Release](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/helm-install)
+
+### Kustomization Override
+
+These examples show how to override the default `Kustomization` resource using the `kustomization_override` field. This lets you start getting your own resources deployed from Git, by referencing them in your additions to said `Kustomization`.
+
+- [Bootstrapping a cluster using a GitHub repository via SSH with flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-customizations)
+- [Bootstrapping a cluster using a GitHub repository via SSH and GPG with inline flux customizations](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/github-with-inline-customizations)
+
+### Other Options
+
+- [Bootstrapping a cluster using a Helm Release](https://github.com/fluxcd/terraform-provider-flux/tree/main/examples/helm-install) **
+
+** This is the recommended approach if you do not want to perform initial flux bootstrapping.
 
 {{ .SchemaMarkdown | trimspace }}
 

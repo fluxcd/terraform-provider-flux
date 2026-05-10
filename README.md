@@ -17,15 +17,30 @@ All documentation is available on the [Terraform provider website](https://regis
 
 The following guides are available to help you use the provider:
 
+### Git Providers
+
+> [!IMPORTANT]
+> The guides in this section only set up Flux itself but provide no way for you to actually use it to deploy your own resources via Git. Refer to the next section for how to get started adding your own resources.
+
+These guides show how to connect Flux to various Git providers using different means of authentication.
+
 - [Bootstrapping a cluster using a GitHub repository using a personal access token (PAT)](examples/github-via-pat)
 - [Bootstrapping a cluster using a GitHub repository via SSH](examples/github-via-ssh)
 - [Bootstrapping a cluster using a GitHub repository via SSH and GPG](examples/github-via-ssh-with-gpg)
 - [Bootstrapping a cluster using a GitHub repository self-managing the SSH keypair secret)](examples/github-self-managed-ssh-keypair)
-- [Bootstrapping a cluster using a GitHub repository via SSH with flux customizations](examples/github-with-customizations)
-- [Bootstrapping a cluster using a GitHub repository via SSH and GPG with inline flux customizations](examples/github-with-inline-customizations)
 - [Bootstrapping a cluster using a GitLab repository via SSH](examples/gitlab-via-ssh)
 - [Bootstrapping a cluster using a GitLab repository via SSH and GPG](examples/gitlab-via-ssh-with-gpg)
 - [Bootstrapping a cluster using a Forgejo repository via SSH](examples/forgejo-via-ssh)
+
+### Kustomization Override
+
+These guides show how to override the default `Kustomization` resource using the `kustomization_override` field. This lets you start getting your own resources deployed from Git, by referencing them in your additions to said `Kustomization`.
+
+- [Bootstrapping a cluster using a GitHub repository via SSH with flux customizations](examples/github-with-customizations)
+- [Bootstrapping a cluster using a GitHub repository via SSH and GPG with inline flux customizations](examples/github-with-inline-customizations)
+
+### Other Options
+
 - [Bootstrapping a cluster using a Helm Release and not the flux_bootstrap_git resource](examples/helm-install) **
 
 ** This is the recommended approach if you do not want to perform initial flux bootstrapping.
