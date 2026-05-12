@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Flux authors
+Copyright 2026 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,4 +16,7 @@ limitations under the License.
 
 package utils
 
-const DefaultFluxVersion string = "v2.8.7"
+const (
+	testFoo = "foo"
+	testBar = "bar"
+)

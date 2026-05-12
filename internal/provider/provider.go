@@ -131,11 +131,11 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 						Optional:    true,
 						Description: "The hostname (in form of URI) of Kubernetes master.",
 					},
-					"username": schema.StringAttribute{
+					attrUsername: schema.StringAttribute{
 						Optional:    true,
 						Description: "The username to use for HTTP basic authentication when accessing the Kubernetes master endpoint.",
 					},
-					"password": schema.StringAttribute{
+					attrPassword: schema.StringAttribute{
 						Optional:    true,
 						Description: "The password to use for HTTP basic authentication when accessing the Kubernetes master endpoint.",
 					},
@@ -211,7 +211,7 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 				},
 				Optional: true,
 			},
-			"git": schema.SingleNestedAttribute{
+			attrGit: schema.SingleNestedAttribute{
 				Description: "Configuration block with settings for Git.",
 				Attributes: map[string]schema.Attribute{
 					"url": schema.StringAttribute{
@@ -251,13 +251,13 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 						Description: "String to add to the commit messages.",
 						Optional:    true,
 					},
-					"ssh": schema.SingleNestedAttribute{
+					attrSsh: schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
-							"username": schema.StringAttribute{
+							attrUsername: schema.StringAttribute{
 								Description: "Username for Git SSH server.",
 								Optional:    true,
 							},
-							"password": schema.StringAttribute{
+							attrPassword: schema.StringAttribute{
 								Description: "Password of the SSH private key.",
 								Optional:    true,
 								Sensitive:   true,
@@ -277,11 +277,11 @@ func (p *fluxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 					},
 					"http": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
-							"username": schema.StringAttribute{
+							attrUsername: schema.StringAttribute{
 								Description: "Username for basic authentication.",
 								Optional:    true,
 							},
-							"password": schema.StringAttribute{
+							attrPassword: schema.StringAttribute{
 								Description: "Password for basic authentication.",
 								Optional:    true,
 								Sensitive:   true,

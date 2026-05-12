@@ -24,7 +24,7 @@ import (
 )
 
 func TestGenereateKustomizationYamlWithNoPatches(t *testing.T) {
-	result, err := GenerateKustomizationYaml([]string{"foo", "bar"}, []string{})
+	result, err := GenerateKustomizationYaml([]string{testFoo, testBar}, []string{})
 
 	expected := `
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -39,7 +39,7 @@ resources:
 }
 
 func TestGenereateKustomizationYamlWithPatches(t *testing.T) {
-	result, err := GenerateKustomizationYaml([]string{"foo", "bar"}, []string{"baz", "buzz"})
+	result, err := GenerateKustomizationYaml([]string{testFoo, testBar}, []string{"baz", "buzz"})
 
 	expected := `
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -57,7 +57,7 @@ patchesStrategicMerge:
 }
 
 func TestMap(t *testing.T) {
-	input := []string{"foo", "bar"}
+	input := []string{testFoo, testBar}
 
 	expected := []string{"FOO", "BAR"}
 	actual := Map(input, strings.ToUpper)
@@ -84,7 +84,7 @@ func TestMapReturnsNilSliceGivenNilSlice(t *testing.T) {
 }
 
 func TestGetPatchBases(t *testing.T) {
-	input := []string{"foo", "bar"}
+	input := []string{testFoo, testBar}
 
 	expected := []string{"patch-foo.yaml", "patch-bar.yaml"}
 	actual := GetPatchBases(input)
@@ -94,9 +94,9 @@ func TestGetPatchBases(t *testing.T) {
 
 func TestGenPatchFilePaths(t *testing.T) {
 	basePath := "/foo"
-	patchNames := []string{"bar"}
+	patchNames := []string{testBar}
 
-	expected := map[string]string{"bar": "/foo/patch-bar.yaml"}
+	expected := map[string]string{testBar: "/foo/patch-bar.yaml"}
 	actual := GenPatchFilePaths(basePath, patchNames)
 
 	assert.Equal(t, expected, actual)
