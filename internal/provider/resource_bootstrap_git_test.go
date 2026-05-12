@@ -63,6 +63,9 @@ import (
 const (
 	giteaImageName    = "gitea/gitea:1.17"
 	hostaliasesEnvKey = "HOSTALIASES"
+
+	resourceFluxBootstrapGitThis = "flux_bootstrap_git.this"
+	defaultFluxNamespace         = "flux-system"
 )
 
 func TestMain(m *testing.M) {
@@ -145,16 +148,16 @@ func TestAccBootstrapGit_HTTP(t *testing.T) {
 			{
 				Config: bootstrapGitHTTP(env),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
 			{
 				Config:            bootstrapGitHTTP(env),
-				ResourceName:      "flux_bootstrap_git.this",
+				ResourceName:      resourceFluxBootstrapGitThis,
 				ImportState:       true,
-				ImportStateId:     "flux-system",
+				ImportStateId:     defaultFluxNamespace,
 				ImportStateVerify: true,
 			},
 		},
@@ -169,16 +172,16 @@ func TestAccBootstrapGit_SSH(t *testing.T) {
 			{
 				Config: bootstrapGitSSH(env),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
 			{
 				Config:            bootstrapGitSSH(env),
-				ResourceName:      "flux_bootstrap_git.this",
+				ResourceName:      resourceFluxBootstrapGitThis,
 				ImportState:       true,
-				ImportStateId:     "flux-system",
+				ImportStateId:     defaultFluxNamespace,
 				ImportStateVerify: true,
 			},
 		},
@@ -204,9 +207,9 @@ func TestAccBootstrapGit_AirGapped(t *testing.T) {
 				},
 				Config: bootstrapAirGapped(env),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
 		},
@@ -222,9 +225,9 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 			{
 				Config: bootstrapGitHTTP(env),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
 			// Remove file in Git and expect Terraform to correct drift.
@@ -245,9 +248,9 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 				},
 				Config: bootstrapGitHTTP(env),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
 			// Remove GitRepository in-cluster and expect Terraform to correct drift.
@@ -263,8 +266,8 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 					}
 					rootSource := &sourcev1.GitRepository{
 						ObjectMeta: metav1.ObjectMeta{
-							Name:      "flux-system",
-							Namespace: "flux-system",
+							Name:      defaultFluxNamespace,
+							Namespace: defaultFluxNamespace,
 						},
 					}
 					if err := kubeClient.Delete(context.Background(), rootSource); err != nil {
@@ -274,17 +277,17 @@ func TestAccBootstrapGit_Drift(t *testing.T) {
 				},
 				Config: bootstrapGitSSH(env),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
 			// Expect no-op when Git and in-cluster state are in sync.
 			{
 				Config:            bootstrapGitSSH(env),
-				ResourceName:      "flux_bootstrap_git.this",
+				ResourceName:      resourceFluxBootstrapGitThis,
 				ImportState:       true,
-				ImportStateId:     "flux-system",
+				ImportStateId:     defaultFluxNamespace,
 				ImportStateVerify: true,
 			},
 		},
@@ -299,17 +302,17 @@ func TestAccBootstrapGit_Upgrade(t *testing.T) {
 			{
 				Config: bootstrapGitVersion(env, "v2.7.0"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
 			{
 				Config: bootstrapGitVersion(env, utils.DefaultFluxVersion),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
 		},
@@ -324,16 +327,16 @@ func TestAccBootstrapGit_Components(t *testing.T) {
 			{
 				Config: bootstrapGitComponents(env),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 				),
 			},
 			{
 				Config:            bootstrapGitComponents(env),
-				ResourceName:      "flux_bootstrap_git.this",
+				ResourceName:      resourceFluxBootstrapGitThis,
 				ImportState:       true,
-				ImportStateId:     "flux-system",
+				ImportStateId:     defaultFluxNamespace,
 				ImportStateVerify: true,
 			},
 		},
@@ -367,9 +370,9 @@ patches:
 			{
 				Config: bootstrapGitCustomization(env, kustomizationOverride),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 					func(state *terraform.State) error {
 						cfg, err := clientcmd.BuildConfigFromFlags("", env.kubeCfgPath)
 						if err != nil {
@@ -379,7 +382,7 @@ patches:
 						if err != nil {
 							t.Fatalf("Can not initialize kubeconfig: %s", err)
 						}
-						deploymentList, err := kClient.AppsV1().Deployments("flux-system").List(context.TODO(), metav1.ListOptions{})
+						deploymentList, err := kClient.AppsV1().Deployments(defaultFluxNamespace).List(context.TODO(), metav1.ListOptions{})
 						if err != nil {
 							t.Fatalf("Can not list deployments: %s", err)
 						}
@@ -404,13 +407,13 @@ func TestAccBootstrapGit_WithExistingSecret(t *testing.T) {
 	env := setupEnvironment(t)
 	namespace := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "flux-system",
+			Name: defaultFluxNamespace,
 		},
 	}
 
 	existingSecret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "flux-system",
+			Name:      defaultFluxNamespace,
 			Namespace: namespace.Name,
 		},
 		StringData: map[string]string{
@@ -445,9 +448,9 @@ func TestAccBootstrapGit_WithExistingSecret(t *testing.T) {
 				},
 				Config: bootstrapGitWithExistingSecret(env),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/kustomization.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-components.yaml"),
-					resource.TestCheckResourceAttrSet("flux_bootstrap_git.this", "repository_files.flux-system/gotk-sync.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/kustomization.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-components.yaml"),
+					resource.TestCheckResourceAttrSet(resourceFluxBootstrapGitThis, "repository_files.flux-system/gotk-sync.yaml"),
 					func(state *terraform.State) error {
 						cfg, err := clientcmd.BuildConfigFromFlags("", env.kubeCfgPath)
 						if err != nil {

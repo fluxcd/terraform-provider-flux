@@ -27,10 +27,10 @@ import (
 func TestGetContainers(t *testing.T) {
 	containers := []corev1.Container{
 		{
-			Name: "foo",
+			Name: testFoo,
 		},
 		{
-			Name: "foo",
+			Name: testFoo,
 		},
 		{
 			Name: "baz",
@@ -91,7 +91,7 @@ func TestGetArgValue(t *testing.T) {
 			name:          "arg with equal",
 			args:          args,
 			arg:           "--foo",
-			expectedValue: "bar",
+			expectedValue: testBar,
 		},
 		{
 			name:          "arg with separate item",

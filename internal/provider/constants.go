@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Flux authors
+Copyright 2022 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package utils
+package provider
 
-const DefaultFluxVersion string = "v2.8.7"
+const (
+	attrUsername = "username"
+	attrPassword = "password"
+	attrGit      = "git"
+	attrSsh      = "ssh"
+	attrPath     = "path"
+)

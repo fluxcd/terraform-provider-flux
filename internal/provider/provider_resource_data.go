@@ -281,7 +281,7 @@ func getAuthOpts(g *Git) (*git.AuthOptions, error) {
 			Password:  g.Http.Password.ValueString(),
 			CAFile:    []byte(g.Http.CertificateAuthority.ValueString()),
 		}, nil
-	case "ssh":
+	case attrSsh:
 		if g.Ssh == nil {
 			return nil, fmt.Errorf("git URL scheme is ssh but ssh configuration is empty")
 		}

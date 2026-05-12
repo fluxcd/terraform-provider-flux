@@ -274,7 +274,7 @@ func (r *bootstrapGitResource) Schema(ctx context.Context, req resource.SchemaRe
 				Computed:    true,
 				Default:     booldefault.StaticBool(defaultOpts.NetworkPolicy),
 			},
-			"path": schema.StringAttribute{
+			attrPath: schema.StringAttribute{
 				Description: "Path relative to the repository root, when specified the cluster sync will be scoped to this path (immutable).",
 				Optional:    true,
 			},
@@ -560,7 +560,7 @@ func (r *bootstrapGitResource) Read(ctx context.Context, req resource.ReadReques
 	for k := range data.RepositoryFiles.Elements() {
 		filePath := filepath.Join(gitClient.Path(), k)
 		if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
-			tflog.Debug(ctx, "Skip reading file that no longer exists in git repository", map[string]interface{}{"path": filePath})
+			tflog.Debug(ctx, "Skip reading file that no longer exists in git repository", map[string]interface{}{attrPath: filePath})
 			continue
 		}
 		b, err := os.ReadFile(filePath)
@@ -662,7 +662,7 @@ func (r bootstrapGitResource) Update(ctx context.Context, req resource.UpdateReq
 			filePath := filepath.Join(gitClient.Path(), k)
 			_, err := os.Stat(filePath)
 			if errors.Is(err, os.ErrNotExist) {
-				tflog.Debug(ctx, "Skipping removing no longer tracked file as it does not exist", map[string]interface{}{"path": filePath})
+				tflog.Debug(ctx, "Skipping removing no longer tracked file as it does not exist", map[string]interface{}{attrPath: filePath})
 				continue
 			}
 			if err != nil {
@@ -816,7 +816,7 @@ func (r bootstrapGitResource) Delete(ctx context.Context, req resource.DeleteReq
 		for k := range data.RepositoryFiles.Elements() {
 			path := filepath.Join(gitClient.Path(), k)
 			if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-				tflog.Debug(ctx, "Skipping file removal as the file does not exist", map[string]interface{}{"path": path})
+				tflog.Debug(ctx, "Skipping file removal as the file does not exist", map[string]interface{}{attrPath: path})
 				continue
 			}
 			err := os.Remove(path)
