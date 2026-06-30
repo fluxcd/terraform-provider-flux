@@ -31,6 +31,7 @@ import (
 	"github.com/fluxcd/pkg/git"
 	"github.com/fluxcd/pkg/git/gogit"
 	"github.com/fluxcd/pkg/git/repository"
+	"github.com/fluxcd/pkg/git/signature"
 	runclient "github.com/fluxcd/pkg/runtime/client"
 	"github.com/mitchellh/go-homedir"
 	apimachineryschema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -176,12 +177,15 @@ func (prd *providerResourceData) CreateCommit(message string) (git.Commit, repos
 	if err != nil {
 		return git.Commit{}, nil, err
 	}
-	var signer *openpgp.Entity
+	var signer signature.Signer
 	if entityList != nil {
-		var err error
-		signer, err = getOpenPgpEntity(entityList, prd.git.GpgPassphrase.ValueString(), prd.git.GpgKeyID.ValueString())
+		entity, err := getOpenPgpEntity(entityList, prd.git.GpgPassphrase.ValueString(), prd.git.GpgKeyID.ValueString())
 		if err != nil {
 			return git.Commit{}, nil, fmt.Errorf("failed to generate OpenPGP entity: %w", err)
+		}
+		signer, err = signature.NewOpenPGPSigner(entity)
+		if err != nil {
+			return git.Commit{}, nil, fmt.Errorf("failed to generate OpenPGP signer: %w", err)
 		}
 	}
 	if prd.git.CommitMessageAppendix.ValueString() != "" {
