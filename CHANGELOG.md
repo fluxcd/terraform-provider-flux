@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.9.0
+
+**Release date:** 2026-06-30
+
+This release includes flux2 [v2.9.0](https://github.com/fluxcd/flux2/releases/tag/v2.9.0).
+
+Please follow the [Upgrade Procedure for Flux v2.7+](https://github.com/fluxcd/flux2/discussions/5572)
+for a smooth upgrade from Flux v2.6 to the latest version.
+
+In addition, the Kubernetes dependencies have been updated to v1.36.2
+and CI acceptance tests now run with Terraform 1.15.
+
+Improvements:
+- Update to Kubernetes v1.36.2 and Terraform 1.15
+  [#825](https://github.com/fluxcd/terraform-provider-flux/pull/825)
+- Update Flux to v2.9.0 and fix the OpenPGP signer
+  [#826](https://github.com/fluxcd/terraform-provider-flux/pull/826)
+
 ## 1.8.8
 
 **Release date:** 2026-05-20
