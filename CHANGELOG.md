@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.9.1
+
+**Release date:** 2026-07-07
+
+This release includes flux2 [v2.9.1](https://github.com/fluxcd/flux2/releases/tag/v2.9.1).
+
+Please follow the [Upgrade Procedure for Flux v2.7+](https://github.com/fluxcd/flux2/discussions/5572)
+for a smooth upgrade from Flux v2.6 to the latest version.
+
 ## 1.9.0
 
 **Release date:** 2026-06-30
