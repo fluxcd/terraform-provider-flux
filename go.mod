@@ -17,11 +17,11 @@ require (
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-connections v0.7.0
 	github.com/fluxcd/cli-utils v1.2.2
-	github.com/fluxcd/flux2/v2 v2.9.2
-	github.com/fluxcd/helm-controller/api v1.6.2
+	github.com/fluxcd/flux2/v2 v2.9.3
+	github.com/fluxcd/helm-controller/api v1.6.3
 	github.com/fluxcd/image-automation-controller/api v1.2.3
 	github.com/fluxcd/image-reflector-controller/api v1.2.3
-	github.com/fluxcd/kustomize-controller/api v1.9.3
+	github.com/fluxcd/kustomize-controller/api v1.9.4
 	github.com/fluxcd/notification-controller/api v1.9.2
 	github.com/fluxcd/pkg/apis/meta v1.30.1
 	github.com/fluxcd/pkg/git v0.52.0
@@ -93,7 +93,7 @@ require (
 	github.com/fluxcd/go-git-providers v0.27.0 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.10.0 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v1.19.1 // indirect
-	github.com/fluxcd/pkg/kustomize v1.35.3 // indirect
+	github.com/fluxcd/pkg/kustomize v1.35.4 // indirect
 	github.com/fluxcd/pkg/tar v1.2.0 // indirect
 	github.com/fluxcd/pkg/version v0.16.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
