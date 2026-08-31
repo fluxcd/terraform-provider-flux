@@ -16,20 +16,20 @@ require (
 	github.com/ProtonMail/go-crypto v1.4.1
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-connections v0.7.0
-	github.com/fluxcd/cli-utils v1.2.2
-	github.com/fluxcd/flux2/v2 v2.9.4
-	github.com/fluxcd/helm-controller/api v1.6.3
-	github.com/fluxcd/image-automation-controller/api v1.2.4
-	github.com/fluxcd/image-reflector-controller/api v1.2.4
-	github.com/fluxcd/kustomize-controller/api v1.9.4
-	github.com/fluxcd/notification-controller/api v1.9.3
-	github.com/fluxcd/pkg/apis/meta v1.30.1
+	github.com/fluxcd/cli-utils v1.2.3
+	github.com/fluxcd/flux2/v2 v2.9.5
+	github.com/fluxcd/helm-controller/api v1.6.4
+	github.com/fluxcd/image-automation-controller/api v1.2.5
+	github.com/fluxcd/image-reflector-controller/api v1.2.5
+	github.com/fluxcd/kustomize-controller/api v1.9.5
+	github.com/fluxcd/notification-controller/api v1.9.4
+	github.com/fluxcd/pkg/apis/meta v1.30.2
 	github.com/fluxcd/pkg/git v0.52.0
-	github.com/fluxcd/pkg/runtime v0.110.1
-	github.com/fluxcd/pkg/ssa v0.76.1
+	github.com/fluxcd/pkg/runtime v0.110.3
+	github.com/fluxcd/pkg/ssa v0.76.2
 	github.com/fluxcd/pkg/ssh v0.25.0
-	github.com/fluxcd/source-controller/api v1.9.4
-	github.com/fluxcd/source-watcher/api/v2 v2.2.3
+	github.com/fluxcd/source-controller/api v1.9.5
+	github.com/fluxcd/source-watcher/api/v2 v2.2.4
 	github.com/go-logr/logr v1.4.3
 	github.com/google/go-containerregistry v0.21.6
 	github.com/hashicorp/terraform-plugin-docs v0.25.0
@@ -43,11 +43,11 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.14.1
 	github.com/stretchr/testify v1.11.1
-	k8s.io/api v0.36.2
-	k8s.io/apiextensions-apiserver v0.36.2
-	k8s.io/apimachinery v0.36.2
-	k8s.io/cli-runtime v0.36.2
-	k8s.io/client-go v0.36.2
+	k8s.io/api v0.36.4
+	k8s.io/apiextensions-apiserver v0.36.4
+	k8s.io/apimachinery v0.36.4
+	k8s.io/cli-runtime v0.36.4
+	k8s.io/client-go v0.36.4
 	sigs.k8s.io/controller-runtime v0.24.1
 	sigs.k8s.io/kind v0.32.0
 	sigs.k8s.io/kustomize/api v0.21.1
@@ -92,8 +92,8 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fluxcd/go-git-providers v0.27.0 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.10.0 // indirect
-	github.com/fluxcd/pkg/apis/kustomize v1.19.1 // indirect
-	github.com/fluxcd/pkg/kustomize v1.35.4 // indirect
+	github.com/fluxcd/pkg/apis/kustomize v1.19.2 // indirect
+	github.com/fluxcd/pkg/kustomize v1.35.6 // indirect
 	github.com/fluxcd/pkg/tar v1.2.0 // indirect
 	github.com/fluxcd/pkg/version v0.16.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
@@ -219,15 +219,15 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
-	golang.org/x/mod v0.36.0 // indirect
+	golang.org/x/mod v0.37.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/term v0.44.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
+	golang.org/x/text v0.39.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	golang.org/x/tools v0.45.0 // indirect
+	golang.org/x/tools v0.47.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260427160629-7cedc36a6bc4 // indirect
@@ -239,10 +239,10 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.2 // indirect
-	k8s.io/component-base v0.36.2 // indirect
+	k8s.io/component-base v0.36.4 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260603220949-865597e52e25 // indirect
-	k8s.io/kubectl v0.36.2 // indirect
+	k8s.io/kubectl v0.36.4 // indirect
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.21.1 // indirect
