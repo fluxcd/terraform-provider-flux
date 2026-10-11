@@ -1003,11 +1003,18 @@ func (r *bootstrapGitResource) ImportState(ctx context.Context, req resource.Imp
 		resp.Diagnostics.AddError("Could not parse events address", err.Error())
 		return
 	}
-	// TODO: Probably smarter to remove what we know comes before the cluster domain and remove that.
-	host := strings.TrimSuffix(eventsUrl.Host, ".")
-	c := strings.Split(host, ".")
-	clusterDomain := strings.Join(c[len(c)-2:], ".")
+	clusterDomain, inferredClusterDomain, err := getClusterDomainFromEventsAddress(eventsUrl.String(), data.Namespace.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Could not determine cluster domain", err.Error())
+		return
+	}
 	data.ClusterDomain = types.StringValue(clusterDomain)
+	if !inferredClusterDomain {
+		resp.Diagnostics.AddWarning(
+			"Could not infer cluster domain from events address",
+			fmt.Sprintf("The controller events address %q does not include a cluster domain; using the default %q during import. If your cluster uses a custom domain, set the cluster_domain attribute after import.", value, clusterDomain),
+		)
+	}
 
 	// Get values from flux-system GitRepository.
 	gitRepository := sourcev1.GitRepository{
@@ -1122,6 +1129,37 @@ resources:
 - gotk-components.yaml
 - gotk-sync.yaml
 `
+}
+
+func getClusterDomainFromEventsAddress(eventsAddress, namespace string) (string, bool, error) {
+	eventsURL, err := url.Parse(eventsAddress)
+	if err != nil {
+		return "", false, err
+	}
+
+	host := strings.TrimSuffix(eventsURL.Hostname(), ".")
+	if host == "" {
+		return "", false, fmt.Errorf("events address does not contain a host")
+	}
+
+	defaultClusterDomain := install.MakeDefaultOptions().ClusterDomain
+	serviceHost := fmt.Sprintf("notification-controller.%s.svc", namespace)
+
+	if host == serviceHost {
+		return defaultClusterDomain, false, nil
+	}
+
+	prefix := serviceHost + "."
+	if !strings.HasPrefix(host, prefix) {
+		return defaultClusterDomain, false, nil
+	}
+
+	clusterDomain := strings.TrimPrefix(host, prefix)
+	if clusterDomain == "" {
+		return defaultClusterDomain, false, nil
+	}
+
+	return clusterDomain, true, nil
 }
 
 func getInstallOptions(data bootstrapGitResourceData) install.Options {
