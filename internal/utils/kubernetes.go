@@ -41,7 +41,6 @@ import (
 	imagereflectv1 "github.com/fluxcd/image-reflector-controller/api/v1"
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
 	notificationv1 "github.com/fluxcd/notification-controller/api/v1"
-	notificationv1beta3 "github.com/fluxcd/notification-controller/api/v1beta3"
 	runclient "github.com/fluxcd/pkg/runtime/client"
 	sourcev1 "github.com/fluxcd/source-controller/api/v1"
 	swapi "github.com/fluxcd/source-watcher/api/v2/v1beta1"
@@ -91,7 +90,6 @@ func NewScheme() *apiruntime.Scheme {
 	_ = kustomizev1.AddToScheme(scheme)
 	_ = helmv2.AddToScheme(scheme)
 	_ = notificationv1.AddToScheme(scheme)
-	_ = notificationv1beta3.AddToScheme(scheme)
 	_ = imagereflectv1.AddToScheme(scheme)
 	_ = imageautov1.AddToScheme(scheme)
 	_ = swapi.AddToScheme(scheme)
