@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.10.0
+
+**Release date:** 2026-10-26
+
+This release includes flux2 [v2.10.0](https://github.com/fluxcd/flux2/releases/tag/v2.10.0).
+
+Please follow the [Upgrade Procedure for Flux v2.7+](https://github.com/fluxcd/flux2/discussions/5572)
+for a smooth upgrade from Flux v2.6 to the latest version.
+
+In addition, the Kubernetes dependencies have been updated to v1.37.1
+and Go 1.27.
+
+Improvements:
+- Update to Kubernetes v1.37.1 and Go 1.27
+  [#841](https://github.com/fluxcd/terraform-provider-flux/pull/841)
+- Update Flux to v2.10.0 and remove the deprecated notification v1beta3 scheme
+  [#842](https://github.com/fluxcd/terraform-provider-flux/pull/842)
+
 ## 1.9.6
 
 **Release date:** 2026-10-01
