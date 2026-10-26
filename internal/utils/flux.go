@@ -16,4 +16,4 @@ limitations under the License.
 
 package utils
 
-const DefaultFluxVersion string = "v2.9.6"
+const DefaultFluxVersion string = "v2.10.0"
