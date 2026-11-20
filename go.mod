@@ -17,18 +17,18 @@ require (
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-connections v0.7.0
 	github.com/fluxcd/cli-utils v1.4.0
-	github.com/fluxcd/flux2/v2 v2.10.0
-	github.com/fluxcd/helm-controller/api v1.7.1
-	github.com/fluxcd/image-automation-controller/api v1.3.0
-	github.com/fluxcd/image-reflector-controller/api v1.3.0
-	github.com/fluxcd/kustomize-controller/api v1.10.1
-	github.com/fluxcd/notification-controller/api v1.10.0
+	github.com/fluxcd/flux2/v2 v2.10.1
+	github.com/fluxcd/helm-controller/api v1.7.2
+	github.com/fluxcd/image-automation-controller/api v1.3.1
+	github.com/fluxcd/image-reflector-controller/api v1.3.1
+	github.com/fluxcd/kustomize-controller/api v1.10.2
+	github.com/fluxcd/notification-controller/api v1.10.1
 	github.com/fluxcd/pkg/apis/meta v1.38.0
-	github.com/fluxcd/pkg/git v0.56.0
+	github.com/fluxcd/pkg/git v0.56.2
 	github.com/fluxcd/pkg/runtime v0.122.0
 	github.com/fluxcd/pkg/ssa v0.83.0
-	github.com/fluxcd/pkg/ssh v0.29.0
-	github.com/fluxcd/source-controller/api v1.10.1
+	github.com/fluxcd/pkg/ssh v0.29.1
+	github.com/fluxcd/source-controller/api v1.10.2
 	github.com/fluxcd/source-watcher/api/v2 v2.3.1
 	github.com/go-logr/logr v1.4.4
 	github.com/google/go-containerregistry v0.22.1
